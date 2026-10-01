@@ -1,5 +1,5 @@
-import React from 'react';
-import { BookMarked, UserCheck, LogIn, ChevronRight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { BookMarked, User, LogOut, LogIn, ChevronDown } from 'lucide-react';
 
 interface NavbarProps {
   currentScreen: 'landing' | 'studio' | 'lookbook';
@@ -16,6 +16,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   isLoggedIn,
   onToggleAuth,
 }) => {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isUserMenuOpen]);
+
   const navItems = [
     { id: 'landing' as const, label: 'Trang chủ' },
     { id: 'studio' as const, label: 'Studio phối đồ' },
@@ -23,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-lacquer/95 backdrop-blur-md border-b border-imperial-gold/20 shadow-lg transition-all font-sans select-none">
+    <header className="sticky top-0 z-50 bg-lacquer/95 backdrop-blur-md border-b border-imperial-gold/20 shadow-lg font-sans select-none">
       <div className="w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         {/* Brand Identity: Haute Couture Maison Style */}
         <div
@@ -46,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Center: Haute Couture Atelier Unified Nav Items */}
+        {/* Center: Haute Couture Atelier Unified Nav Items (Zero Layout Shift) */}
         <nav className="h-full flex items-center gap-1 sm:gap-2 lg:gap-4">
           {navItems.map((item) => {
             const isActive = currentScreen === item.id;
@@ -54,20 +72,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`relative h-full px-2.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-all ${
+                /* Constant font-medium & fixed paddings to ensure zero horizontal shift */
+                className={`relative h-full px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-colors ${
                   isActive
-                    ? 'text-imperial-gold font-semibold'
+                    ? 'text-imperial-gold'
                     : 'text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface/40'
                 }`}
               >
                 <span>{item.label}</span>
 
-                {/* Refined Count Pill for Lookbook */}
+                {/* Lookbook Count Badge */}
                 {item.count !== undefined && item.count > 0 && (
                   <span
-                    className={`px-1.5 py-0.2 text-[10px] font-bold rounded-none transition-all ${
+                    className={`px-1.5 py-0.2 text-[10px] font-bold rounded-none transition-colors ${
                       isActive
-                        ? 'bg-imperial-gold text-lacquer shadow-sm font-extrabold'
+                        ? 'bg-imperial-gold text-lacquer shadow-sm'
                         : 'bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/30'
                     }`}
                   >
@@ -77,42 +96,85 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Active Golden Hairline Indicator */}
                 {isActive && (
-                  <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-imperial-gold shadow-[0_0_10px_rgba(198,155,86,0.9)] animate-fadeIn" />
+                  <span className="absolute bottom-0 inset-x-2 h-[2px] bg-imperial-gold shadow-[0_0_10px_rgba(198,155,86,0.9)] animate-fadeIn" />
                 )}
               </button>
             );
           })}
         </nav>
 
-        {/* Right: Atelier Member / Guest Profile (Lacquer & Gold Heritage Palette) */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={onToggleAuth}
-            className={`flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-none text-xs sm:text-sm font-medium border transition-all ${
-              isLoggedIn
-                ? 'bg-lacquer-surface border-imperial-gold/50 text-silk-ivory hover:border-imperial-gold hover:bg-lacquer-hover'
-                : 'bg-lacquer-surface/70 border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
-            }`}
-            title="Nhấp để chuyển đổi trạng thái Đăng nhập / Khách để thử nghiệm"
-          >
-            {isLoggedIn ? (
-              <>
-                {/* Monogram Avatar Badge */}
-                <div className="w-5 h-5 rounded-none bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-[10px] font-serif font-bold">
+        {/* Right: User Profile (Avatar + Name + Chevron Toggle with Dropdown) */}
+        <div ref={userMenuRef} className="relative flex items-center">
+          {isLoggedIn ? (
+            <div>
+              {/* Trigger Button: Avatar + Name + Chevron */}
+              <button
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                className={`flex items-center gap-2.5 px-2.5 py-1.5 transition-all cursor-pointer ${
+                  isUserMenuOpen
+                    ? 'bg-lacquer-surface text-imperial-gold'
+                    : 'text-silk-ivory hover:bg-lacquer-surface/80'
+                }`}
+              >
+                {/* Avatar circle with monogram */}
+                <div className="w-7 h-7 rounded-full bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-xs font-serif font-bold shadow-sm">
                   MA
                 </div>
-                <span className="hidden sm:inline font-medium text-silk-ivory">Minh Anh</span>
-                <span className="text-[10px] uppercase font-bold text-imperial-gold px-1.5 py-0.2 bg-imperial-gold/15 border border-imperial-gold/30 hidden md:inline">
-                  Thành viên
+
+                {/* Name */}
+                <span className="text-sm font-medium text-silk-ivory hidden sm:inline">
+                  Minh Anh
                 </span>
-              </>
-            ) : (
-              <>
-                <LogIn className="w-3.5 h-3.5 text-imperial-gold" />
-                <span className="text-silk-ivory">Đăng nhập</span>
-              </>
-            )}
-          </button>
+
+                {/* Chevron Toggle */}
+                <ChevronDown
+                  className={`w-4 h-4 text-silk-muted transition-transform duration-200 ${
+                    isUserMenuOpen ? 'rotate-180 text-imperial-gold' : ''
+                  }`}
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-lacquer-card border-2 border-imperial-gold/60 shadow-2xl rounded-none p-1.5 z-50 animate-fadeIn font-sans">
+                  {/* User Profile Action */}
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onNavigate('lookbook');
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-silk-ivory hover:text-imperial-gold hover:bg-lacquer-surface transition-all text-left"
+                  >
+                    <User className="w-4 h-4 text-imperial-gold flex-shrink-0" />
+                    <span>Trang cá nhân</span>
+                  </button>
+
+                  <div className="my-1 border-t border-lacquer-border" />
+
+                  {/* Logout Action */}
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onToggleAuth();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-imperial-red-bright hover:bg-imperial-red/15 transition-all text-left"
+                  >
+                    <LogOut className="w-4 h-4 flex-shrink-0" />
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Guest / Login Button */
+            <button
+              onClick={onToggleAuth}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold/60 text-silk-muted hover:text-silk-ivory transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5 text-imperial-gold" />
+              <span>Đăng nhập</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
