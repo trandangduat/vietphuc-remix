@@ -173,7 +173,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           {/* Nút Nam (Male ♂) */}
           <button
             onClick={() => onSelectGender('men')}
-            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-xs sm:text-sm font-bold transition-all uppercase tracking-wider ${
+            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-sm font-bold transition-all uppercase tracking-wider ${
               outfit.mannequinGender === 'men'
                 ? 'bg-imperial-gold text-lacquer shadow font-extrabold'
                 : 'text-silk-muted hover:text-silk-ivory'
@@ -190,7 +190,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           {/* Nút Nữ (Female ♀) */}
           <button
             onClick={() => onSelectGender('women')}
-            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-xs sm:text-sm font-bold transition-all uppercase tracking-wider ${
+            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-sm font-bold transition-all uppercase tracking-wider ${
               outfit.mannequinGender === 'women'
                 ? 'bg-rose-300 text-lacquer shadow font-extrabold'
                 : 'text-silk-muted hover:text-silk-ivory'
@@ -211,7 +211,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-            className="flex items-center gap-2.5 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border text-xs sm:text-sm font-bold text-silk-ivory hover:border-imperial-gold shadow-xl transition-all"
+            className="flex items-center gap-2.5 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border text-sm font-bold text-silk-ivory hover:border-imperial-gold shadow-xl transition-all"
           >
             <span className="w-2.5 h-2.5 rounded-none bg-imperial-gold" />
             <span>Bối cảnh: {outfit.event.name}</span>
@@ -231,7 +231,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
                     onSelectEvent(evt);
                     setIsEventDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${
+                  className={`w-full text-left px-3.5 py-2.5 rounded-none text-sm font-semibold transition-all flex items-center justify-between ${
                     outfit.event.id === evt.id
                       ? 'bg-imperial-gold/20 text-imperial-gold font-bold border-l-2 border-imperial-gold'
                       : 'text-silk-ivory hover:bg-lacquer-surface'
@@ -248,7 +248,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
                     setIsEventDropdownOpen(false);
                     onOpenCustomEventModal();
                   }}
-                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-none text-sm font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
                 >
                   <Plus className="w-4 h-4" />
                   <span>+ Tạo Event AI mới</span>

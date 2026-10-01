@@ -292,13 +292,13 @@ export function App() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleConfirmMigration(false)}
-                className="py-3 px-4 rounded-none bg-lacquer-surface border-2 border-lacquer-border text-xs sm:text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
+                className="py-3 px-4 rounded-none bg-lacquer-surface border-2 border-lacquer-border text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
               >
                 Bỏ qua
               </button>
               <button
                 onClick={() => handleConfirmMigration(true)}
-                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-xs sm:text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
+                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
               >
                 Đồng ý lưu vào Lookbook
               </button>

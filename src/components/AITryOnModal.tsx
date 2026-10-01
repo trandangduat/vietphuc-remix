@@ -56,17 +56,17 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-serif font-bold text-xl sm:text-2xl text-silk-ivory">
+            <h3 className="font-serif font-bold text-2xl text-silk-ivory">
               Thử trang phục trên người thật (AI Try on)
             </h3>
-            <p className="text-xs sm:text-sm text-silk-muted mt-0.5">
+            <p className="text-sm text-silk-muted mt-0.5">
               Kết hợp chân dung của bạn + Outfit hiện tại + Nền {outfit.event.name}
             </p>
           </div>
         </div>
 
         {/* Privacy Notice Banner */}
-        <div className="my-4 p-3.5 rounded-none bg-lacquer-surface border-l-4 border-l-teal-400 border border-lacquer-border flex items-start gap-3 text-xs sm:text-sm text-silk-muted">
+        <div className="my-4 p-3.5 rounded-none bg-lacquer-surface border-l-4 border-l-teal-400 border border-lacquer-border flex items-start gap-3 text-sm text-silk-muted">
           <Shield className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <span className="font-bold text-silk-ivory">Cam kết bảo mật tuyệt đối: </span>
@@ -78,7 +78,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
           <div className="space-y-4">
             {/* Step 1: Choose / Upload Photo */}
             <div>
-              <label className="block text-xs sm:text-sm font-bold text-silk-ivory mb-2 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-silk-ivory mb-2 uppercase tracking-wider">
                 1. Chọn ảnh chân dung của bạn hoặc ảnh mẫu:
               </label>
               <div className="grid grid-cols-2 gap-3 mb-3">
@@ -97,7 +97,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                       alt={face.label}
                       className="w-12 h-12 rounded-none object-cover border border-lacquer-border"
                     />
-                    <span className="text-xs sm:text-sm text-silk-ivory font-semibold">{face.label}</span>
+                    <span className="text-sm text-silk-ivory font-semibold">{face.label}</span>
                   </div>
                 ))}
               </div>
@@ -112,7 +112,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
 
             {/* Step 2: Parental Consent for Minors */}
             <div className="p-3.5 rounded-none bg-lacquer-surface border border-lacquer-border">
-              <label className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm">
+              <label className="flex items-start gap-3 cursor-pointer text-sm">
                 <input
                   type="checkbox"
                   checked={isMinorConsent}
@@ -129,7 +129,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
             <button
               onClick={handleStartGeneration}
               disabled={!selectedPhoto || isGenerating}
-              className={`w-full py-3.5 rounded-none font-bold text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-lg ${
+              className={`w-full py-3.5 rounded-none font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 selectedPhoto && !isGenerating
                   ? 'bg-gradient-to-r from-imperial-red to-imperial-red-bright text-silk-ivory border border-imperial-red-bright hover:brightness-110'
                   : 'bg-lacquer-surface text-silk-muted border border-lacquer-border cursor-not-allowed opacity-60'
@@ -163,14 +163,14 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-silk-muted max-w-sm mx-auto leading-relaxed">
+            <p className="text-sm text-silk-muted max-w-sm mx-auto leading-relaxed">
               Bức ảnh mô phỏng hoàn tất! Ảnh này chỉ được lưu trữ lâu dài nếu bạn chọn "Lưu vào Lookbook".
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setGeneratedResult(null)}
-                className="py-3 px-4 rounded-none bg-lacquer-surface border border-lacquer-border text-xs sm:text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
+                className="py-3 px-4 rounded-none bg-lacquer-surface border border-lacquer-border text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
               >
                 Thử lại ảnh khác
               </button>
@@ -179,7 +179,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   onSaveToLookbook(generatedResult);
                   onClose();
                 }}
-                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-xs sm:text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
+                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
               >
                 Lưu vào Lookbook
               </button>

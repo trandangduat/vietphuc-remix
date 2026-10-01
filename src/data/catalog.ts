@@ -55,6 +55,7 @@ export const PIECES: Piece[] = [
         colorName: 'Đỏ đô hoàng triều',
         swatchHex: '#7A1C1C',
         assetUrl: '/assets/pieces/tops/top-ao-tac-crimson.png',
+        thumbnailUrl: '/assets/pieces/tops/thumb-ao-tac-crimson.png',
         zIndex: 4,
       },
       {
@@ -62,10 +63,11 @@ export const PIECES: Piece[] = [
         colorName: 'Xanh cổ vịt quý tộc',
         swatchHex: '#1A4B54',
         assetUrl: '/assets/pieces/tops/top-ao-tac-indigo.png',
+        thumbnailUrl: '/assets/pieces/tops/thumb-ao-tac-indigo.png',
         zIndex: 4,
       },
     ],
-    thumbnailUrl: '/assets/pieces/tops/top-ao-tac-crimson.png',
+    thumbnailUrl: '/assets/pieces/tops/thumb-ao-tac-crimson.png',
   },
 
   // --- QUẦN / CHÂN VÁY (BOTTOMS) ---
@@ -88,10 +90,11 @@ export const PIECES: Piece[] = [
         colorName: 'Lụa tơ tằm trắng ngà',
         swatchHex: '#F7F4EE',
         assetUrl: '/assets/pieces/bottoms/bottom-quan-lua-white.png',
+        thumbnailUrl: '/assets/pieces/bottoms/thumb-quan-lua-white.png',
         zIndex: 2,
       },
     ],
-    thumbnailUrl: '/assets/pieces/bottoms/bottom-quan-lua-white.png',
+    thumbnailUrl: '/assets/pieces/bottoms/thumb-quan-lua-white.png',
   },
   {
     id: 'piece-quan-tay',
@@ -112,10 +115,11 @@ export const PIECES: Piece[] = [
         colorName: 'Xám than thanh lịch',
         swatchHex: '#3B3D43',
         assetUrl: '/assets/pieces/bottoms/bottom-quan-tay-charcoal.png',
+        thumbnailUrl: '/assets/pieces/bottoms/thumb-quan-tay-charcoal.png',
         zIndex: 2,
       },
     ],
-    thumbnailUrl: '/assets/pieces/bottoms/bottom-quan-tay-charcoal.png',
+    thumbnailUrl: '/assets/pieces/bottoms/thumb-quan-tay-charcoal.png',
   },
 
   // --- GIÀY / DÉP (FOOTWEAR) ---
@@ -138,10 +142,11 @@ export const PIECES: Piece[] = [
         colorName: 'Nhung đỏ thêu chỉ vàng',
         swatchHex: '#8B1E1E',
         assetUrl: '/assets/pieces/footwear/footwear-hai-nhung-red.png',
+        thumbnailUrl: '/assets/pieces/footwear/thumb-hai-nhung-red.png',
         zIndex: 3,
       },
     ],
-    thumbnailUrl: '/assets/pieces/footwear/footwear-hai-nhung-red.png',
+    thumbnailUrl: '/assets/pieces/footwear/thumb-hai-nhung-red.png',
   },
   {
     id: 'piece-loafer',
@@ -162,10 +167,11 @@ export const PIECES: Piece[] = [
         colorName: 'Da bò nâu bóng cổ điển',
         swatchHex: '#4A2E1B',
         assetUrl: '/assets/pieces/footwear/footwear-loafer-darkbrown.png',
+        thumbnailUrl: '/assets/pieces/footwear/thumb-loafer-darkbrown.png',
         zIndex: 3,
       },
     ],
-    thumbnailUrl: '/assets/pieces/footwear/footwear-loafer-darkbrown.png',
+    thumbnailUrl: '/assets/pieces/footwear/thumb-loafer-darkbrown.png',
   },
 
   // --- PHỤ KIỆN (ACCESSORIES) ---
@@ -188,10 +194,11 @@ export const PIECES: Piece[] = [
         colorName: 'Lá cọ tự nhiên & quai lụa hồng',
         swatchHex: '#D4A373',
         assetUrl: '/assets/pieces/accessories/acc-non-la-traditional.png',
+        thumbnailUrl: '/assets/pieces/accessories/thumb-non-la-traditional.png',
         zIndex: 5,
       },
     ],
-    thumbnailUrl: '/assets/pieces/accessories/acc-non-la-traditional.png',
+    thumbnailUrl: '/assets/pieces/accessories/thumb-non-la-traditional.png',
   },
 ];
 

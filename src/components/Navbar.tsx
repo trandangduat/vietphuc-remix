@@ -34,17 +34,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Atelier 2D
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-silk-muted hidden sm:block font-sans font-medium">Di sản cung đình gặp thời trang đương đại</p>
+            <p className="text-xs text-silk-muted hidden sm:block font-sans font-medium">Di sản cung đình gặp thời trang đương đại</p>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="flex items-center gap-2 sm:gap-3 font-sans">
+        <nav className="flex items-center gap-1.5 sm:gap-2 font-sans">
           <button
             onClick={() => onNavigate('landing')}
-            className={`px-4 py-2 rounded-none text-sm sm:text-base font-semibold transition-all border ${
+            className={`px-3.5 py-2 rounded-none text-sm font-semibold transition-all border ${
               currentScreen === 'landing'
-                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm'
+                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm font-bold'
                 : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
             }`}
           >
@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => onNavigate('studio')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-none text-sm sm:text-base font-semibold transition-all border ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold transition-all border ${
               currentScreen === 'studio'
                 ? 'bg-imperial-gold/20 text-imperial-gold border-imperial-gold shadow-sm font-bold'
                 : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
@@ -65,9 +65,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => onNavigate('lookbook')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-none text-sm sm:text-base font-semibold transition-all relative border ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold transition-all relative border ${
               currentScreen === 'lookbook'
-                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm'
+                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm font-bold'
                 : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
             }`}
           >
@@ -85,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 font-sans">
           <button
             onClick={onToggleAuth}
-            className={`flex items-center gap-2 px-4 py-2 rounded-none text-xs sm:text-sm font-semibold border transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold border transition-all ${
               isLoggedIn
                 ? 'bg-imperial-teal/30 text-teal-200 border-imperial-teal-light/60 hover:bg-imperial-teal/40'
                 : 'bg-lacquer-surface text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'

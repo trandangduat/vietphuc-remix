@@ -58,10 +58,10 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-serif font-bold text-xl sm:text-2xl text-silk-ivory">
+            <h3 className="font-serif font-bold text-2xl text-silk-ivory">
               Tạo Bối cảnh Event bằng AI
             </h3>
-            <p className="text-xs sm:text-sm text-silk-muted mt-0.5">
+            <p className="text-sm text-silk-muted mt-0.5">
               Nhập mô tả không gian để AI sinh một nền độc nhất cho Studio
             </p>
           </div>
@@ -69,7 +69,7 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
 
         <div className="space-y-4 my-5">
           <div>
-            <label className="block text-xs sm:text-sm font-bold text-silk-ivory mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-silk-ivory mb-2 uppercase tracking-wider">
               Mô tả không gian hoặc bối cảnh:
             </label>
             <textarea
@@ -88,7 +88,7 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
                 <button
                   key={idx}
                   onClick={() => setPrompt(item)}
-                  className="px-3 py-1.5 rounded-none text-xs sm:text-sm bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-imperial-gold hover:border-imperial-gold transition-all text-left font-medium"
+                  className="px-3 py-1.5 rounded-none text-xs bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-imperial-gold hover:border-imperial-gold transition-all text-left font-medium"
                 >
                   {item}
                 </button>
@@ -100,7 +100,7 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || isGenerating}
-          className={`w-full py-3.5 rounded-none font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md ${
+          className={`w-full py-3.5 rounded-none font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md ${
             prompt.trim() && !isGenerating
               ? 'bg-imperial-gold text-lacquer hover:bg-imperial-gold-light'
               : 'bg-lacquer-surface text-silk-muted border border-lacquer-border cursor-not-allowed opacity-60'

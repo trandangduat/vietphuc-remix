@@ -132,13 +132,13 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
         <div className="p-3.5 sm:p-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Lock className="w-4 h-4 text-imperial-gold" />
-            <h4 className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-silk-ivory">
+            <h4 className="font-sans font-bold text-sm uppercase tracking-wider text-silk-ivory">
               AI Overview (Cố vấn Văn hóa)
             </h4>
           </div>
           <button
             onClick={onLoginPrompt}
-            className="py-1.5 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-xs hover:bg-imperial-gold-light transition-all uppercase tracking-wider"
+            className="py-1.5 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light transition-all uppercase tracking-wider"
           >
             Đăng nhập để xem
           </button>
@@ -156,7 +156,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
       >
         <div className="flex items-center gap-2.5">
           <Sparkles className="w-4 h-4 text-imperial-gold" />
-          <h4 className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-silk-ivory">
+          <h4 className="font-sans font-bold text-sm uppercase tracking-wider text-silk-ivory">
             AI Overview (Đánh giá văn hóa)
           </h4>
           <span className="text-xs px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold font-extrabold border border-imperial-gold/40">
@@ -199,7 +199,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
             {/* Color Harmony Score */}
             <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">Hài hòa màu sắc:</span>
+                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Hài hòa màu sắc:</span>
                 <span className="font-bold text-imperial-gold">{analysis.criteria.colorHarmony.score}/10</span>
               </div>
               <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
@@ -213,7 +213,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
             {/* Event Fit Score */}
             <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">Phù hợp sự kiện:</span>
+                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Phù hợp sự kiện:</span>
                 <span className="font-bold text-imperial-gold">{analysis.criteria.eventFit.score}/10</span>
               </div>
               <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
@@ -227,7 +227,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
             {/* Cultural Norm Score */}
             <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">Chuẩn mực lễ nghi:</span>
+                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Chuẩn mực lễ nghi:</span>
                 <span className="font-bold text-imperial-gold">{analysis.criteria.culturalNorm.score}/10</span>
               </div>
               <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
@@ -240,7 +240,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
           </div>
 
           {/* 2. Detailed Feedback Content for each criterion */}
-          <div className="space-y-2 text-xs sm:text-sm">
+          <div className="space-y-2 text-sm">
             <div className="p-3 rounded-none bg-lacquer/80 border border-lacquer-border space-y-1.5">
               <div className="flex items-start gap-2">
                 <span className="w-1.5 h-1.5 rounded-none bg-imperial-gold mt-1.5 flex-shrink-0" />

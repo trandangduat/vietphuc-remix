@@ -16,6 +16,7 @@ export interface PieceVariant {
   swatchHex: string;
   assetUrl: string;
   zIndex: number;
+  thumbnailUrl?: string;
 }
 
 export interface Piece {

@@ -125,13 +125,13 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       {outfit.event.name}
                     </span>
                   </div>
-                  <h4 className="font-sans font-bold text-silk-ivory text-base sm:text-lg mb-1.5">{outfit.name}</h4>
-                  <p className="text-xs sm:text-sm text-silk-muted mb-4 font-medium">{outfit.top.piece.name} • {outfit.bottom.piece.name}</p>
+                  <h4 className="font-sans font-bold text-silk-ivory text-lg mb-1.5">{outfit.name}</h4>
+                  <p className="text-xs text-silk-muted mb-4 font-medium">{outfit.top.piece.name} • {outfit.bottom.piece.name}</p>
                 </div>
                 <div className="flex items-center gap-3 pt-3 border-t-2 border-lacquer-border">
                   <button
                     onClick={() => onLoadOutfitIntoStudio(outfit)}
-                    className="flex-1 py-2.5 px-4 rounded-none bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold text-xs sm:text-sm font-bold text-imperial-gold transition-all uppercase tracking-wider"
+                    className="flex-1 py-2.5 px-4 rounded-none bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold text-sm font-bold text-imperial-gold transition-all uppercase tracking-wider"
                   >
                     Mở lại trong Studio
                   </button>
@@ -163,7 +163,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
           <h2 className="font-serif font-bold text-3xl sm:text-4xl text-silk-ivory">
             Lookbook của Minh Anh
           </h2>
-          <div className="flex items-center gap-4 text-xs sm:text-sm text-silk-muted mt-2 font-medium">
+          <div className="flex items-center gap-4 text-sm text-silk-muted mt-2 font-medium">
             <span><strong>{outfits.length}</strong> Outfit 2D đã lưu</span>
             <span>•</span>
             <span><strong>{tryOnOutfits.length}</strong> Ảnh AI Try-on</span>
@@ -173,7 +173,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={onOpenStudio}
-            className="py-3 px-5 rounded-none bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 uppercase tracking-wider"
+            className="py-3 px-5 rounded-none bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-sm shadow-md transition-all flex items-center gap-2 uppercase tracking-wider"
           >
             <Layers className="w-4 h-4" />
             <span>+ Phối bộ đồ mới</span>
@@ -182,7 +182,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
           <button
             onClick={() => setIsCompareModalOpen(true)}
             disabled={selectedForCompare.length < 2}
-            className={`py-3 px-5 rounded-none text-xs sm:text-sm font-bold transition-all border uppercase tracking-wider ${
+            className={`py-3 px-5 rounded-none text-sm font-bold transition-all border uppercase tracking-wider ${
               selectedForCompare.length >= 2
                 ? 'bg-lacquer-surface border-imperial-gold text-imperial-gold shadow-sm'
                 : 'bg-lacquer-surface text-silk-muted border-lacquer-border opacity-50 cursor-not-allowed'
@@ -193,7 +193,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
           <button
             onClick={() => setIsShareModalOpen(true)}
-            className="py-3 px-5 rounded-none bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold text-silk-ivory text-xs sm:text-sm font-bold transition-all flex items-center gap-2 uppercase tracking-wider"
+            className="py-3 px-5 rounded-none bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold text-silk-ivory text-sm font-bold transition-all flex items-center gap-2 uppercase tracking-wider"
           >
             <Share2 className="w-4 h-4 text-imperial-gold" />
             <span>Cài đặt chia sẻ</span>
@@ -205,9 +205,9 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
       <div className="flex items-center gap-2 border-b-2 border-lacquer-border pb-4 mb-8 overflow-x-auto">
         <button
           onClick={() => setActiveTab('2d')}
-          className={`py-2.5 px-5 rounded-none text-xs sm:text-sm font-bold transition-all uppercase tracking-wider ${
+          className={`py-2.5 px-5 rounded-none text-sm font-semibold transition-all uppercase tracking-wider ${
             activeTab === '2d'
-              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm'
+              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm font-bold'
               : 'text-silk-muted hover:text-silk-ivory'
           }`}
         >
@@ -216,9 +216,9 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
         <button
           onClick={() => setActiveTab('tryon')}
-          className={`py-2.5 px-5 rounded-none text-xs sm:text-sm font-bold transition-all flex items-center gap-2 uppercase tracking-wider ${
+          className={`py-2.5 px-5 rounded-none text-sm font-semibold transition-all flex items-center gap-2 uppercase tracking-wider ${
             activeTab === 'tryon'
-              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm'
+              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm font-bold'
               : 'text-silk-muted hover:text-silk-ivory'
           }`}
         >
@@ -228,9 +228,9 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
         <button
           onClick={() => setActiveTab('public_preview')}
-          className={`py-2.5 px-5 rounded-none text-xs sm:text-sm font-bold transition-all flex items-center gap-2 uppercase tracking-wider ${
+          className={`py-2.5 px-5 rounded-none text-sm font-semibold transition-all flex items-center gap-2 uppercase tracking-wider ${
             activeTab === 'public_preview'
-              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm'
+              ? 'bg-imperial-gold/20 text-imperial-gold border border-imperial-gold shadow-sm font-bold'
               : 'text-silk-muted hover:text-silk-ivory'
           }`}
         >
@@ -298,7 +298,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       </div>
                     ) : (
                       <>
-                        <h4 className="font-sans font-bold text-silk-ivory text-base sm:text-lg truncate">{outfit.name}</h4>
+                        <h4 className="font-sans font-bold text-silk-ivory text-lg truncate">{outfit.name}</h4>
                         <button
                           onClick={() => handleStartRename(outfit)}
                           className="p-1.5 text-silk-muted hover:text-silk-ivory opacity-0 group-hover:opacity-100 transition-opacity"
@@ -328,7 +328,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 <div className="flex items-center gap-3 pt-3.5 border-t-2 border-lacquer-border">
                   <button
                     onClick={() => onLoadOutfitIntoStudio(outfit)}
-                    className="flex-1 py-2.5 px-4 rounded-none bg-lacquer-surface hover:bg-lacquer-hover border border-lacquer-border hover:border-imperial-gold text-xs sm:text-sm font-bold text-imperial-gold transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+                    className="flex-1 py-2.5 px-4 rounded-none bg-lacquer-surface hover:bg-lacquer-hover border border-lacquer-border hover:border-imperial-gold text-sm font-bold text-imperial-gold transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Mở trong Studio</span>
@@ -365,7 +365,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   </span>
                 </div>
                 <h4 className="font-sans font-bold text-silk-ivory text-base mb-1">{outfit.name}</h4>
-                <p className="text-xs sm:text-sm text-silk-muted font-medium">{outfit.event.name}</p>
+                <p className="text-xs text-silk-muted font-medium">{outfit.event.name}</p>
               </div>
             ))
           )}
@@ -395,13 +395,13 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     <img src={outfit.top.variant.assetUrl} alt={outfit.name} className="w-full h-full object-cover" />
                   </div>
                   <h4 className="font-sans font-bold text-silk-ivory text-base mb-1.5">{outfit.name}</h4>
-                  <p className="text-xs sm:text-sm text-silk-muted mb-4 font-medium">{outfit.event.name}</p>
+                  <p className="text-xs text-silk-muted mb-4 font-medium">{outfit.event.name}</p>
                 </div>
 
                 {/* THE REMIX IN STUDIO BUTTON */}
                 <button
                   onClick={() => onLoadOutfitIntoStudio(outfit)}
-                  className="w-full py-3 px-4 rounded-none bg-gradient-to-r from-imperial-gold to-imperial-gold-light text-lacquer font-bold text-xs sm:text-sm hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all uppercase tracking-wider"
+                  className="w-full py-3 px-4 rounded-none bg-gradient-to-r from-imperial-gold to-imperial-gold-light text-lacquer font-bold text-sm hover:brightness-105 shadow-md flex items-center justify-center gap-2 transition-all uppercase tracking-wider"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>✨ Phối lại outfit này (Remix)</span>

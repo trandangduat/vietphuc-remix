@@ -81,9 +81,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       <div className="flex items-center border-b-2 border-lacquer-border bg-lacquer-surface overflow-x-auto scrollbar-none flex-shrink-0">
         <button
           onClick={() => onSelectCategory('top')}
-          className={`flex-1 min-w-[80px] py-3.5 px-3 text-xs sm:text-sm font-bold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
+          className={`flex-1 min-w-[80px] py-3.5 px-3 text-sm font-semibold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
             activeCategory === 'top'
-              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15'
+              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15 font-bold'
               : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover'
           }`}
         >
@@ -91,9 +91,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         </button>
         <button
           onClick={() => onSelectCategory('bottom')}
-          className={`flex-1 min-w-[95px] py-3.5 px-3 text-xs sm:text-sm font-bold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
+          className={`flex-1 min-w-[95px] py-3.5 px-3 text-sm font-semibold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
             activeCategory === 'bottom'
-              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15'
+              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15 font-bold'
               : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover'
           }`}
         >
@@ -101,9 +101,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         </button>
         <button
           onClick={() => onSelectCategory('footwear')}
-          className={`flex-1 min-w-[85px] py-3.5 px-3 text-xs sm:text-sm font-bold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
+          className={`flex-1 min-w-[85px] py-3.5 px-3 text-sm font-semibold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
             activeCategory === 'footwear'
-              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15'
+              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15 font-bold'
               : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover'
           }`}
         >
@@ -111,9 +111,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         </button>
         <button
           onClick={() => onSelectCategory('accessory')}
-          className={`flex-1 min-w-[90px] py-3.5 px-3 text-xs sm:text-sm font-bold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
+          className={`flex-1 min-w-[90px] py-3.5 px-3 text-sm font-semibold transition-all border-b-2 text-center whitespace-nowrap uppercase tracking-wider ${
             activeCategory === 'accessory'
-              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15'
+              ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/15 font-bold'
               : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover'
           }`}
         >
@@ -121,9 +121,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         </button>
         <button
           onClick={() => onSelectCategory('presets')}
-          className={`flex-1 min-w-[110px] py-3.5 px-3 text-xs sm:text-sm font-bold transition-all border-b-2 text-center whitespace-nowrap flex items-center justify-center gap-1.5 uppercase tracking-wider ${
+          className={`flex-1 min-w-[110px] py-3.5 px-3 text-sm font-semibold transition-all border-b-2 text-center whitespace-nowrap flex items-center justify-center gap-1.5 uppercase tracking-wider ${
             activeCategory === 'presets'
-              ? 'border-imperial-gold text-imperial-gold-light bg-gradient-to-r from-imperial-red/25 to-imperial-gold/15'
+              ? 'border-imperial-gold text-imperial-gold-light bg-gradient-to-r from-imperial-red/25 to-imperial-gold/15 font-bold'
               : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover'
           }`}
         >
@@ -186,7 +186,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                       {preset.style}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-silk-muted leading-relaxed mb-3">
+                  <p className="text-sm text-silk-muted leading-relaxed mb-3">
                     {preset.description}
                   </p>
                 </div>
@@ -238,7 +238,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
 
                   {/* Clean Visual Preview (No text inside card) */}
                   <img
-                    src={displayVariant?.assetUrl || piece.thumbnailUrl}
+                    src={displayVariant?.thumbnailUrl || piece.thumbnailUrl || displayVariant?.assetUrl}
                     alt={piece.name}
                     className="max-h-full max-w-full object-contain filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform"
                   />
@@ -256,17 +256,17 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-none border border-imperial-gold/50 p-1 bg-lacquer flex items-center justify-center flex-shrink-0">
               <img
-                src={currentActiveVariant.assetUrl}
+                src={currentActiveVariant.thumbnailUrl || currentActivePiece.thumbnailUrl || currentActiveVariant.assetUrl}
                 alt={currentActivePiece.name}
                 className="max-h-full max-w-full object-contain"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                <span className="text-xs uppercase font-bold tracking-wider px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
                   Đang chọn
                 </span>
-                <h4 className="font-sans font-bold text-sm sm:text-base text-silk-ivory">
+                <h4 className="font-sans font-bold text-base text-silk-ivory">
                   {currentActivePiece.name}
                 </h4>
               </div>
@@ -304,14 +304,14 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
               </div>
             </div>
 
-            <span className="text-xs sm:text-sm font-semibold text-imperial-gold px-2 py-1 bg-lacquer border border-lacquer-border">
+            <span className="text-sm font-semibold text-imperial-gold px-2.5 py-1 bg-lacquer border border-lacquer-border">
               {currentActiveVariant.colorName}
             </span>
 
             {activeCategory === 'accessory' && (
               <button
                 onClick={onClearAccessory}
-                className="text-xs text-imperial-red-bright hover:text-white hover:bg-imperial-red/20 border border-imperial-red/40 px-2 py-1 font-bold uppercase transition-all"
+                className="text-xs text-imperial-red-bright hover:text-white hover:bg-imperial-red/20 border border-imperial-red/40 px-2 py-1 font-bold uppercase tracking-wider transition-all"
                 title="Bỏ chọn phụ kiện này"
               >
                 Bỏ chọn
@@ -325,34 +325,34 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       {hoveredPiece && (
         <div
           style={{ top: tooltipPos.y, left: tooltipPos.x }}
-          className="fixed z-50 pointer-events-none max-w-sm w-80 bg-lacquer-card/95 backdrop-blur-md border-2 border-imperial-gold shadow-2xl p-4 text-xs font-sans text-silk-ivory space-y-2 rounded-none animate-fadeIn"
+          className="fixed z-50 pointer-events-none max-w-sm w-80 bg-lacquer-card/95 backdrop-blur-md border-2 border-imperial-gold shadow-2xl p-4 text-xs font-sans text-silk-ivory space-y-2.5 rounded-none animate-fadeIn"
         >
           <div className="flex items-center justify-between pb-1.5 border-b border-lacquer-border">
             <h5 className="font-bold text-sm text-silk-ivory flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-imperial-gold" />
               <span>{hoveredPiece.name}</span>
             </h5>
-            <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+            <span className="text-xs uppercase font-bold px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
               {hoveredPiece.style === 'traditional' ? 'Cổ phong' : 'Hiện đại'}
             </span>
           </div>
 
           <div>
-            <span className="font-bold text-silk-muted block text-[10px] uppercase tracking-wider">Thời kỳ lịch sử:</span>
+            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Thời kỳ lịch sử:</span>
             <p className="text-silk-ivory font-medium mt-0.5">{hoveredPiece.culturalInfo.period}</p>
           </div>
 
           <div>
-            <span className="font-bold text-silk-muted block text-[10px] uppercase tracking-wider">Ý nghĩa văn hóa:</span>
-            <p className="text-silk-ivory/90 leading-relaxed mt-0.5">{hoveredPiece.culturalInfo.meaning}</p>
+            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Ý nghĩa văn hóa:</span>
+            <p className="text-silk-ivory/90 leading-relaxed mt-0.5 font-normal">{hoveredPiece.culturalInfo.meaning}</p>
           </div>
 
           <div>
-            <span className="font-bold text-silk-muted block text-[10px] uppercase tracking-wider">Bối cảnh chuẩn mực:</span>
-            <p className="text-silk-ivory/90 leading-relaxed mt-0.5">{hoveredPiece.culturalInfo.context}</p>
+            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Bối cảnh chuẩn mực:</span>
+            <p className="text-silk-ivory/90 leading-relaxed mt-0.5 font-normal">{hoveredPiece.culturalInfo.context}</p>
           </div>
 
-          <div className="pt-2 border-t border-lacquer-border text-[11px] text-imperial-gold font-medium">
+          <div className="pt-2 border-t border-lacquer-border text-xs text-imperial-gold font-medium">
             <span>Nguồn: </span>
             <span className="italic text-silk-ivory">{hoveredPiece.culturalInfo.source}</span>
           </div>

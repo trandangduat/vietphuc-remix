@@ -58,10 +58,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, outfits
             <LinkIcon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-serif font-bold text-xl sm:text-2xl text-silk-ivory">
+            <h3 className="font-serif font-bold text-2xl text-silk-ivory">
               Cài đặt Chia sẻ Lookbook
             </h3>
-            <p className="text-xs sm:text-sm text-silk-muted mt-0.5">
+            <p className="text-sm text-silk-muted mt-0.5">
               Quản lý liên kết công khai và kiểm soát nghiêm ngặt quyền riêng tư hình ảnh
             </p>
           </div>
@@ -108,7 +108,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, outfits
 
             {/* Privacy Granularity Checklist */}
             <div className="border-2 border-lacquer-border rounded-none p-4 bg-lacquer-surface/80">
-              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-silk-ivory mb-3 uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-xs font-bold text-silk-ivory mb-3 uppercase tracking-wider">
                 <ShieldCheck className="w-5 h-5 text-teal-400" />
                 <span>Nội dung được phép xuất hiện trên liên kết:</span>
               </div>
@@ -142,11 +142,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, outfits
             </div>
 
             {/* Revoke Button */}
-            <div className="pt-2 flex justify-between items-center text-xs sm:text-sm">
+            <div className="pt-2 flex justify-between items-center text-sm">
               <span className="text-silk-muted font-medium">Muốn hủy chia sẻ?</span>
               <button
                 onClick={handleRevoke}
-                className="py-2 px-3.5 rounded-none bg-imperial-red/20 text-imperial-red-bright hover:bg-imperial-red/30 border border-imperial-red/40 font-bold uppercase tracking-wider transition-all"
+                className="py-2 px-3.5 rounded-none bg-imperial-red/20 text-imperial-red-bright hover:bg-imperial-red/30 border border-imperial-red/40 text-xs font-bold uppercase tracking-wider transition-all"
               >
                 Hủy liên kết này (Revoke)
               </button>
@@ -168,19 +168,19 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, outfits
               <h4 className="font-sans font-bold text-base text-silk-ivory mb-2 uppercase tracking-wider">
                 Cảnh báo quyền riêng tư hình ảnh
               </h4>
-              <p className="text-xs sm:text-sm text-silk-muted leading-relaxed mb-5">
+              <p className="text-sm text-silk-muted leading-relaxed mb-5">
                 Bức ảnh này chứa chân dung/khuôn mặt người thật. Bạn có chắc chắn muốn cho phép bất kỳ ai có liên kết đều xem được bức ảnh này trên Internet không?
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShowFaceWarning(null)}
-                  className="py-2.5 px-4 rounded-none bg-lacquer-surface border border-lacquer-border text-xs sm:text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
+                  className="py-2.5 px-4 rounded-none bg-lacquer-surface border border-lacquer-border text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   onClick={() => confirmIncludeFace(showFaceWarning)}
-                  className="py-2.5 px-4 rounded-none bg-amber-500 text-lacquer font-bold text-xs sm:text-sm hover:bg-amber-400 uppercase tracking-wider"
+                  className="py-2.5 px-4 rounded-none bg-amber-500 text-lacquer font-bold text-sm hover:bg-amber-400 uppercase tracking-wider"
                 >
                   Tôi đồng ý
                 </button>
