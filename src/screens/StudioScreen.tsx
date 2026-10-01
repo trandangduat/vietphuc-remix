@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StudioCanvas2D } from '../components/StudioCanvas2D';
 import { PieceSelector } from '../components/PieceSelector';
-import { AIOverviewCard } from '../components/AIOverviewCard';
+import { CulturalMascot } from '../components/CulturalMascot';
 import { AITryOnModal } from '../components/AITryOnModal';
 import { CustomEventModal } from '../components/CustomEventModal';
 import { PIECES, EVENTS, PRESET_OUTFITS } from '../data/catalog';
@@ -173,14 +173,14 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           onClearCategory={handleClearCategory}
           onSelectPreset={handleSelectPreset}
         />
-
-        {/* Bottom: Docked AI Overview with Zero Gap */}
-        <AIOverviewCard
-          outfit={outfit}
-          isLoggedIn={isLoggedIn}
-          onLoginPrompt={onLoginPrompt}
-        />
       </div>
+
+      {/* Floating Free-Draggable Cultural Mascot (Bé Nghê Cung Đình) */}
+      <CulturalMascot
+        outfit={outfit}
+        isLoggedIn={isLoggedIn}
+        onLoginPrompt={onLoginPrompt}
+      />
 
       {/* Modals */}
       <AITryOnModal

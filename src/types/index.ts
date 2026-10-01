@@ -114,4 +114,6 @@ export interface AIOverviewResult {
   explanation: string;
   suggestion?: string;
   source: string;
+  mascotQuote?: string;
+  mascotMood?: 'happy' | 'thinking' | 'curious' | 'reverent';
 }
