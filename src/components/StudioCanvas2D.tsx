@@ -42,11 +42,16 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
     return () => window.removeEventListener('vietphuc_alignments_updated', handleUpdate);
   }, []);
 
-  // Compute alignments for active pieces
-  const bottomAlign = getPieceAlignment(outfit.bottomPiece?.id, outfit.bottomVariant?.variantId);
-  const footwearAlign = getPieceAlignment(outfit.footwearPiece?.id, outfit.footwearVariant?.variantId);
-  const topAlign = getPieceAlignment(outfit.topPiece?.id, outfit.topVariant?.variantId);
-  const accessoryAlign = getPieceAlignment(outfit.accessoryPiece?.id, outfit.accessoryVariant?.variantId);
+  // Compute active pieces (supporting piece or variant alias)
+  const bottomPiece = outfit.bottomPiece || outfit.bottomVariant;
+  const footwearPiece = outfit.footwearPiece || outfit.footwearVariant;
+  const topPiece = outfit.topPiece || outfit.topVariant;
+  const accessoryPiece = outfit.accessoryPiece || outfit.accessoryVariant;
+
+  const bottomAlign = getPieceAlignment(bottomPiece?.id);
+  const footwearAlign = getPieceAlignment(footwearPiece?.id);
+  const topAlign = getPieceAlignment(topPiece?.id);
+  const accessoryAlign = getPieceAlignment(accessoryPiece?.id);
 
   // Export current layers to a single downloadable PNG via HTML5 Canvas
   const handleDownloadMockup = async () => {
@@ -73,23 +78,23 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
       layersToDraw.push({ url: '/assets/mannequins/mannequin-base.png' });
 
       // 2. Bottoms
-      if (outfit.bottomVariant) {
-        layersToDraw.push({ url: outfit.bottomVariant.assetUrl, alignment: bottomAlign });
+      if (bottomPiece) {
+        layersToDraw.push({ url: bottomPiece.assetUrl, alignment: bottomAlign });
       }
 
       // 3. Footwear
-      if (outfit.footwearVariant) {
-        layersToDraw.push({ url: outfit.footwearVariant.assetUrl, alignment: footwearAlign });
+      if (footwearPiece) {
+        layersToDraw.push({ url: footwearPiece.assetUrl, alignment: footwearAlign });
       }
 
       // 4. Tops
-      if (outfit.topVariant) {
-        layersToDraw.push({ url: outfit.topVariant.assetUrl, alignment: topAlign });
+      if (topPiece) {
+        layersToDraw.push({ url: topPiece.assetUrl, alignment: topAlign });
       }
 
       // 5. Accessories
-      if (outfit.accessoryVariant) {
-        layersToDraw.push({ url: outfit.accessoryVariant.assetUrl, alignment: accessoryAlign });
+      if (accessoryPiece) {
+        layersToDraw.push({ url: accessoryPiece.assetUrl, alignment: accessoryAlign });
       }
 
       // Load all images
@@ -174,56 +179,56 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         </div>
 
         {/* Layer 2: Quần / Chân váy (Z=20) */}
-        {outfit.bottomVariant && (
+        {bottomPiece && (
           <div
             className="absolute inset-0 z-20 pointer-events-none transition-all duration-150"
             style={getAlignmentStyle(bottomAlign)}
           >
             <img
-              src={outfit.bottomVariant.assetUrl}
-              alt={outfit.bottomPiece?.name}
+              src={bottomPiece.assetUrl}
+              alt={bottomPiece.name}
               className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
             />
           </div>
         )}
 
         {/* Layer 3: Giày / Dép (Z=30) */}
-        {outfit.footwearVariant && (
+        {footwearPiece && (
           <div
             className="absolute inset-0 z-30 pointer-events-none transition-all duration-150"
             style={getAlignmentStyle(footwearAlign)}
           >
             <img
-              src={outfit.footwearVariant.assetUrl}
-              alt={outfit.footwearPiece?.name}
+              src={footwearPiece.assetUrl}
+              alt={footwearPiece.name}
               className="w-full h-full object-contain filter drop-shadow-[0_6px_12px_rgba(0,0,0,0.6)]"
             />
           </div>
         )}
 
         {/* Layer 4: Áo (Z=40) - Phủ lên quần */}
-        {outfit.topVariant && (
+        {topPiece && (
           <div
             className="absolute inset-0 z-40 pointer-events-none transition-all duration-150"
             style={getAlignmentStyle(topAlign)}
           >
             <img
-              src={outfit.topVariant.assetUrl}
-              alt={outfit.topPiece?.name}
+              src={topPiece.assetUrl}
+              alt={topPiece.name}
               className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
             />
           </div>
         )}
 
         {/* Layer 5: Phụ kiện (Z=50) - Trên cùng */}
-        {outfit.accessoryVariant && (
+        {accessoryPiece && (
           <div
             className="absolute inset-0 z-50 pointer-events-none transition-all duration-150"
             style={getAlignmentStyle(accessoryAlign)}
           >
             <img
-              src={outfit.accessoryVariant.assetUrl}
-              alt={outfit.accessoryPiece?.name}
+              src={accessoryPiece.assetUrl}
+              alt={accessoryPiece.name}
               className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.65)]"
             />
           </div>

@@ -117,7 +117,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 <div>
                   <div className="aspect-[3/4] rounded-none overflow-hidden mb-4 border-2 border-lacquer-border bg-lacquer-surface relative">
                     <img
-                      src={outfit.tryOnImage || outfit.top.variant.assetUrl}
+                      src={outfit.tryOnImage || outfit.top.piece.assetUrl || outfit.top.variant?.assetUrl}
                       alt={outfit.name}
                       className="w-full h-full object-cover"
                     />
@@ -256,7 +256,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   {/* Image Stage */}
                   <div className="relative aspect-[3/4] rounded-none overflow-hidden border-2 border-lacquer-border bg-lacquer-surface mb-4">
                     <img
-                      src={outfit.tryOnImage || outfit.top.variant.assetUrl}
+                      src={outfit.tryOnImage || outfit.top.piece.assetUrl || outfit.top.variant?.assetUrl}
                       alt={outfit.name}
                       className="w-full h-full object-cover"
                     />
@@ -392,7 +392,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
               <div key={outfit.id} className="p-5 rounded-none bg-lacquer-surface border-2 border-lacquer-border flex flex-col justify-between">
                 <div>
                   <div className="aspect-[3/4] rounded-none overflow-hidden mb-4 border-2 border-lacquer-border bg-lacquer-card">
-                    <img src={outfit.top.variant.assetUrl} alt={outfit.name} className="w-full h-full object-cover" />
+                    <img src={outfit.top.piece.assetUrl || outfit.top.variant?.assetUrl} alt={outfit.name} className="w-full h-full object-cover" />
                   </div>
                   <h4 className="font-sans font-bold text-silk-ivory text-base mb-1.5">{outfit.name}</h4>
                   <p className="text-xs text-silk-muted mb-4 font-medium">{outfit.event.name}</p>

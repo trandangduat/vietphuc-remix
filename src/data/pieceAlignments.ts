@@ -56,6 +56,22 @@ export const DEFAULT_PIECE_ALIGNMENTS: AlignmentMap = {
     scaleY: 1,
     rotate: 0,
   },
+  'piece-ao-tac-do': {
+    x: 0.24,
+    y: -0.53,
+    scale: 0.8,
+    scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
+  'piece-ao-tac-xanh': {
+    x: -1.19,
+    y: -6.6,
+    scale: 0.8,
+    scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
   'piece-ao-tac': {
     x: 0.24,
     y: -0.53,

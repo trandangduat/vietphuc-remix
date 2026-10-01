@@ -26,9 +26,13 @@ export interface Piece {
   gender: 'men' | 'women' | 'unisex';
   style: 'traditional' | 'modern' | 'remix';
   culturalInfo: CulturalInfo;
-  defaultVariantId: string;
-  variants: PieceVariant[];
-  thumbnailUrl?: string;
+  colorName: string;
+  swatchHex?: string;
+  assetUrl: string;
+  thumbnailUrl: string;
+  zIndex: number;
+  defaultVariantId?: string;
+  variants?: PieceVariant[];
 }
 
 export interface EventBackground {
@@ -46,11 +50,11 @@ export interface PresetOutfit {
   description: string;
   gender: GenderSelection;
   topPieceId: string;
-  topVariantId: string;
+  topVariantId?: string;
   bottomPieceId: string;
-  bottomVariantId: string;
+  bottomVariantId?: string;
   footwearPieceId: string;
-  footwearVariantId: string;
+  footwearVariantId?: string;
   accessoryPieceId?: string;
   accessoryVariantId?: string;
   eventId: string;
@@ -59,16 +63,21 @@ export interface PresetOutfit {
 
 export interface ActiveOutfitState {
   topPiece?: Piece;
-  topVariant?: PieceVariant;
+  topVariant?: Piece;
   bottomPiece?: Piece;
-  bottomVariant?: PieceVariant;
+  bottomVariant?: Piece;
   footwearPiece?: Piece;
-  footwearVariant?: PieceVariant;
+  footwearVariant?: Piece;
   accessoryPiece?: Piece;
-  accessoryVariant?: PieceVariant;
+  accessoryVariant?: Piece;
   event: EventBackground;
   mannequinGender: GenderSelection;
   styleFilter: StyleFilter;
+}
+
+export interface SavedOutfitSlot {
+  piece: Piece;
+  variant?: Piece | PieceVariant;
 }
 
 export interface SavedOutfit {
@@ -76,10 +85,10 @@ export interface SavedOutfit {
   name: string;
   createdAt: string;
   gender: GenderSelection;
-  top: { piece: Piece; variant: PieceVariant };
-  bottom: { piece: Piece; variant: PieceVariant };
-  footwear: { piece: Piece; variant: PieceVariant };
-  accessory?: { piece: Piece; variant: PieceVariant };
+  top: SavedOutfitSlot;
+  bottom: SavedOutfitSlot;
+  footwear: SavedOutfitSlot;
+  accessory?: SavedOutfitSlot;
   event: EventBackground;
   aiAnalysis?: AIOverviewResult;
   tryOnImage?: string;

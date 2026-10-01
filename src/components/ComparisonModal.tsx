@@ -55,7 +55,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                   <td key={outfit.id} className="py-4 px-4 border-l border-lacquer-border">
                     <div className="relative aspect-[3/4] w-32 rounded-none overflow-hidden border-2 border-lacquer-border shadow">
                       <img
-                        src={outfit.tryOnImage || outfit.top.variant.assetUrl}
+                        src={outfit.tryOnImage || outfit.top.piece.assetUrl || outfit.top.variant?.assetUrl}
                         alt={outfit.name}
                         className="w-full h-full object-cover bg-lacquer-surface"
                       />
@@ -80,7 +80,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 {outfits.map((outfit) => (
                   <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
                     <span className="text-silk-ivory font-bold block">{outfit.top.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.top.variant.colorName}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.top.piece.colorName || outfit.top.variant?.colorName}</span>
                   </td>
                 ))}
               </tr>
@@ -91,7 +91,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 {outfits.map((outfit) => (
                   <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
                     <span className="text-silk-ivory font-bold block">{outfit.bottom.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.bottom.variant.colorName}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.bottom.piece.colorName || outfit.bottom.variant?.colorName}</span>
                   </td>
                 ))}
               </tr>
@@ -102,7 +102,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 {outfits.map((outfit) => (
                   <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
                     <span className="text-silk-ivory font-bold block">{outfit.footwear.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.footwear.variant.colorName}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.footwear.piece.colorName || outfit.footwear.variant?.colorName}</span>
                   </td>
                 ))}
               </tr>

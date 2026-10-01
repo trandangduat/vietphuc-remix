@@ -12,7 +12,7 @@ import {
   exportAlignmentsAsCode,
   getAlignmentStyle,
 } from '../data/pieceAlignments';
-import { Piece, PieceCategory, PieceVariant } from '../types';
+import { Piece, PieceCategory } from '../types';
 import {
   Sliders,
   Move,
@@ -55,16 +55,9 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
     return defaultPiece;
   });
 
-  // Currently active variant of the selected piece
-  const [selectedVariant, setSelectedVariant] = useState<PieceVariant>(() => {
-    const defaultPiece = PIECES.find((p) => p.id === 'piece-quan-lua') || PIECES[0];
-    return defaultPiece.variants[0];
-  });
-
-  // When selected piece changes, ensure selected variant belongs to it
+  // When selected piece changes
   const handleSelectPiece = (piece: Piece) => {
     setSelectedPiece(piece);
-    setSelectedVariant(piece.variants[0]);
   };
 
   // Preview options
@@ -428,7 +421,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                   {/* Thumbnail */}
                   <div className="w-12 h-12 rounded-none bg-lacquer-card border border-lacquer-border flex items-center justify-center p-1 flex-shrink-0">
                     <img
-                      src={piece.variants[0]?.thumbnailUrl || piece.thumbnailUrl || piece.variants[0]?.assetUrl}
+                      src={piece.thumbnailUrl || piece.assetUrl}
                       alt={piece.name}
                       className="max-h-full max-w-full object-contain"
                     />
@@ -550,7 +543,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                     className="absolute inset-0 z-20 pointer-events-none opacity-40"
                     style={getAlignmentStyle(alignments[refBottom.id] || DEFAULT_PIECE_ALIGNMENTS[refBottom.id] || DEFAULT_PIECE_ALIGNMENT)}
                   >
-                    <img src={refBottom.variants[0].assetUrl} alt="Ref Bottom" className="w-full h-full object-contain" />
+                    <img src={refBottom.assetUrl} alt="Ref Bottom" className="w-full h-full object-contain" />
                   </div>
                 )}
                 {refFootwear && refFootwear.id !== selectedPiece.id && (
@@ -558,7 +551,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                     className="absolute inset-0 z-30 pointer-events-none opacity-40"
                     style={getAlignmentStyle(alignments[refFootwear.id] || DEFAULT_PIECE_ALIGNMENTS[refFootwear.id] || DEFAULT_PIECE_ALIGNMENT)}
                   >
-                    <img src={refFootwear.variants[0].assetUrl} alt="Ref Footwear" className="w-full h-full object-contain" />
+                    <img src={refFootwear.assetUrl} alt="Ref Footwear" className="w-full h-full object-contain" />
                   </div>
                 )}
                 {refTop && refTop.id !== selectedPiece.id && (
@@ -566,7 +559,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                     className="absolute inset-0 z-40 pointer-events-none opacity-40"
                     style={getAlignmentStyle(alignments[refTop.id] || DEFAULT_PIECE_ALIGNMENTS[refTop.id] || DEFAULT_PIECE_ALIGNMENT)}
                   >
-                    <img src={refTop.variants[0].assetUrl} alt="Ref Top" className="w-full h-full object-contain" />
+                    <img src={refTop.assetUrl} alt="Ref Top" className="w-full h-full object-contain" />
                   </div>
                 )}
                 {refAccessory && refAccessory.id !== selectedPiece.id && (
@@ -574,7 +567,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                     className="absolute inset-0 z-50 pointer-events-none opacity-40"
                     style={getAlignmentStyle(alignments[refAccessory.id] || DEFAULT_PIECE_ALIGNMENTS[refAccessory.id] || DEFAULT_PIECE_ALIGNMENT)}
                   >
-                    <img src={refAccessory.variants[0].assetUrl} alt="Ref Accessory" className="w-full h-full object-contain" />
+                    <img src={refAccessory.assetUrl} alt="Ref Accessory" className="w-full h-full object-contain" />
                   </div>
                 )}
               </>
@@ -586,7 +579,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
               style={activePieceStyle}
             >
               <img
-                src={selectedVariant.assetUrl}
+                src={selectedPiece.assetUrl}
                 alt={selectedPiece.name}
                 className="w-full h-full object-contain filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.85)]"
               />
@@ -666,47 +659,37 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-lacquer-surface border border-imperial-gold/50 p-1 flex items-center justify-center flex-shrink-0">
                 <img
-                  src={selectedVariant.thumbnailUrl || selectedPiece.thumbnailUrl || selectedVariant.assetUrl}
+                  src={selectedPiece.thumbnailUrl || selectedPiece.assetUrl}
                   alt={selectedPiece.name}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
               <div className="min-w-0">
                 <h3 className="font-bold text-sm text-silk-ivory truncate">{selectedPiece.name}</h3>
-                <p className="text-xs text-silk-muted capitalize">
-                  {selectedPiece.category === 'top'
-                    ? 'Áo'
-                    : selectedPiece.category === 'bottom'
-                    ? 'Quần'
-                    : selectedPiece.category === 'footwear'
-                    ? 'Giày'
-                    : 'Phụ kiện'}
-                  {' • ' + selectedVariant.colorName}
-                </p>
-              </div>
-            </div>
-
-            {/* Color Swatch Picker if piece has variants */}
-            {selectedPiece.variants.length > 1 && (
-              <div className="pt-2 border-t border-lacquer-border flex items-center gap-2">
-                <span className="text-xs text-silk-muted font-bold">Màu thử:</span>
-                <div className="flex items-center gap-1.5">
-                  {selectedPiece.variants.map((v) => (
-                    <button
-                      key={v.variantId}
-                      onClick={() => setSelectedVariant(v)}
-                      className={`w-5 h-5 border transition-all ${
-                        selectedVariant.variantId === v.variantId
-                          ? 'border-imperial-gold ring-2 ring-imperial-gold/50 scale-110'
-                          : 'border-lacquer-border hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: v.swatchHex }}
-                      title={v.colorName}
-                    />
-                  ))}
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-silk-muted capitalize">
+                    {selectedPiece.category === 'top'
+                      ? 'Áo'
+                      : selectedPiece.category === 'bottom'
+                      ? 'Quần'
+                      : selectedPiece.category === 'footwear'
+                      ? 'Giày'
+                      : 'Phụ kiện'}
+                  </p>
+                  {selectedPiece.colorName && (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium bg-lacquer-surface border border-lacquer-border text-silk-ivory">
+                      {selectedPiece.swatchHex && (
+                        <span
+                          className="w-2.5 h-2.5 border border-lacquer-border/60 flex-shrink-0 inline-block"
+                          style={{ backgroundColor: selectedPiece.swatchHex }}
+                        />
+                      )}
+                      <span>{selectedPiece.colorName}</span>
+                    </span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Precision Sliders */}

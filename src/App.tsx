@@ -37,17 +37,17 @@ export function App() {
   }, []);
 
   // Initial active outfit state
-  const initialTop = PIECES.find((p) => p.id === 'piece-ao-tac');
-  const initialTopVariant = initialTop?.variants[0];
+  const initialTop = PIECES.find((p) => p.id === 'piece-ao-tac-do') || PIECES[0];
+  const initialTopVariant = initialTop;
 
   const initialBottom = PIECES.find((p) => p.id === 'piece-quan-lua');
-  const initialBottomVariant = initialBottom?.variants[0];
+  const initialBottomVariant = initialBottom;
 
   const initialFootwear = PIECES.find((p) => p.id === 'piece-hai-nhung');
-  const initialFootwearVariant = initialFootwear?.variants[0];
+  const initialFootwearVariant = initialFootwear;
 
   const initialAccessory = PIECES.find((p) => p.id === 'piece-non-la');
-  const initialAccessoryVariant = initialAccessory?.variants[0];
+  const initialAccessoryVariant = initialAccessory;
 
   const [activeOutfit, setActiveOutfit] = useState<ActiveOutfitState>({
     topPiece: undefined,
@@ -104,7 +104,7 @@ export function App() {
 
   // Save active outfit
   const handleSaveOutfit = () => {
-    if (!activeOutfit.topPiece || !activeOutfit.topVariant || !activeOutfit.bottomPiece || !activeOutfit.bottomVariant || !activeOutfit.footwearPiece || !activeOutfit.footwearVariant) {
+    if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) {
       showToast('⚠️ Vui lòng chọn đủ Áo, Quần và Giày để hoàn tất outfit!');
       return;
     }
@@ -114,10 +114,10 @@ export function App() {
       name: `${activeOutfit.topPiece.name} • ${activeOutfit.event.name}`,
       createdAt: new Date().toISOString().split('T')[0],
       gender: activeOutfit.mannequinGender,
-      top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant },
-      bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant },
-      footwear: { piece: activeOutfit.footwearPiece, variant: activeOutfit.footwearVariant },
-      accessory: activeOutfit.accessoryPiece && activeOutfit.accessoryVariant ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant } : undefined,
+      top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant || activeOutfit.topPiece },
+      bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant || activeOutfit.bottomPiece },
+      footwear: { piece: activeOutfit.footwearPiece, variant: activeOutfit.footwearVariant || activeOutfit.footwearPiece },
+      accessory: activeOutfit.accessoryPiece ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant || activeOutfit.accessoryPiece } : undefined,
       event: activeOutfit.event,
     };
 
@@ -132,17 +132,17 @@ export function App() {
 
   // Save AI Try-on image into Lookbook
   const handleSaveTryOnToLookbook = (tryOnImgUrl: string) => {
-    if (!activeOutfit.topPiece || !activeOutfit.topVariant || !activeOutfit.bottomPiece || !activeOutfit.bottomVariant || !activeOutfit.footwearPiece || !activeOutfit.footwearVariant) return;
+    if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) return;
 
     const tryOnOutfit: SavedOutfit = {
       id: `outfit-tryon-${Date.now()}`,
       name: `AI Try on: ${activeOutfit.topPiece.name}`,
       createdAt: new Date().toISOString().split('T')[0],
       gender: activeOutfit.mannequinGender,
-      top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant },
-      bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant },
-      footwear: { piece: activeOutfit.footwearPiece, variant: activeOutfit.footwearVariant },
-      accessory: activeOutfit.accessoryPiece && activeOutfit.accessoryVariant ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant } : undefined,
+      top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant || activeOutfit.topPiece },
+      bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant || activeOutfit.bottomPiece },
+      footwear: { piece: activeOutfit.footwearPiece, variant: activeOutfit.footwearVariant || activeOutfit.footwearPiece },
+      accessory: activeOutfit.accessoryPiece ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant || activeOutfit.accessoryPiece } : undefined,
       event: activeOutfit.event,
       tryOnImage: tryOnImgUrl,
     };
@@ -155,13 +155,13 @@ export function App() {
   const handleLoadOutfitIntoStudio = (saved: SavedOutfit) => {
     setActiveOutfit({
       topPiece: saved.top.piece,
-      topVariant: saved.top.variant,
+      topVariant: saved.top.piece,
       bottomPiece: saved.bottom.piece,
-      bottomVariant: saved.bottom.variant,
+      bottomVariant: saved.bottom.piece,
       footwearPiece: saved.footwear.piece,
-      footwearVariant: saved.footwear.variant,
+      footwearVariant: saved.footwear.piece,
       accessoryPiece: saved.accessory?.piece,
-      accessoryVariant: saved.accessory?.variant,
+      accessoryVariant: saved.accessory?.piece,
       event: saved.event,
       mannequinGender: saved.gender,
       styleFilter: 'all',
@@ -174,16 +174,16 @@ export function App() {
   const handleOpenStudio = (preset?: PresetOutfit, event?: EventBackground) => {
     if (preset) {
       const topPiece = PIECES.find((p) => p.id === preset.topPieceId);
-      const topVariant = topPiece?.variants.find((v) => v.variantId === preset.topVariantId);
+      const topVariant = topPiece;
 
       const bottomPiece = PIECES.find((p) => p.id === preset.bottomPieceId);
-      const bottomVariant = bottomPiece?.variants.find((v) => v.variantId === preset.bottomVariantId);
+      const bottomVariant = bottomPiece;
 
       const footwearPiece = PIECES.find((p) => p.id === preset.footwearPieceId);
-      const footwearVariant = footwearPiece?.variants.find((v) => v.variantId === preset.footwearVariantId);
+      const footwearVariant = footwearPiece;
 
       const accessoryPiece = preset.accessoryPieceId ? PIECES.find((p) => p.id === preset.accessoryPieceId) : undefined;
-      const accessoryVariant = accessoryPiece?.variants.find((v) => v.variantId === preset.accessoryVariantId);
+      const accessoryVariant = accessoryPiece;
 
       const presetEvent = EVENTS.find((e) => e.id === preset.eventId) || EVENTS[0];
 

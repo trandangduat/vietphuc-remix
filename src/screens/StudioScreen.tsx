@@ -39,7 +39,11 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
   const [allEvents, setAllEvents] = useState<EventBackground[]>(EVENTS);
 
   // Check if outfit has required 3 pieces (Top, Bottom, Footwear)
-  const canTryOn = Boolean(outfit.topVariant && outfit.bottomVariant && outfit.footwearVariant);
+  const canTryOn = Boolean(
+    (outfit.topPiece || outfit.topVariant) &&
+    (outfit.bottomPiece || outfit.bottomVariant) &&
+    (outfit.footwearPiece || outfit.footwearVariant)
+  );
 
   // Switch Mannequin Gender
   const handleSelectGender = (gender: GenderSelection) => {
@@ -56,18 +60,18 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
     setOutfit((prev) => ({ ...prev, styleFilter }));
   };
 
-  // Select Piece Variant (from swatches)
-  const handleSelectVariant = (piece: Piece, variant: PieceVariant) => {
+  // Select Piece directly
+  const handleSelectPiece = (piece: Piece) => {
     setOutfit((prev) => {
       switch (piece.category) {
         case 'top':
-          return { ...prev, topPiece: piece, topVariant: variant };
+          return { ...prev, topPiece: piece, topVariant: piece };
         case 'bottom':
-          return { ...prev, bottomPiece: piece, bottomVariant: variant };
+          return { ...prev, bottomPiece: piece, bottomVariant: piece };
         case 'footwear':
-          return { ...prev, footwearPiece: piece, footwearVariant: variant };
+          return { ...prev, footwearPiece: piece, footwearVariant: piece };
         case 'accessory':
-          return { ...prev, accessoryPiece: piece, accessoryVariant: variant };
+          return { ...prev, accessoryPiece: piece, accessoryVariant: piece };
         default:
           return prev;
       }
@@ -98,29 +102,21 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
   // Load Preset Outfit
   const handleSelectPreset = (preset: PresetOutfit) => {
     const topPiece = PIECES.find((p) => p.id === preset.topPieceId);
-    const topVariant = topPiece?.variants.find((v) => v.variantId === preset.topVariantId);
-
     const bottomPiece = PIECES.find((p) => p.id === preset.bottomPieceId);
-    const bottomVariant = bottomPiece?.variants.find((v) => v.variantId === preset.bottomVariantId);
-
     const footwearPiece = PIECES.find((p) => p.id === preset.footwearPieceId);
-    const footwearVariant = footwearPiece?.variants.find((v) => v.variantId === preset.footwearVariantId);
-
     const accessoryPiece = preset.accessoryPieceId ? PIECES.find((p) => p.id === preset.accessoryPieceId) : undefined;
-    const accessoryVariant = accessoryPiece?.variants.find((v) => v.variantId === preset.accessoryVariantId);
-
     const event = allEvents.find((e) => e.id === preset.eventId) || allEvents[0];
 
     setOutfit((prev) => ({
       ...prev,
       topPiece,
-      topVariant,
+      topVariant: topPiece,
       bottomPiece,
-      bottomVariant,
+      bottomVariant: bottomPiece,
       footwearPiece,
-      footwearVariant,
+      footwearVariant: footwearPiece,
       accessoryPiece,
-      accessoryVariant,
+      accessoryVariant: accessoryPiece,
       event,
       mannequinGender: preset.gender,
     }));
@@ -156,7 +152,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
       </div>
 
       {/* RIGHT COLUMN: Docked Pieces Selector + Integrated AI Overview with Zero Container Padding & Zero Gap */}
-      <div className="w-full lg:w-1/2 xl:w-[48%] h-full flex flex-col border-t lg:border-t-0 lg:border-l border-lacquer-border bg-lacquer-card overflow-hidden">
+      <div className="w-full lg:w-1/2 xl:w-[48%] h-full flex flex-col border-t lg:border-t-0 lg:border-l border-lacquer-border bg-lacquer-card overflow-hidden relative">
         {/* Top: Piece Selector with Category Tabs and Swatches */}
         <PieceSelector
           pieces={PIECES}
@@ -166,12 +162,13 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           styleFilter={outfit.styleFilter}
           onSelectStyle={handleSelectStyle}
           selectedPieces={{
-            top: outfit.topVariant,
-            bottom: outfit.bottomVariant,
-            footwear: outfit.footwearVariant,
-            accessory: outfit.accessoryVariant,
+            top: outfit.topPiece || outfit.topVariant,
+            bottom: outfit.bottomPiece || outfit.bottomVariant,
+            footwear: outfit.footwearPiece || outfit.footwearVariant,
+            accessory: outfit.accessoryPiece || outfit.accessoryVariant,
           }}
-          onSelectVariant={handleSelectVariant}
+          onSelectPiece={handleSelectPiece}
+          onSelectVariant={handleSelectPiece}
           onClearAccessory={handleClearAccessory}
           onClearCategory={handleClearCategory}
           onSelectPreset={handleSelectPreset}

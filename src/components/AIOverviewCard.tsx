@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveOutfitState, AIOverviewResult } from '../types';
-import { Sparkles, ShieldCheck, AlertTriangle, AlertCircle, BookCheck, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, ShieldCheck, AlertTriangle, AlertCircle, BookCheck, Lock, ChevronDown, ChevronUp, X } from 'lucide-react';
 
 interface AIOverviewCardProps {
   outfit: ActiveOutfitState;
@@ -34,15 +34,17 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
       };
     }
 
-    const isAoTac = outfit.topPiece?.id === 'piece-ao-tac';
+    const isAoTacDo = outfit.topPiece?.id === 'piece-ao-tac-do' || outfit.topPiece?.id === 'piece-ao-tac';
+    const isAoTacXanh = outfit.topPiece?.id === 'piece-ao-tac-xanh';
+    const isAoTac = isAoTacDo || isAoTacXanh;
     const isQuanLua = outfit.bottomPiece?.id === 'piece-quan-lua';
     const isQuanTay = outfit.bottomPiece?.id === 'piece-quan-tay';
     const isHaiNhung = outfit.footwearPiece?.id === 'piece-hai-nhung';
     const isLoafer = outfit.footwearPiece?.id === 'piece-loafer';
     const isEventTet = outfit.event.id === 'event-tet';
 
-    // Case 1: Pure Traditional Royal (Áo tấc + Quần lụa + Hài nhung)
-    if (isAoTac && isQuanLua && isHaiNhung) {
+    // Case 1A: Pure Traditional Royal (Áo tấc đỏ + Quần lụa + Hài nhung)
+    if (isAoTacDo && isQuanLua && isHaiNhung) {
       return {
         totalScore: isEventTet ? 9.8 : 9.5,
         criteria: {
@@ -50,7 +52,7 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
             name: 'Hài hòa màu sắc',
             score: 9.8,
             maxScore: 10,
-            comment: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc, đoan chính và quý phái.',
+            comment: 'Tương phản Đỏ gấm hoàng triều và Lụa trắng ngà, đoan chính và quyền quý rực rỡ sắc xuân.',
           },
           eventFit: {
             name: 'Phù hợp sự kiện',
@@ -64,13 +66,47 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
             name: 'Chuẩn mực lễ nghi',
             score: 9.7,
             maxScore: 10,
-            comment: 'Bảo toàn trọn vẹn quy thức lễ nghi thời Nguyễn, thể hiện sự đoan chính và tôn ti trật tự.',
+            comment: 'Bảo toàn trọn vẹn quy thức lễ phục triều Nguyễn, thể hiện sự đoan chính và tôn ti trật tự.',
           },
         },
-        colorHarmony: 'Tương phản Cung đình Huế (Đỏ/Xanh tấc đi cùng lụa trắng ngà).',
+        colorHarmony: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc.',
         eventFit: isEventTet ? 'Tuyệt đối phù hợp với không khí trang trọng ngày Tết cổ truyền.' : 'Rất trang trọng, phù hợp đại lễ và nghi thức cổ điển.',
         culturalStatus: 'suitable',
-        explanation: 'Bộ trang phục bảo toàn trọn vẹn quy thức lễ nghi thời Nguyễn. Áo tấc đi cùng quần lụa trắng và hài thêu thể hiện sự đoan chính, lễ giáo tôn ti trật tự.',
+        explanation: 'Bộ trang phục bảo toàn trọn vẹn quy thức lễ nghi thời Nguyễn. Áo tấc đỏ gấm đi cùng quần lụa trắng và hài thêu thể hiện sự đoan chính, phúc lộc đầu năm.',
+        source: 'Bảo tàng Lịch sử Quốc gia & "Ngàn năm áo mũ" (Trần Quang Đức)',
+      };
+    }
+
+    // Case 1B: Traditional Scholar Royal (Áo tấc xanh + Quần lụa + Hài nhung)
+    if (isAoTacXanh && isQuanLua && isHaiNhung) {
+      return {
+        totalScore: isEventTet ? 9.6 : 9.7,
+        criteria: {
+          colorHarmony: {
+            name: 'Hài hòa màu sắc',
+            score: 9.7,
+            maxScore: 10,
+            comment: 'Sắc xanh cổ vịt quý tộc đi cùng lụa trắng ngà, toát lên vẻ đĩnh đạc, trầm tĩnh và trí thức thanh tao.',
+          },
+          eventFit: {
+            name: 'Phù hợp sự kiện',
+            score: isEventTet ? 9.5 : 9.8,
+            maxScore: 10,
+            comment: isEventTet
+              ? 'Trang nghiêm, thanh nhã cho du xuân và dâng hương đầu năm.'
+              : 'Hoàn hảo cho sự kiện văn hóa, lễ kỷ niệm và đại lễ trang trọng.',
+          },
+          culturalNorm: {
+            name: 'Chuẩn mực lễ nghi',
+            score: 9.6,
+            maxScore: 10,
+            comment: 'Chuẩn mực phong thái Nho gia và quý tộc triều Nguyễn, khoan thai và đĩnh đạc.',
+          },
+        },
+        colorHarmony: 'Sắc xanh cổ vịt quý tộc đi cùng lụa trắng ngà.',
+        eventFit: 'Trang nghiêm, thanh nhã cho sự kiện văn hóa và lễ nghi truyền thống.',
+        culturalStatus: 'suitable',
+        explanation: 'Sắc xanh cổ vịt quý tộc đem lại vẻ trầm tĩnh, trí thức của giới học giả xưa, kết hợp hoàn hảo cùng quần lụa trắng và hài thêu.',
         source: 'Bảo tàng Lịch sử Quốc gia & "Ngàn năm áo mũ" (Trần Quang Đức)',
       };
     }
@@ -145,17 +181,17 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
 
   if (!isLoggedIn) {
     return (
-      <div className="border-t-2 border-lacquer-border bg-lacquer-surface/95 backdrop-blur-md flex-shrink-0 font-sans">
-        <div className="p-3.5 sm:p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Lock className="w-4 h-4 text-imperial-gold" />
-            <h4 className="font-sans font-bold text-sm uppercase tracking-wider text-silk-ivory">
-              AI Overview (Cố vấn Văn hóa)
+      <div className="border-t border-lacquer-border bg-lacquer-surface flex-shrink-0 font-sans">
+        <div className="h-11 px-4 sm:px-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Lock className="w-3.5 h-3.5 text-imperial-gold" />
+            <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-silk-ivory">
+              Cố vấn Văn hóa AI
             </h4>
           </div>
           <button
             onClick={onLoginPrompt}
-            className="py-1.5 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light transition-all uppercase tracking-wider"
+            className="py-1 px-3 bg-imperial-gold text-lacquer font-bold text-xs hover:bg-imperial-gold-light transition-all uppercase tracking-wider"
           >
             Đăng nhập để xem
           </button>
@@ -165,146 +201,198 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
   }
 
   return (
-    <div className="border-t-2 border-lacquer-border bg-lacquer-surface/95 backdrop-blur-md flex-shrink-0 relative overflow-hidden font-sans transition-all">
-      {/* Clickable Header Bar (Allows Expand / Collapse) */}
+    <div className="border-t border-lacquer-border bg-lacquer-surface flex-shrink-0 relative font-sans z-30">
+      {/* 1. Permanent Fixed-Height Summary Dock Bar (Zero Layout Shift - Always ~44px) */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="px-4 py-3 sm:px-5 flex items-center justify-between cursor-pointer hover:bg-lacquer-hover transition-colors select-none"
+        className="h-11 px-4 sm:px-5 flex items-center justify-between cursor-pointer hover:bg-lacquer-hover/60 transition-colors select-none"
       >
-        <div className="flex items-center gap-2.5">
-          <Sparkles className="w-4 h-4 text-imperial-gold" />
-          <h4 className="font-sans font-bold text-sm uppercase tracking-wider text-silk-ivory">
-            AI Overview (Đánh giá văn hóa)
+        {/* Left: Sparkle Icon + Title + Score */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Sparkles className="w-3.5 h-3.5 text-imperial-gold flex-shrink-0" />
+          <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-silk-ivory whitespace-nowrap">
+            Đánh giá văn hóa
           </h4>
+
           {analysis.totalScore > 0 ? (
-            <span className="text-xs px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold font-extrabold border border-imperial-gold/40">
+            <span className="text-[11px] font-serif font-bold px-2 py-0.5 bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/40 whitespace-nowrap">
               {analysis.totalScore} / 10
             </span>
           ) : (
-            <span className="text-xs px-2 py-0.5 rounded-none bg-lacquer text-silk-muted font-medium border border-lacquer-border">
+            <span className="text-[10px] px-2 py-0.5 bg-lacquer text-silk-muted font-medium border border-lacquer-border whitespace-nowrap">
               Chờ phối đồ
             </span>
           )}
+
+          {/* Quick 1-line verdict preview on desktop */}
+          {analysis.totalScore > 0 && (
+            <p className="hidden md:block text-[11px] text-silk-muted/80 truncate max-w-[220px] xl:max-w-xs font-normal ml-1">
+              • {analysis.criteria.eventFit.comment}
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Right: Cultural Status Badge + Expand Action */}
+        <div className="flex items-center gap-2.5 flex-shrink-0">
           {analysis.totalScore === 0 ? (
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-medium text-silk-muted border border-lacquer-border bg-lacquer/50">
+            <span className="hidden sm:inline-block text-[10px] text-silk-muted px-2 py-0.5 border border-lacquer-border bg-lacquer/40">
               Chưa chọn món nào
             </span>
           ) : analysis.culturalStatus === 'suitable' ? (
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-green-500/15 text-green-400 border border-green-500/40">
-              <ShieldCheck className="w-3.5 h-3.5" /> Phù hợp
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-950/70 text-emerald-300 border border-emerald-500/50">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span>Phù hợp</span>
             </span>
           ) : analysis.culturalStatus === 'caution' ? (
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40">
-              <AlertTriangle className="w-3.5 h-3.5" /> Cần lưu ý
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-950/70 text-amber-300 border border-amber-500/50">
+              <AlertTriangle className="w-3 h-3 text-amber-400" />
+              <span>Cần lưu ý</span>
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/40">
-              <AlertCircle className="w-3.5 h-3.5" /> Chưa khuyến nghị
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-rose-950/70 text-rose-300 border border-rose-500/50">
+              <AlertCircle className="w-3 h-3 text-rose-400" />
+              <span>Chưa chuẩn</span>
             </span>
           )}
 
           <button
-            className="flex items-center gap-1 text-xs text-silk-muted hover:text-silk-ivory font-semibold px-2 py-1 rounded-none border border-lacquer-border bg-lacquer-surface"
-            title={isExpanded ? 'Thu gọn AI Overview' : 'Mở rộng xem chi tiết'}
+            className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 border transition-all ${
+              isExpanded
+                ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                : 'text-silk-muted hover:text-silk-ivory bg-lacquer border-lacquer-border hover:border-imperial-gold/60'
+            }`}
+            title={isExpanded ? 'Đóng bảng thẩm định' : 'Mở rộng xem luận giải chi tiết'}
           >
-            <span>{isExpanded ? 'Thu gọn' : 'Chi tiết'}</span>
-            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            <span>{isExpanded ? 'Đóng' : 'Chi tiết'}</span>
+            {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
           </button>
         </div>
       </div>
 
-      {/* Expandable Body */}
+      {/* 2. Floating Bottom Sheet Overlay (Rises above the dock bar, ZERO layout shift to piece grid) */}
       {isExpanded && (
-        <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-1 space-y-3.5 border-t border-lacquer-border/60 max-h-[340px] overflow-y-auto scrollbar-thin animate-fadeIn">
-          {/* 1. Score Breakdown Bars for each criterion */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            {/* Color Harmony Score */}
-            <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Hài hòa màu sắc:</span>
-                <span className="font-bold text-imperial-gold">{analysis.criteria.colorHarmony.score}/10</span>
+        <>
+          {/* Subtle click-away backdrop */}
+          <div
+            className="fixed inset-0 z-30 bg-black/40 backdrop-blur-[1px] transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(false);
+            }}
+          />
+
+          {/* Floating Sheet Container */}
+          <div
+            className="absolute bottom-full left-0 right-0 z-40 mb-[1px] bg-lacquer-surface/98 backdrop-blur-2xl border-t-2 border-x border-imperial-gold/50 shadow-[0_-16px_40px_rgba(0,0,0,0.9)] max-h-[70vh] sm:max-h-[460px] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sheet Header */}
+            <div className="px-4 py-3 sm:px-5 border-b border-lacquer-border/80 flex items-center justify-between bg-lacquer-card/70 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-imperial-gold" />
+                <h4 className="font-serif font-bold text-sm text-silk-ivory uppercase tracking-wider">
+                  Cố vấn Văn hóa & Lễ nghi
+                </h4>
+                {analysis.totalScore > 0 && (
+                  <span className="text-xs font-serif font-bold px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                    {analysis.totalScore} / 10 Điểm
+                  </span>
+                )}
               </div>
-              <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
-                <div
-                  className="bg-imperial-gold h-full transition-all duration-500"
-                  style={{ width: `${(analysis.criteria.colorHarmony.score / 10) * 100}%` }}
-                />
-              </div>
+
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="w-7 h-7 flex items-center justify-center text-silk-muted hover:text-white border border-lacquer-border hover:border-imperial-gold transition-colors"
+                title="Đóng bảng thẩm định"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Event Fit Score */}
-            <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Phù hợp sự kiện:</span>
-                <span className="font-bold text-imperial-gold">{analysis.criteria.eventFit.score}/10</span>
-              </div>
-              <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
-                <div
-                  className="bg-imperial-gold h-full transition-all duration-500"
-                  style={{ width: `${(analysis.criteria.eventFit.score / 10) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Cultural Norm Score */}
-            <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-bold text-silk-muted uppercase tracking-wider text-xs">Chuẩn mực lễ nghi:</span>
-                <span className="font-bold text-imperial-gold">{analysis.criteria.culturalNorm.score}/10</span>
-              </div>
-              <div className="w-full bg-lacquer-card h-1.5 rounded-none overflow-hidden">
-                <div
-                  className="bg-imperial-gold h-full transition-all duration-500"
-                  style={{ width: `${(analysis.criteria.culturalNorm.score / 10) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Detailed Feedback Content for each criterion */}
-          <div className="space-y-2 text-sm">
-            <div className="p-3 rounded-none bg-lacquer/80 border border-lacquer-border space-y-1.5">
-              <div className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-none bg-imperial-gold mt-1.5 flex-shrink-0" />
-                <p className="text-silk-ivory leading-relaxed font-normal">
-                  <strong className="text-imperial-gold font-bold">Màu sắc: </strong>
-                  {analysis.criteria.colorHarmony.comment}
-                </p>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-none bg-imperial-gold mt-1.5 flex-shrink-0" />
-                <p className="text-silk-ivory leading-relaxed font-normal">
-                  <strong className="text-imperial-gold font-bold">Bối cảnh: </strong>
-                  {analysis.criteria.eventFit.comment}
-                </p>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-none bg-imperial-gold mt-1.5 flex-shrink-0" />
-                <p className="text-silk-ivory leading-relaxed font-normal">
-                  <strong className="text-imperial-gold font-bold">Quy thức di sản: </strong>
-                  {analysis.criteria.culturalNorm.comment}
-                </p>
-              </div>
-
-              {analysis.suggestion && (
-                <div className="mt-2 pt-2 border-t border-lacquer-border text-amber-300 font-medium">
-                  💡 <strong>Gợi ý:</strong> {analysis.suggestion}
+            {/* Sheet Scrollable Body */}
+            <div className="p-4 sm:p-5 space-y-3.5 overflow-y-auto scrollbar-thin">
+              {/* 3 Aesthetic Criteria Cards (No RPG progress bars) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Criterion 1: Hài hòa màu sắc */}
+                <div className="p-3 bg-lacquer/80 border border-lacquer-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
+                        Hài hòa màu sắc
+                      </span>
+                      <span className="font-serif font-bold text-imperial-gold text-xs">
+                        {analysis.criteria.colorHarmony.score}/10
+                      </span>
+                    </div>
+                    <p className="text-xs text-silk-ivory/90 leading-relaxed font-normal">
+                      {analysis.criteria.colorHarmony.comment}
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* 3. Citation */}
-            <div className="flex items-center gap-2 text-xs text-silk-muted pt-1 font-medium">
-              <BookCheck className="w-4 h-4 text-imperial-gold flex-shrink-0" />
-              <span className="truncate">Nguồn kiểm chứng: {analysis.source}</span>
+                {/* Criterion 2: Phù hợp sự kiện */}
+                <div className="p-3 bg-lacquer/80 border border-lacquer-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
+                        Phù hợp sự kiện
+                      </span>
+                      <span className="font-serif font-bold text-imperial-gold text-xs">
+                        {analysis.criteria.eventFit.score}/10
+                      </span>
+                    </div>
+                    <p className="text-xs text-silk-ivory/90 leading-relaxed font-normal">
+                      {analysis.criteria.eventFit.comment}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Criterion 3: Chuẩn mực lễ nghi */}
+                <div className="p-3 bg-lacquer/80 border border-lacquer-border flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
+                        Chuẩn mực lễ nghi
+                      </span>
+                      <span className="font-serif font-bold text-imperial-gold text-xs">
+                        {analysis.criteria.culturalNorm.score}/10
+                      </span>
+                    </div>
+                    <p className="text-xs text-silk-ivory/90 leading-relaxed font-normal">
+                      {analysis.criteria.culturalNorm.comment}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Curator Editorial Synthesis Block */}
+              <div className="p-3.5 bg-lacquer/90 border-l-2 border-imperial-gold space-y-2">
+                <div className="flex items-center gap-1.5 text-xs text-imperial-gold font-bold uppercase tracking-wider">
+                  <BookCheck className="w-3.5 h-3.5" />
+                  <span>Luận giải của Giám tuyển</span>
+                </div>
+                <p className="font-serif italic text-sm text-silk-ivory leading-relaxed">
+                  "{analysis.explanation}"
+                </p>
+                {analysis.suggestion && (
+                  <p className="text-xs text-amber-300 font-medium pt-1.5 border-t border-lacquer-border/60">
+                    💡 <strong>Gợi ý cải thiện:</strong> {analysis.suggestion}
+                  </p>
+                )}
+              </div>
+
+              {/* Archival Citation Seal */}
+              <div className="flex items-center justify-between pt-1 border-t border-lacquer-border/60 text-[11px] text-silk-muted">
+                <span className="truncate">
+                  Nguồn kiểm chứng: <strong className="text-silk-ivory font-serif italic">{analysis.source}</strong>
+                </span>
+                <span className="text-[10px] tracking-widest uppercase text-imperial-gold/80 border border-imperial-gold/30 px-1.5 py-0.5 whitespace-nowrap">
+                  Di sản đối chiếu
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
