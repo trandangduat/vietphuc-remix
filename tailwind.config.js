@@ -1,0 +1,43 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        lacquer: {
+          DEFAULT: '#0A0D12',
+          surface: '#12161F',
+          card: '#181E29',
+          border: '#242D3D',
+          hover: '#1F2736',
+        },
+        imperial: {
+          gold: '#C69B56',
+          'gold-light': '#E2BE7C',
+          'gold-dark': '#9A7332',
+          red: '#8B1E1E',
+          'red-bright': '#B82828',
+          teal: '#1A4B54',
+          'teal-light': '#266D7A',
+        },
+        silk: {
+          ivory: '#F7F4EE',
+          muted: '#8B94A0',
+          dark: '#484F58',
+        }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      boxShadow: {
+        'atrium': '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(198, 155, 86, 0.08)',
+        'gold-glow': '0 0 20px rgba(198, 155, 86, 0.25)',
+      }
+    },
+  },
+  plugins: [],
+}
