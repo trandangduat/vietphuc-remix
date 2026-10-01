@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PIECES, EVENTS } from '../data/catalog';
+import { PIECES } from '../data/catalog';
 import {
   PieceAlignment,
   AlignmentMap,
@@ -23,9 +23,10 @@ import {
   RotateCcw,
   Check,
   ArrowLeft,
-  Layers,
+  Grid,
   Sparkles,
   Info,
+  Layers,
 } from 'lucide-react';
 
 interface DevCalibratorScreenProps {
@@ -39,64 +40,47 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
   const [copiedCode, setCopiedCode] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Active outfit test state
-  const tops = PIECES.filter((p) => p.category === 'top');
-  const bottoms = PIECES.filter((p) => p.category === 'bottom');
-  const footwears = PIECES.filter((p) => p.category === 'footwear');
-  const accessories = PIECES.filter((p) => p.category === 'accessory');
+  // Category filter for the pieces list
+  const [categoryFilter, setCategoryFilter] = useState<PieceCategory | 'all'>('all');
 
-  const [activeTop, setActiveTop] = useState<Piece>(tops[0]);
-  const [activeTopVariant, setActiveTopVariant] = useState<PieceVariant>(tops[0].variants[0]);
+  // Currently active piece being calibrated (1-on-1 with mannequin)
+  const [selectedPiece, setSelectedPiece] = useState<Piece>(() => {
+    // Default to bottom (Quần lụa) since user is actively tuning pants
+    const defaultPiece = PIECES.find((p) => p.id === 'piece-quan-lua') || PIECES[0];
+    return defaultPiece;
+  });
 
-  const [activeBottom, setActiveBottom] = useState<Piece>(bottoms[0]);
-  const [activeBottomVariant, setActiveBottomVariant] = useState<PieceVariant>(bottoms[0].variants[0]);
+  // Currently active variant of the selected piece
+  const [selectedVariant, setSelectedVariant] = useState<PieceVariant>(() => {
+    const defaultPiece = PIECES.find((p) => p.id === 'piece-quan-lua') || PIECES[0];
+    return defaultPiece.variants[0];
+  });
 
-  const [activeFootwear, setActiveFootwear] = useState<Piece>(footwears[0]);
-  const [activeFootwearVariant, setActiveFootwearVariant] = useState<PieceVariant>(footwears[0].variants[0]);
-
-  const [activeAccessory, setActiveAccessory] = useState<Piece | null>(accessories[0]);
-  const [activeAccessoryVariant, setActiveAccessoryVariant] = useState<PieceVariant | null>(accessories[0].variants[0]);
-
-  // Calibration target category
-  const [targetCategory, setTargetCategory] = useState<PieceCategory>('bottom');
+  // When selected piece changes, ensure selected variant belongs to it
+  const handleSelectPiece = (piece: Piece) => {
+    setSelectedPiece(piece);
+    setSelectedVariant(piece.variants[0]);
+  };
 
   // Preview options
-  const [bgMode, setBgMode] = useState<'checker' | 'event' | 'dark'>('checker');
-  const [xrayMode, setXrayMode] = useState(false);
+  const [bgMode, setBgMode] = useState<'checker' | 'dark' | 'light'>('checker');
+  const [showGuidelines, setShowGuidelines] = useState(true);
+  const [pieceOpacity, setPieceOpacity] = useState(1);
+  const [showFullOutfit, setShowFullOutfit] = useState(false); // Default: FALSE (Pure 1-on-1)
 
-  // Active piece being calibrated
-  const currentTargetPiece: Piece | null =
-    targetCategory === 'top'
-      ? activeTop
-      : targetCategory === 'bottom'
-      ? activeBottom
-      : targetCategory === 'footwear'
-      ? activeFootwear
-      : activeAccessory;
-
-  const currentTargetVariant: PieceVariant | null =
-    targetCategory === 'top'
-      ? activeTopVariant
-      : targetCategory === 'bottom'
-      ? activeBottomVariant
-      : targetCategory === 'footwear'
-      ? activeFootwearVariant
-      : activeAccessoryVariant;
-
-  const currentPieceKey = currentTargetPiece?.id || '';
-
-  // Current alignment for target piece
+  // Current alignment for selected piece
+  const pieceKey = selectedPiece.id;
   const currentAlignment: PieceAlignment =
-    alignments[currentPieceKey] || DEFAULT_PIECE_ALIGNMENTS[currentPieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
+    alignments[pieceKey] || DEFAULT_PIECE_ALIGNMENTS[pieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
 
   // Update alignment helper
   const updateCurrentAlignment = (patch: Partial<PieceAlignment>) => {
-    if (!currentPieceKey) return;
+    if (!pieceKey) return;
     setAlignments((prev) => {
-      const existing = prev[currentPieceKey] || DEFAULT_PIECE_ALIGNMENTS[currentPieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
+      const existing = prev[pieceKey] || DEFAULT_PIECE_ALIGNMENTS[pieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
       return {
         ...prev,
-        [currentPieceKey]: {
+        [pieceKey]: {
           ...existing,
           ...patch,
         },
@@ -124,7 +108,6 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !dragStartRef.current || !stageRef.current) return;
     const stageRect = stageRef.current.getBoundingClientRect();
-    // Delta in pixels converted to percentage of stage dimension
     const dxPx = e.clientX - dragStartRef.current.mouseX;
     const dyPx = e.clientY - dragStartRef.current.mouseY;
 
@@ -150,7 +133,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
     updateCurrentAlignment({ scale: newScale });
   };
 
-  // Keyboard nudge navigation
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
@@ -174,20 +157,12 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
       } else if (e.key === ']') {
         e.preventDefault();
         updateCurrentAlignment({ scale: Math.min(2.5, Number((currentAlignment.scale + 0.05).toFixed(3))) });
-      } else if (e.key === '1') {
-        setTargetCategory('top');
-      } else if (e.key === '2') {
-        setTargetCategory('bottom');
-      } else if (e.key === '3') {
-        setTargetCategory('footwear');
-      } else if (e.key === '4') {
-        setTargetCategory('accessory');
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentAlignment, currentPieceKey]);
+  }, [currentAlignment, pieceKey]);
 
   // Save handler
   const handleSave = () => {
@@ -209,39 +184,33 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
     }
   };
 
-  // Reset target handler
-  const handleResetTarget = () => {
-    if (!currentPieceKey) return;
-    const def = DEFAULT_PIECE_ALIGNMENTS[currentPieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
+  // Reset selected piece
+  const handleResetCurrentPiece = () => {
+    const def = DEFAULT_PIECE_ALIGNMENTS[pieceKey] || { ...DEFAULT_PIECE_ALIGNMENT };
     updateCurrentAlignment(def);
   };
 
-  // Reset all handler
-  const handleResetAll = () => {
-    if (confirm('Khôi phục toàn bộ các piece về thông số gốc mặc định?')) {
-      resetPieceAlignments();
-      setAlignments({ ...DEFAULT_PIECE_ALIGNMENTS });
-      setHasUnsavedChanges(false);
-    }
-  };
+  // Filtered pieces
+  const displayedPieces = PIECES.filter((p) => {
+    if (categoryFilter === 'all') return true;
+    return p.category === categoryFilter;
+  });
 
-  // Helper styles for preview layers
-  const getStyleForCategory = (cat: PieceCategory, pieceId?: string) => {
-    if (!pieceId) return {};
-    const align = alignments[pieceId] || DEFAULT_PIECE_ALIGNMENTS[pieceId] || DEFAULT_PIECE_ALIGNMENT;
-    const baseStyle = getAlignmentStyle(align);
+  // Find reference pieces if showFullOutfit is enabled
+  const refTop = PIECES.find((p) => p.category === 'top');
+  const refBottom = PIECES.find((p) => p.category === 'bottom');
+  const refFootwear = PIECES.find((p) => p.category === 'footwear');
+  const refAccessory = PIECES.find((p) => p.category === 'accessory');
 
-    if (xrayMode) {
-      if (cat !== targetCategory) {
-        return { ...baseStyle, opacity: 0.35 };
-      }
-    }
-    return baseStyle;
+  // Compute piece transform style
+  const activePieceStyle = {
+    ...getAlignmentStyle(currentAlignment),
+    opacity: pieceOpacity,
   };
 
   return (
     <div className="min-h-screen bg-lacquer text-silk-ivory flex flex-col font-sans select-none">
-      {/* Top Header Bar */}
+      {/* Header Bar */}
       <header className="border-b-2 border-imperial-gold/40 bg-lacquer-surface px-4 py-3 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <button
@@ -255,27 +224,32 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
             <span className="text-xs uppercase font-extrabold px-2 py-0.5 bg-imperial-red text-white tracking-widest border border-imperial-red-bright shadow-sm">
               DEV ONLY
             </span>
-            <h1 className="font-serif font-bold text-lg text-imperial-gold flex items-center gap-1.5">
-              <span>Bộ Căn Chỉnh Piece (Visual Calibrator)</span>
-            </h1>
+            <div>
+              <h1 className="font-serif font-bold text-base text-imperial-gold flex items-center gap-1.5">
+                <span>Căn Chỉnh Từng Piece Với Ma-nơ-canh (1-on-1 Calibrator)</span>
+              </h1>
+              <p className="text-xs text-silk-muted">
+                Căn chỉnh độc lập từng món đồ trực tiếp trên phôi ma-nơ-canh, không bị che khuất bởi các món khác
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Global Action Buttons */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={handleResetAll}
+            onClick={handleResetCurrentPiece}
             className="px-3 py-1.5 text-xs font-semibold text-silk-muted hover:text-white border border-lacquer-border hover:border-imperial-red transition-all flex items-center gap-1"
-            title="Khôi phục toàn bộ về mặc định"
+            title="Đặt lại món này về mặc định"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Đặt lại tất cả</span>
+            <span>Đặt lại món này</span>
           </button>
 
           <button
             onClick={handleCopyCode}
             className="px-3 py-1.5 text-xs font-semibold bg-lacquer border border-imperial-gold/60 text-imperial-gold hover:bg-imperial-gold/10 transition-all flex items-center gap-1.5"
-            title="Sao chép mã TypeScript để dán vào source code"
+            title="Sao chép toàn bộ mã cấu hình TypeScript để dán vào src/data/pieceAlignments.ts"
           >
             {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedCode ? 'Đã chép mã!' : 'Xuất mã TypeScript'}</span>
@@ -292,18 +266,144 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
             }`}
           >
             {saveSuccess ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-            <span>{saveSuccess ? 'Đã lưu thành công!' : 'Lưu cấu hình'}</span>
+            <span>{saveSuccess ? 'Đã lưu!' : 'Lưu cấu hình'}</span>
           </button>
         </div>
       </header>
 
-      {/* Main 2-Column Workbench */}
+      {/* 3-Column Layout: [Piece Catalog List] | [Isolated 1-on-1 Canvas] | [Sliders & Fine-tuning] */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* LEFT COLUMN: Visual Interactive Stage */}
+        {/* COLUMN 1: Piece Catalog List (Left Sidebar) */}
+        <div className="w-full lg:w-72 bg-lacquer-surface border-b lg:border-b-0 lg:border-r border-lacquer-border flex flex-col flex-shrink-0">
+          {/* Category Filter Chips */}
+          <div className="p-3 border-b border-lacquer-border">
+            <span className="text-xs font-bold text-silk-muted uppercase tracking-wider block mb-2">
+              Danh mục đồ:
+            </span>
+            <div className="grid grid-cols-3 gap-1 text-xs font-semibold">
+              <button
+                onClick={() => setCategoryFilter('all')}
+                className={`py-1.5 px-2 text-center border ${
+                  categoryFilter === 'all'
+                    ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-white'
+                }`}
+              >
+                Tất cả
+              </button>
+              <button
+                onClick={() => setCategoryFilter('top')}
+                className={`py-1.5 px-2 text-center border ${
+                  categoryFilter === 'top'
+                    ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-white'
+                }`}
+              >
+                Áo
+              </button>
+              <button
+                onClick={() => setCategoryFilter('bottom')}
+                className={`py-1.5 px-2 text-center border ${
+                  categoryFilter === 'bottom'
+                    ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-white'
+                }`}
+              >
+                Quần
+              </button>
+              <button
+                onClick={() => setCategoryFilter('footwear')}
+                className={`py-1.5 px-2 text-center border ${
+                  categoryFilter === 'footwear'
+                    ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-white'
+                }`}
+              >
+                Giày / Hài
+              </button>
+              <button
+                onClick={() => setCategoryFilter('accessory')}
+                className={`py-1.5 px-2 text-center border col-span-2 ${
+                  categoryFilter === 'accessory'
+                    ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold'
+                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-white'
+                }`}
+              >
+                Nón / Phụ kiện
+              </button>
+            </div>
+          </div>
+
+          {/* Piece Cards List */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {displayedPieces.map((piece) => {
+              const isSelected = piece.id === selectedPiece.id;
+              const align = alignments[piece.id] || DEFAULT_PIECE_ALIGNMENTS[piece.id] || DEFAULT_PIECE_ALIGNMENT;
+              const isModified =
+                align.x !== 0 ||
+                align.y !== 0 ||
+                align.scale !== 1 ||
+                (align.scaleX ?? 1) !== 1 ||
+                (align.scaleY ?? 1) !== 1;
+
+              return (
+                <div
+                  key={piece.id}
+                  onClick={() => handleSelectPiece(piece)}
+                  className={`p-2.5 border-2 transition-all cursor-pointer flex items-center gap-3 ${
+                    isSelected
+                      ? 'bg-lacquer-card border-imperial-gold ring-1 ring-imperial-gold/50 shadow-md'
+                      : 'bg-lacquer border-lacquer-border hover:border-silk-muted hover:bg-lacquer-surface'
+                  }`}
+                >
+                  {/* Thumbnail */}
+                  <div className="w-12 h-12 rounded-none bg-lacquer-card border border-lacquer-border flex items-center justify-center p-1 flex-shrink-0">
+                    <img
+                      src={piece.variants[0]?.thumbnailUrl || piece.thumbnailUrl || piece.variants[0]?.assetUrl}
+                      alt={piece.name}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <h4 className={`text-xs font-bold truncate ${isSelected ? 'text-imperial-gold' : 'text-silk-ivory'}`}>
+                        {piece.name}
+                      </h4>
+                      {isModified && (
+                        <span className="text-[10px] px-1 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40 flex-shrink-0">
+                          Đã chỉnh
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-silk-muted">
+                      <span className="capitalize">
+                        {piece.category === 'top'
+                          ? 'Áo'
+                          : piece.category === 'bottom'
+                          ? 'Quần'
+                          : piece.category === 'footwear'
+                          ? 'Giày'
+                          : 'Phụ kiện'}
+                      </span>
+                      <span>•</span>
+                      <span className="font-mono text-silk-muted">
+                        X:{align.x} Y:{align.y}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* COLUMN 2: Isolated Canvas Stage (Center) */}
         <div className="flex-1 bg-lacquer-card p-4 sm:p-6 flex flex-col items-center justify-center relative overflow-hidden border-b lg:border-b-0 lg:border-r border-lacquer-border">
-          {/* Stage Quick Controls */}
+          {/* Top Canvas Toolbar */}
           <div className="absolute top-4 left-4 z-40 flex items-center gap-2 bg-lacquer/90 backdrop-blur border border-lacquer-border p-1 text-xs">
-            <span className="text-silk-muted px-2 font-bold uppercase">Phông:</span>
+            <span className="text-silk-muted px-1.5 font-bold uppercase">Nền:</span>
             <button
               onClick={() => setBgMode('checker')}
               className={`px-2 py-1 ${bgMode === 'checker' ? 'bg-imperial-gold text-lacquer font-bold' : 'text-silk-muted hover:text-white'}`}
@@ -311,31 +411,41 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
               Lưới Pixel
             </button>
             <button
-              onClick={() => setBgMode('event')}
-              className={`px-2 py-1 ${bgMode === 'event' ? 'bg-imperial-gold text-lacquer font-bold' : 'text-silk-muted hover:text-white'}`}
-            >
-              Phố Tết
-            </button>
-            <button
               onClick={() => setBgMode('dark')}
               className={`px-2 py-1 ${bgMode === 'dark' ? 'bg-imperial-gold text-lacquer font-bold' : 'text-silk-muted hover:text-white'}`}
             >
-              Tối giản
+              Tối đen
+            </button>
+            <button
+              onClick={() => setBgMode('light')}
+              className={`px-2 py-1 ${bgMode === 'light' ? 'bg-imperial-gold text-lacquer font-bold' : 'text-silk-muted hover:text-white'}`}
+              title="Phông nền sáng (rất dễ nhìn khi căn chỉnh quần hoặc giày tối màu)"
+            >
+              Phông sáng
             </button>
           </div>
 
           <div className="absolute top-4 right-4 z-40 flex items-center gap-2 bg-lacquer/90 backdrop-blur border border-lacquer-border p-1 text-xs">
             <button
-              onClick={() => setXrayMode(!xrayMode)}
-              className={`px-2.5 py-1 flex items-center gap-1.5 transition-all ${
-                xrayMode
-                  ? 'bg-imperial-red text-white font-bold'
-                  : 'text-silk-muted hover:text-white'
+              onClick={() => setShowGuidelines(!showGuidelines)}
+              className={`px-2.5 py-1 flex items-center gap-1 transition-all ${
+                showGuidelines ? 'bg-imperial-gold text-lacquer font-bold' : 'text-silk-muted hover:text-white'
               }`}
-              title="Làm mờ các lớp khác để nhìn rõ khung xương ma-nơ-canh bên dưới"
+              title="Hiện các đường gióng giải phẫu (Vai, Eo, Gối, Cổ chân)"
             >
-              <Eye className="w-3.5 h-3.5" />
-              <span>X-Ray Skeleton: {xrayMode ? 'BẬT' : 'TẮT'}</span>
+              <Grid className="w-3.5 h-3.5" />
+              <span>Đường gióng: {showGuidelines ? 'BẬT' : 'TẮT'}</span>
+            </button>
+
+            <button
+              onClick={() => setShowFullOutfit(!showFullOutfit)}
+              className={`px-2.5 py-1 flex items-center gap-1 transition-all ${
+                showFullOutfit ? 'bg-imperial-red text-white font-bold' : 'text-silk-muted hover:text-white'
+              }`}
+              title="Bật/Tắt xem cùng các món đồ khác để kiểm tra tổng thể"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Xem cùng outfit: {showFullOutfit ? 'BẬT' : 'TẮT'}</span>
             </button>
           </div>
 
@@ -346,24 +456,15 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onWheel={handleWheel}
-            className={`relative w-full max-w-[420px] aspect-[3/4] border-2 border-imperial-gold/60 shadow-2xl flex items-center justify-center overflow-hidden cursor-move ${
+            className={`relative w-full max-w-[420px] aspect-[3/4] border-2 border-imperial-gold/60 shadow-2xl flex items-center justify-center overflow-hidden cursor-move select-none ${
               bgMode === 'checker'
                 ? 'bg-[radial-gradient(#2a3441_1px,transparent_1px)] [background-size:16px_16px] bg-lacquer-surface'
                 : bgMode === 'dark'
                 ? 'bg-lacquer'
-                : 'bg-lacquer-surface'
+                : 'bg-[#d8d4c8]'
             }`}
           >
-            {/* Background Image if Event Mode */}
-            {bgMode === 'event' && (
-              <img
-                src={EVENTS[0].bgUrl}
-                alt="Event"
-                className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
-              />
-            )}
-
-            {/* Mannequin Base (Always centered & reference base) */}
+            {/* Layer 1: Mannequin Base (Always visible at center) */}
             <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
               <img
                 src="/assets/mannequins/mannequin-base.png"
@@ -372,77 +473,102 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
               />
             </div>
 
-            {/* Layer 2: Quần (Bottom) */}
-            {activeBottomVariant && (
-              <div
-                className={`absolute inset-0 z-20 pointer-events-none transition-transform duration-75 ${
-                  targetCategory === 'bottom' ? 'ring-1 ring-imperial-gold/40' : ''
-                }`}
-                style={getStyleForCategory('bottom', activeBottom.id)}
-              >
-                <img
-                  src={activeBottomVariant.assetUrl}
-                  alt={activeBottom.name}
-                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
-                />
-              </div>
+            {/* Optional Full Outfit Context (if enabled, semi-transparent) */}
+            {showFullOutfit && (
+              <>
+                {refBottom && refBottom.id !== selectedPiece.id && (
+                  <div
+                    className="absolute inset-0 z-20 pointer-events-none opacity-40"
+                    style={getAlignmentStyle(alignments[refBottom.id] || DEFAULT_PIECE_ALIGNMENTS[refBottom.id] || DEFAULT_PIECE_ALIGNMENT)}
+                  >
+                    <img src={refBottom.variants[0].assetUrl} alt="Ref Bottom" className="w-full h-full object-contain" />
+                  </div>
+                )}
+                {refFootwear && refFootwear.id !== selectedPiece.id && (
+                  <div
+                    className="absolute inset-0 z-30 pointer-events-none opacity-40"
+                    style={getAlignmentStyle(alignments[refFootwear.id] || DEFAULT_PIECE_ALIGNMENTS[refFootwear.id] || DEFAULT_PIECE_ALIGNMENT)}
+                  >
+                    <img src={refFootwear.variants[0].assetUrl} alt="Ref Footwear" className="w-full h-full object-contain" />
+                  </div>
+                )}
+                {refTop && refTop.id !== selectedPiece.id && (
+                  <div
+                    className="absolute inset-0 z-40 pointer-events-none opacity-40"
+                    style={getAlignmentStyle(alignments[refTop.id] || DEFAULT_PIECE_ALIGNMENTS[refTop.id] || DEFAULT_PIECE_ALIGNMENT)}
+                  >
+                    <img src={refTop.variants[0].assetUrl} alt="Ref Top" className="w-full h-full object-contain" />
+                  </div>
+                )}
+                {refAccessory && refAccessory.id !== selectedPiece.id && (
+                  <div
+                    className="absolute inset-0 z-50 pointer-events-none opacity-40"
+                    style={getAlignmentStyle(alignments[refAccessory.id] || DEFAULT_PIECE_ALIGNMENTS[refAccessory.id] || DEFAULT_PIECE_ALIGNMENT)}
+                  >
+                    <img src={refAccessory.variants[0].assetUrl} alt="Ref Accessory" className="w-full h-full object-contain" />
+                  </div>
+                )}
+              </>
             )}
 
-            {/* Layer 3: Giày (Footwear) */}
-            {activeFootwearVariant && (
-              <div
-                className={`absolute inset-0 z-30 pointer-events-none transition-transform duration-75 ${
-                  targetCategory === 'footwear' ? 'ring-1 ring-imperial-gold/40' : ''
-                }`}
-                style={getStyleForCategory('footwear', activeFootwear.id)}
-              >
-                <img
-                  src={activeFootwearVariant.assetUrl}
-                  alt={activeFootwear.name}
-                  className="w-full h-full object-contain filter drop-shadow-[0_6px_12px_rgba(0,0,0,0.6)]"
-                />
-              </div>
-            )}
-
-            {/* Layer 4: Áo (Top) */}
-            {activeTopVariant && (
-              <div
-                className={`absolute inset-0 z-40 pointer-events-none transition-transform duration-75 ${
-                  targetCategory === 'top' ? 'ring-1 ring-imperial-gold/40' : ''
-                }`}
-                style={getStyleForCategory('top', activeTop.id)}
-              >
-                <img
-                  src={activeTopVariant.assetUrl}
-                  alt={activeTop.name}
-                  className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
-                />
-              </div>
-            )}
-
-            {/* Layer 5: Phụ kiện (Accessory) */}
-            {activeAccessoryVariant && (
-              <div
-                className={`absolute inset-0 z-50 pointer-events-none transition-transform duration-75 ${
-                  targetCategory === 'accessory' ? 'ring-1 ring-imperial-gold/40' : ''
-                }`}
-                style={getStyleForCategory('accessory', activeAccessory?.id)}
-              >
-                <img
-                  src={activeAccessoryVariant.assetUrl}
-                  alt={activeAccessory?.name}
-                  className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.65)]"
-                />
-              </div>
-            )}
-
-            {/* Center Reference Crosshairs */}
-            <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
-              <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-imperial-gold" />
-              <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-imperial-gold" />
+            {/* THE ISOLATED TARGET PIECE BEING CALIBRATED */}
+            <div
+              className="absolute inset-0 z-40 pointer-events-none transition-transform duration-75 ring-1 ring-imperial-gold/60"
+              style={activePieceStyle}
+            >
+              <img
+                src={selectedVariant.assetUrl}
+                alt={selectedPiece.name}
+                className="w-full h-full object-contain filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.85)]"
+              />
             </div>
 
-            {/* Dragging notification tag */}
+            {/* Anatomical Reference Guidelines */}
+            {showGuidelines && (
+              <div className="absolute inset-0 pointer-events-none z-30 opacity-70">
+                {/* Đỉnh đầu (Y ≈ 15%) */}
+                <div className="absolute top-[15%] left-0 right-0 border-b border-dashed border-sky-400/60">
+                  <span className="text-[9px] font-mono text-sky-400 bg-black/80 px-1 absolute right-1 -top-3">
+                    Đỉnh đầu (15%)
+                  </span>
+                </div>
+                {/* Vai & Cổ (Y ≈ 25%) */}
+                <div className="absolute top-[25%] left-0 right-0 border-b border-dashed border-emerald-400/60">
+                  <span className="text-[9px] font-mono text-emerald-400 bg-black/80 px-1 absolute right-1 -top-3">
+                    Vai / Cổ áo (25%)
+                  </span>
+                </div>
+                {/* Eo / Cạp quần (Y ≈ 50%) */}
+                <div className="absolute top-[50%] left-0 right-0 border-b-2 border-dashed border-imperial-gold">
+                  <span className="text-[9px] font-mono text-imperial-gold bg-black/80 px-1 absolute right-1 -top-3">
+                    Eo / Cạp quần (50%)
+                  </span>
+                </div>
+                {/* Gối (Y ≈ 72%) */}
+                <div className="absolute top-[72%] left-0 right-0 border-b border-dashed border-amber-400/60">
+                  <span className="text-[9px] font-mono text-amber-400 bg-black/80 px-1 absolute right-1 -top-3">
+                    Đầu gối (72%)
+                  </span>
+                </div>
+                {/* Gấu quần / Cổ chân (Y ≈ 87.5%) */}
+                <div className="absolute top-[87.5%] left-0 right-0 border-b-2 border-dashed border-rose-400">
+                  <span className="text-[9px] font-mono text-rose-400 bg-black/80 px-1 absolute right-1 -top-3">
+                    Gấu quần / Cổ chân (87.5%)
+                  </span>
+                </div>
+                {/* Bàn chân (Y ≈ 94%) */}
+                <div className="absolute top-[94%] left-0 right-0 border-b border-dashed border-purple-400/60">
+                  <span className="text-[9px] font-mono text-purple-400 bg-black/80 px-1 absolute right-1 -top-3">
+                    Bàn chân (94%)
+                  </span>
+                </div>
+
+                {/* Trục giữa cơ thể (Center line) */}
+                <div className="absolute left-1/2 top-0 bottom-0 border-r border-dashed border-imperial-gold/40" />
+              </div>
+            )}
+
+            {/* Live dragging indicator */}
             {isDragging && (
               <div className="absolute bottom-3 bg-imperial-gold text-lacquer text-xs font-bold px-3 py-1 shadow-lg pointer-events-none z-50">
                 X: {currentAlignment.x}% | Y: {currentAlignment.y}%
@@ -450,131 +576,82 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
             )}
           </div>
 
-          <p className="text-xs text-silk-muted mt-3 text-center">
-            💡 <strong className="text-imperial-gold">Mẹo:</strong> Kéo chuột trực tiếp trên khung để di chuyển
-            layer đang chọn • Lăn chuột để Zoom • Dùng phím mũi tên <kbd className="px-1 bg-lacquer border border-lacquer-border">↑</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">↓</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">←</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">→</kbd>
+          <p className="text-xs text-silk-muted mt-3 text-center max-w-sm">
+            💡 <strong className="text-imperial-gold">Kéo thả chuột</strong> trực tiếp trên khung • Lăn chuột để Zoom • Dùng phím mũi tên <kbd className="px-1 bg-lacquer border border-lacquer-border">↑</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">↓</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">←</kbd> <kbd className="px-1 bg-lacquer border border-lacquer-border">→</kbd>
           </p>
         </div>
 
-        {/* RIGHT COLUMN: Control Panel & Fine-tuning Sliders */}
-        <div className="w-full lg:w-[460px] bg-lacquer-surface p-4 sm:p-6 overflow-y-auto flex flex-col gap-5 border-l border-lacquer-border">
-          {/* Section 1: Target Layer Category Selector */}
-          <div>
-            <label className="text-xs font-bold text-silk-muted uppercase tracking-wider block mb-2">
-              1. Chọn Layer Cần Căn Chỉnh
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              <button
-                onClick={() => setTargetCategory('top')}
-                className={`py-2 px-1 text-xs font-bold transition-all border ${
-                  targetCategory === 'top'
-                    ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow'
-                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-silk-ivory'
-                }`}
-              >
-                1. Áo (Top)
-              </button>
-              <button
-                onClick={() => setTargetCategory('bottom')}
-                className={`py-2 px-1 text-xs font-bold transition-all border ${
-                  targetCategory === 'bottom'
-                    ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow'
-                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-silk-ivory'
-                }`}
-              >
-                2. Quần (Bottom)
-              </button>
-              <button
-                onClick={() => setTargetCategory('footwear')}
-                className={`py-2 px-1 text-xs font-bold transition-all border ${
-                  targetCategory === 'footwear'
-                    ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow'
-                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-silk-ivory'
-                }`}
-              >
-                3. Giày (Footwear)
-              </button>
-              <button
-                onClick={() => setTargetCategory('accessory')}
-                className={`py-2 px-1 text-xs font-bold transition-all border ${
-                  targetCategory === 'accessory'
-                    ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow'
-                    : 'bg-lacquer border-lacquer-border text-silk-muted hover:text-silk-ivory'
-                }`}
-              >
-                4. Nón / Phụ kiện
-              </button>
-            </div>
-          </div>
-
-          {/* Section 2: Swap Item & Variant within Active Category */}
-          <div className="p-3 bg-lacquer border border-lacquer-border space-y-2">
+        {/* COLUMN 3: Fine-Tuning Sliders & Precision Controls (Right) */}
+        <div className="w-full lg:w-96 bg-lacquer-surface p-4 sm:p-5 overflow-y-auto flex flex-col gap-4 border-l border-lacquer-border flex-shrink-0">
+          {/* Active Piece Header Info */}
+          <div className="p-3 bg-lacquer border-2 border-imperial-gold/40 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-imperial-gold uppercase">
-                Món đang chọn: {currentTargetPiece?.name}
-              </span>
+              <span className="text-xs font-bold uppercase text-imperial-gold">Đang căn chỉnh:</span>
               <button
-                onClick={handleResetTarget}
+                onClick={handleResetCurrentPiece}
                 className="text-xs text-imperial-red-bright hover:underline font-semibold"
               >
-                Đặt lại món này
+                Khôi phục mặc định
               </button>
             </div>
-
-            {/* Quick swap options for this category */}
-            <div className="flex items-center gap-2 overflow-x-auto py-1">
-              {(targetCategory === 'top'
-                ? tops
-                : targetCategory === 'bottom'
-                ? bottoms
-                : targetCategory === 'footwear'
-                ? footwears
-                : accessories
-              ).map((p) => {
-                const isSelected = p.id === currentTargetPiece?.id;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      if (targetCategory === 'top') {
-                        setActiveTop(p);
-                        setActiveTopVariant(p.variants[0]);
-                      } else if (targetCategory === 'bottom') {
-                        setActiveBottom(p);
-                        setActiveBottomVariant(p.variants[0]);
-                      } else if (targetCategory === 'footwear') {
-                        setActiveFootwear(p);
-                        setActiveFootwearVariant(p.variants[0]);
-                      } else {
-                        setActiveAccessory(p);
-                        setActiveAccessoryVariant(p.variants[0]);
-                      }
-                    }}
-                    className={`px-2.5 py-1 text-xs font-semibold whitespace-nowrap border ${
-                      isSelected
-                        ? 'bg-imperial-gold/20 text-imperial-gold border-imperial-gold'
-                        : 'text-silk-muted border-lacquer-border hover:text-white'
-                    }`}
-                  >
-                    {p.name}
-                  </button>
-                );
-              })}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-lacquer-surface border border-imperial-gold/50 p-1 flex items-center justify-center flex-shrink-0">
+                <img
+                  src={selectedVariant.thumbnailUrl || selectedPiece.thumbnailUrl || selectedVariant.assetUrl}
+                  alt={selectedPiece.name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm text-silk-ivory truncate">{selectedPiece.name}</h3>
+                <p className="text-xs text-silk-muted capitalize">
+                  {selectedPiece.category === 'top'
+                    ? 'Áo'
+                    : selectedPiece.category === 'bottom'
+                    ? 'Quần'
+                    : selectedPiece.category === 'footwear'
+                    ? 'Giày'
+                    : 'Phụ kiện'}
+                  {' • ' + selectedVariant.colorName}
+                </p>
+              </div>
             </div>
+
+            {/* Color Swatch Picker if piece has variants */}
+            {selectedPiece.variants.length > 1 && (
+              <div className="pt-2 border-t border-lacquer-border flex items-center gap-2">
+                <span className="text-xs text-silk-muted font-bold">Màu thử:</span>
+                <div className="flex items-center gap-1.5">
+                  {selectedPiece.variants.map((v) => (
+                    <button
+                      key={v.variantId}
+                      onClick={() => setSelectedVariant(v)}
+                      className={`w-5 h-5 border transition-all ${
+                        selectedVariant.variantId === v.variantId
+                          ? 'border-imperial-gold ring-2 ring-imperial-gold/50 scale-110'
+                          : 'border-lacquer-border hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: v.swatchHex }}
+                      title={v.colorName}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Section 3: Fine-Tuning Sliders & Step Inputs */}
-          <div className="space-y-4">
+          {/* Precision Sliders */}
+          <div className="space-y-3.5">
             {/* Vị trí X (%) */}
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-silk-muted mb-1">
                 <span>VỊ TRÍ NGANG X (%)</span>
                 <span className="text-imperial-gold font-mono">{currentAlignment.x}%</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => updateCurrentAlignment({ x: Number((currentAlignment.x - 1).toFixed(2)) })}
-                  className="px-2 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
+                  className="px-1.5 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
                 >
                   -1%
                 </button>
@@ -601,7 +678,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                 </button>
                 <button
                   onClick={() => updateCurrentAlignment({ x: Number((currentAlignment.x + 1).toFixed(2)) })}
-                  className="px-2 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
+                  className="px-1.5 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
                 >
                   +1%
                 </button>
@@ -614,10 +691,10 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                 <span>VỊ TRÍ DỌC Y (%)</span>
                 <span className="text-imperial-gold font-mono">{currentAlignment.y}%</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => updateCurrentAlignment({ y: Number((currentAlignment.y - 1).toFixed(2)) })}
-                  className="px-2 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
+                  className="px-1.5 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
                 >
                   -1%
                 </button>
@@ -644,7 +721,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                 </button>
                 <button
                   onClick={() => updateCurrentAlignment({ y: Number((currentAlignment.y + 1).toFixed(2)) })}
-                  className="px-2 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
+                  className="px-1.5 py-1 bg-lacquer border border-lacquer-border text-xs font-mono hover:border-imperial-gold"
                 >
                   +1%
                 </button>
@@ -686,7 +763,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
               </div>
             </div>
 
-            {/* Co giãn Ngang (Scale X) - Cực kỳ quan trọng để bóp/nới hông quần */}
+            {/* Co giãn Ngang (Scale X) */}
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-silk-muted mb-1">
                 <span>CO GIÃN CHIỀU NGANG (SCALE X)</span>
@@ -703,7 +780,7 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
               />
             </div>
 
-            {/* Co giãn Dọc (Scale Y) - Kéo dài ống quần / thu ngắn vạt */}
+            {/* Co giãn Dọc (Scale Y) */}
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-silk-muted mb-1">
                 <span>CO GIÃN CHIỀU DỌC (SCALE Y)</span>
@@ -736,19 +813,34 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
                 className="w-full accent-imperial-gold cursor-pointer"
               />
             </div>
+
+            {/* Độ mờ của vải (Opacity Preview) */}
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-silk-muted mb-1">
+                <span>ĐỘ MỜ CỦA VẢI (NHÌN XUYÊN THẤU)</span>
+                <span className="text-imperial-gold font-mono">{Math.round(pieceOpacity * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min="0.2"
+                max="1.0"
+                step="0.05"
+                value={pieceOpacity}
+                onChange={(e) => setPieceOpacity(parseFloat(e.target.value))}
+                className="w-full accent-imperial-gold cursor-pointer"
+              />
+            </div>
           </div>
 
-          {/* Section 4: Live Code Snippet for Selected Piece */}
+          {/* Live JSON snippet */}
           <div className="mt-auto pt-3 border-t border-lacquer-border">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-bold text-silk-muted uppercase tracking-wider">
-                Thông số JSON hiện tại:
-              </span>
-            </div>
-            <pre className="p-2.5 bg-lacquer text-[11px] font-mono text-imperial-gold overflow-x-auto border border-lacquer-border">
+            <span className="text-[11px] font-bold text-silk-muted uppercase tracking-wider block mb-1">
+              Thông số JSON của món này:
+            </span>
+            <pre className="p-2 bg-lacquer text-[11px] font-mono text-imperial-gold overflow-x-auto border border-lacquer-border">
               {JSON.stringify(
                 {
-                  [currentPieceKey]: {
+                  [pieceKey]: {
                     x: currentAlignment.x,
                     y: currentAlignment.y,
                     scale: currentAlignment.scale,
