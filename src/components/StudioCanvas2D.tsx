@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, Heart, CheckCircle2, ChevronDown, Plus } from 'lucide-react';
 import { ActiveOutfitState, EventBackground, GenderSelection } from '../types';
+import {
+  getPieceAlignment,
+  getAlignmentStyle,
+  PieceAlignment,
+} from '../data/pieceAlignments';
 
 interface StudioCanvas2DProps {
   outfit: ActiveOutfitState;
@@ -28,6 +33,20 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
+  const [, setAlignmentVersion] = useState(0);
+
+  // Subscribe to live alignment updates from Dev Calibrator
+  useEffect(() => {
+    const handleUpdate = () => setAlignmentVersion((v) => v + 1);
+    window.addEventListener('vietphuc_alignments_updated', handleUpdate);
+    return () => window.removeEventListener('vietphuc_alignments_updated', handleUpdate);
+  }, []);
+
+  // Compute alignments for active pieces
+  const bottomAlign = getPieceAlignment(outfit.bottomPiece?.id, outfit.bottomVariant?.variantId);
+  const footwearAlign = getPieceAlignment(outfit.footwearPiece?.id, outfit.footwearVariant?.variantId);
+  const topAlign = getPieceAlignment(outfit.topPiece?.id, outfit.topVariant?.variantId);
+  const accessoryAlign = getPieceAlignment(outfit.accessoryPiece?.id, outfit.accessoryVariant?.variantId);
 
   // Export current layers to a single downloadable PNG via HTML5 Canvas
   const handleDownloadMockup = async () => {
@@ -39,27 +58,41 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      const layerUrls: string[] = [];
+      interface LayerItem {
+        url: string;
+        alignment?: PieceAlignment;
+        isCover?: boolean;
+      }
+
+      const layersToDraw: LayerItem[] = [];
 
       // 0. Event Background
-      if (outfit.event.bgUrl) layerUrls.push(outfit.event.bgUrl);
+      if (outfit.event.bgUrl) layersToDraw.push({ url: outfit.event.bgUrl, isCover: true });
 
       // 1. Mannequin
-      layerUrls.push('/assets/mannequins/mannequin-base.png');
+      layersToDraw.push({ url: '/assets/mannequins/mannequin-base.png' });
 
       // 2. Bottoms
-      if (outfit.bottomVariant) layerUrls.push(outfit.bottomVariant.assetUrl);
+      if (outfit.bottomVariant) {
+        layersToDraw.push({ url: outfit.bottomVariant.assetUrl, alignment: bottomAlign });
+      }
 
       // 3. Footwear
-      if (outfit.footwearVariant) layerUrls.push(outfit.footwearVariant.assetUrl);
+      if (outfit.footwearVariant) {
+        layersToDraw.push({ url: outfit.footwearVariant.assetUrl, alignment: footwearAlign });
+      }
 
       // 4. Tops
-      if (outfit.topVariant) layerUrls.push(outfit.topVariant.assetUrl);
+      if (outfit.topVariant) {
+        layersToDraw.push({ url: outfit.topVariant.assetUrl, alignment: topAlign });
+      }
 
       // 5. Accessories
-      if (outfit.accessoryVariant) layerUrls.push(outfit.accessoryVariant.assetUrl);
+      if (outfit.accessoryVariant) {
+        layersToDraw.push({ url: outfit.accessoryVariant.assetUrl, alignment: accessoryAlign });
+      }
 
-      // Load all images in order
+      // Load all images
       const loadImg = (url: string): Promise<HTMLImageElement> =>
         new Promise((resolve, reject) => {
           const img = new Image();
@@ -69,9 +102,27 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           img.src = url;
         });
 
-      const loadedImages = await Promise.all(layerUrls.map(loadImg));
-      for (const img of loadedImages) {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      for (const item of layersToDraw) {
+        const img = await loadImg(item.url);
+        if (item.isCover) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } else if (item.alignment) {
+          const align = item.alignment;
+          ctx.save();
+          const cx = canvas.width / 2 + (align.x / 100) * canvas.width;
+          const cy = canvas.height / 2 + (align.y / 100) * canvas.height;
+          ctx.translate(cx, cy);
+          if (align.rotate) {
+            ctx.rotate((align.rotate * Math.PI) / 180);
+          }
+          const sx = align.scale * (align.scaleX ?? 1);
+          const sy = align.scale * (align.scaleY ?? 1);
+          ctx.scale(sx, sy);
+          ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+          ctx.restore();
+        } else {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
       }
 
       // Watermark / signature
@@ -124,7 +175,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
 
         {/* Layer 2: Quần / Chân váy (Z=20) */}
         {outfit.bottomVariant && (
-          <div className="absolute inset-0 z-20 pointer-events-none transition-all duration-200">
+          <div
+            className="absolute inset-0 z-20 pointer-events-none transition-all duration-150"
+            style={getAlignmentStyle(bottomAlign)}
+          >
             <img
               src={outfit.bottomVariant.assetUrl}
               alt={outfit.bottomPiece?.name}
@@ -135,7 +189,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
 
         {/* Layer 3: Giày / Dép (Z=30) */}
         {outfit.footwearVariant && (
-          <div className="absolute inset-0 z-30 pointer-events-none transition-all duration-200">
+          <div
+            className="absolute inset-0 z-30 pointer-events-none transition-all duration-150"
+            style={getAlignmentStyle(footwearAlign)}
+          >
             <img
               src={outfit.footwearVariant.assetUrl}
               alt={outfit.footwearPiece?.name}
@@ -146,7 +203,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
 
         {/* Layer 4: Áo (Z=40) - Phủ lên quần */}
         {outfit.topVariant && (
-          <div className="absolute inset-0 z-40 pointer-events-none transition-all duration-200">
+          <div
+            className="absolute inset-0 z-40 pointer-events-none transition-all duration-150"
+            style={getAlignmentStyle(topAlign)}
+          >
             <img
               src={outfit.topVariant.assetUrl}
               alt={outfit.topPiece?.name}
@@ -157,7 +217,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
 
         {/* Layer 5: Phụ kiện (Z=50) - Trên cùng */}
         {outfit.accessoryVariant && (
-          <div className="absolute inset-0 z-50 pointer-events-none transition-all duration-200">
+          <div
+            className="absolute inset-0 z-50 pointer-events-none transition-all duration-150"
+            style={getAlignmentStyle(accessoryAlign)}
+          >
             <img
               src={outfit.accessoryVariant.assetUrl}
               alt={outfit.accessoryPiece?.name}
