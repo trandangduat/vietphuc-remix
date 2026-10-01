@@ -16,6 +16,116 @@ import {
   ShieldCheck,
   Plus,
 } from 'lucide-react';
+import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
+
+/**
+ * Renders the full mannequin composite wearing all pieces for an outfit
+ */
+const OutfitMannequinComposite: React.FC<{
+  outfit: SavedOutfit;
+  className?: string;
+  isModal?: boolean;
+}> = ({ outfit, className = '', isModal = false }) => {
+  const bottomPiece = outfit.bottom?.piece || (outfit.bottom?.variant as Piece | undefined);
+  const footwearPiece = outfit.footwear?.piece || (outfit.footwear?.variant as Piece | undefined);
+  const topPiece = outfit.top?.piece || (outfit.top?.variant as Piece | undefined);
+  const accessoryPiece = outfit.accessory?.piece || (outfit.accessory?.variant as Piece | undefined);
+
+  const bottomAlign = getPieceAlignment(bottomPiece?.id);
+  const footwearAlign = getPieceAlignment(footwearPiece?.id);
+  const topAlign = getPieceAlignment(topPiece?.id);
+  const accessoryAlign = getPieceAlignment(accessoryPiece?.id);
+
+  return (
+    <div className={`relative w-full h-full flex items-center justify-center overflow-hidden select-none ${className}`}>
+      {/* Background Event Layer */}
+      {outfit.event?.bgUrl && (
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <img
+            src={outfit.event.bgUrl}
+            alt={outfit.event.name}
+            className={`w-full h-full object-cover filter blur-[0.5px] transition-transform duration-700 ${
+              isModal ? 'opacity-60' : 'opacity-50 group-hover:scale-105'
+            }`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35" />
+        </div>
+      )}
+
+      {/* Scaled Mannequin & Clothes Composite Stage */}
+      <div
+        className={`relative z-10 w-full h-full max-h-[96%] aspect-[3/4] flex items-center justify-center pointer-events-none py-2 transition-transform duration-500 ${
+          isModal ? '' : 'group-hover:scale-105'
+        }`}
+      >
+        {/* Layer 1: Mannequin Base */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <img
+            src="/assets/mannequins/mannequin-base.png"
+            alt="Ma-nơ-canh"
+            className="w-full h-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)]"
+          />
+        </div>
+
+        {/* Layer 2: Quần / Chân váy (Z=20) */}
+        {bottomPiece?.assetUrl && (
+          <div
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={getAlignmentStyle(bottomAlign)}
+          >
+            <img
+              src={bottomPiece.assetUrl}
+              alt={bottomPiece.name}
+              className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+            />
+          </div>
+        )}
+
+        {/* Layer 3: Giày / Dép (Z=30) */}
+        {footwearPiece?.assetUrl && (
+          <div
+            className="absolute inset-0 z-30 pointer-events-none"
+            style={getAlignmentStyle(footwearAlign)}
+          >
+            <img
+              src={footwearPiece.assetUrl}
+              alt={footwearPiece.name}
+              className="w-full h-full object-contain filter drop-shadow-[0_6px_12px_rgba(0,0,0,0.6)]"
+            />
+          </div>
+        )}
+
+        {/* Layer 4: Áo (Z=40) - Phủ lên quần */}
+        {topPiece?.assetUrl && (
+          <div
+            className="absolute inset-0 z-40 pointer-events-none"
+            style={getAlignmentStyle(topAlign)}
+          >
+            <img
+              src={topPiece.assetUrl}
+              alt={topPiece.name}
+              className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
+            />
+          </div>
+        )}
+
+        {/* Layer 5: Phụ kiện (Z=50) - Nón, khăn, mũ */}
+        {accessoryPiece?.assetUrl && (
+          <div
+            className="absolute inset-0 z-50 pointer-events-none"
+            style={getAlignmentStyle(accessoryAlign)}
+          >
+            <img
+              src={accessoryPiece.assetUrl}
+              alt={accessoryPiece.name}
+              className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.65)]"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface LookbookScreenProps {
   outfits: SavedOutfit[];
@@ -162,29 +272,22 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
       )}
 
       {/* 2. GALLERY HERO HEADER & MINIMAL EDITORIAL CONTROLS */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-lacquer-border/60">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-6 sm:pt-8 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-lacquer-border/60">
           <div>
-            <div className="flex items-center gap-2 text-imperial-gold text-xs font-bold uppercase tracking-[0.2em] mb-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Phòng Trưng Bày Phục Sức</span>
-            </div>
-            <h1 className="font-serif font-extrabold text-3xl sm:text-4xl text-silk-ivory tracking-tight">
+            <h1 className="font-serif font-extrabold text-2xl sm:text-3xl text-silk-ivory tracking-tight">
               Bộ Sưu Tập Outfit
             </h1>
-            <p className="text-xs sm:text-sm text-silk-muted mt-1.5 font-normal max-w-lg">
-              Kho lưu trữ tác phẩm thời trang cổ phong và những bản phục dựng AI cá nhân của bạn.
-            </p>
           </div>
 
-          {/* Right Action: Create New Outfit in Studio */}
+          {/* Right Action: Create Lookbook */}
           <div className="flex items-center gap-3">
             <button
-              onClick={onOpenStudio}
-              className="py-3 px-5 bg-gradient-to-r from-imperial-gold to-imperial-gold-light hover:brightness-105 text-lacquer font-bold text-xs sm:text-sm shadow-[0_4px_16px_rgba(212,175,55,0.25)] flex items-center gap-2 transition-all uppercase tracking-wider rounded-xl"
+              onClick={() => {}}
+              className="py-2.5 px-5 bg-gradient-to-r from-imperial-gold to-imperial-gold-light hover:brightness-105 text-lacquer font-bold text-xs sm:text-sm shadow-[0_4px_16px_rgba(212,175,55,0.25)] flex items-center gap-2 transition-all uppercase tracking-wider rounded-xl cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Phối Bộ Đồ Mới</span>
+              <span>Tạo Lookbook</span>
             </button>
           </div>
         </div>
@@ -252,8 +355,8 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </div>
       </div>
 
-      {/* 4. THE STAGGERED MASONRY WATERFALL GALLERY */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      {/* 4. GALLERY OUTFITS GRID (Full Width & Uniform 9:16 Ratio) */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
         {filteredOutfits.length === 0 ? (
           /* Empty State */
           <div className="text-center py-24 p-8 rounded-2xl bg-lacquer-surface/40 border border-lacquer-border">
@@ -272,62 +375,34 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             </button>
           </div>
         ) : (
-          /* True Masonry Multi-Column Waterfall Layout */
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-3 gap-6 [column-fill:_balance]">
-            {filteredOutfits.map((outfit, index) => {
-              // Determine card aspect ratio to create natural staggered waterfall rhythm
+          /* Responsive Grid with Uniform 9:16 Aspect Ratio Cards */
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5 sm:gap-6">
+            {filteredOutfits.map((outfit) => {
               const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
               const displayImage = outfit.tryOnImage || outfit.top.piece.assetUrl || (outfit.top.variant as Piece)?.assetUrl;
-
-              // Staggered height logic:
-              // - If outfit specifies aspectRatio: use it
-              // - If has AI image: towering tall (3:4 or 9:16)
-              // - Otherwise: alternate between 3:4, 4:5, and 1:1
-              let aspectClass = 'aspect-[3/4]';
-              if (outfit.aspectRatio === 'tall') {
-                aspectClass = 'aspect-[9/16]';
-              } else if (outfit.aspectRatio === 'medium') {
-                aspectClass = 'aspect-[4/5]';
-              } else if (outfit.aspectRatio === 'short') {
-                aspectClass = 'aspect-[1/1]';
-              } else if (hasAIImage && index % 2 === 0) {
-                aspectClass = 'aspect-[9/15]';
-              } else if (index % 3 === 1) {
-                aspectClass = 'aspect-[4/5]';
-              } else if (index % 3 === 2) {
-                aspectClass = 'aspect-[1/1]';
-              }
 
               return (
                 <div
                   key={outfit.id}
                   onClick={() => handleOpenDetail(outfit)}
-                  className="break-inside-avoid mb-6 group relative rounded-2xl overflow-hidden border border-lacquer-border/80 hover:border-imperial-gold/70 bg-lacquer-surface shadow-lg hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-all duration-300 cursor-pointer"
+                  className="group relative rounded-2xl overflow-hidden border border-lacquer-border/80 hover:border-imperial-gold/70 bg-lacquer-surface shadow-lg hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-all duration-300 cursor-pointer"
                 >
-                  {/* Photo Canvas Container with varying aspect ratio */}
-                  <div className={`relative w-full ${aspectClass} overflow-hidden bg-lacquer-card`}>
-                    {/* Event Background Layer (for 2D Studio Outfits) */}
-                    {!hasAIImage && (
-                      <div className="absolute inset-0 z-0 overflow-hidden">
+                  {/* Photo Canvas Container with uniform 9:16 aspect ratio */}
+                  <div className="relative w-full aspect-[9/16] overflow-hidden bg-lacquer-card">
+                    {hasAIImage ? (
+                      /* AI Try-on Photo */
+                      <div className="relative w-full h-full overflow-hidden">
                         <img
-                          src={outfit.event.bgUrl}
-                          alt={outfit.event.name}
-                          className="w-full h-full object-cover opacity-50 filter blur-[1px] group-hover:scale-105 transition-transform duration-700"
+                          src={outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages[0])}
+                          alt={outfit.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
                       </div>
+                    ) : (
+                      /* Full Mannequin Composite Stage */
+                      <OutfitMannequinComposite outfit={outfit} />
                     )}
-
-                    {/* Main Subject Image */}
-                    <div className="relative z-10 w-full h-full flex items-center justify-center p-3">
-                      <img
-                        src={displayImage}
-                        alt={outfit.name}
-                        className={`w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500 ${
-                          hasAIImage ? 'object-cover' : 'object-contain'
-                        }`}
-                      />
-                    </div>
 
                     {/* Top Badges: Event Pill & AI Badge */}
                     <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
@@ -398,36 +473,27 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             {/* LEFT SIDE: Media Visual Stage (60%) */}
             <div className="w-full lg:w-[58%] bg-lacquer-card flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-lacquer-border/80 relative overflow-hidden">
               {/* Media Display Canvas */}
-              <div className="relative flex-1 min-h-[320px] sm:min-h-[420px] flex items-center justify-center p-6 bg-gradient-to-b from-lacquer to-lacquer-surface overflow-hidden">
-                {/* Event background behind 2D mockup */}
-                {activeMediaIndex === 0 && (
-                  <div className="absolute inset-0 z-0">
-                    <img
-                      src={selectedOutfit.event.bgUrl}
-                      alt={selectedOutfit.event.name}
-                      className="w-full h-full object-cover opacity-60 filter blur-[1px]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
-                  </div>
-                )}
-
-                {/* The Active Image */}
+              <div className="relative flex-1 min-h-[340px] sm:min-h-[440px] flex items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-lacquer to-lacquer-surface overflow-hidden">
+                {/* The Active Media */}
                 {(() => {
                   const mediaList = getOutfitMediaList(selectedOutfit);
                   const activeMedia = mediaList[activeMediaIndex] || mediaList[0];
+                  if (activeMedia?.type === '2d') {
+                    return <OutfitMannequinComposite outfit={selectedOutfit} isModal={true} />;
+                  }
                   return (
-                    <img
-                      src={activeMedia?.url || selectedOutfit.top.piece.assetUrl}
-                      alt={selectedOutfit.name}
-                      className={`relative z-10 max-h-[460px] max-w-full drop-shadow-[0_16px_36px_rgba(0,0,0,0.9)] ${
-                        activeMedia?.type === 'ai' ? 'object-cover rounded-xl' : 'object-contain'
-                      }`}
-                    />
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <img
+                        src={activeMedia?.url}
+                        alt={selectedOutfit.name}
+                        className="relative z-10 max-h-[460px] max-w-full rounded-xl object-contain drop-shadow-[0_16px_36px_rgba(0,0,0,0.9)]"
+                      />
+                    </div>
                   );
                 })()}
 
                 {/* Floating badge for active media */}
-                <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
                   <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-imperial-gold border border-imperial-gold/40 shadow">
                     {selectedOutfit.event.name}
                   </span>

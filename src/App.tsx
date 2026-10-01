@@ -79,8 +79,6 @@ export function App() {
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
-      tryOnImage: '/assets/test-composite-preview.png',
-      tryOnImages: ['/assets/test-composite-preview.png'],
       aspectRatio: 'tall',
       aiAnalysis: {
         totalScore: 9.8,
@@ -157,8 +155,6 @@ export function App() {
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
-      tryOnImage: '/assets/test-composite-preview.png',
-      tryOnImages: ['/assets/test-composite-preview.png'],
       aspectRatio: 'tall',
       aiAnalysis: {
         totalScore: 9.7,
