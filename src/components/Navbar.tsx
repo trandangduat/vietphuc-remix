@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = [
     { id: 'landing' as const, label: 'Trang chủ' },
     { id: 'studio' as const, label: 'Studio phối đồ' },
-    { id: 'lookbook' as const, label: 'Lookbook', count: sessionCount },
+    { id: 'lookbook' as const, label: 'Bộ sưu tập', count: sessionCount },
   ];
 
   return (

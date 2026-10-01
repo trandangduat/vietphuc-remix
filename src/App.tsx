@@ -40,6 +40,10 @@ export function App() {
   const initialTop = PIECES.find((p) => p.id === 'piece-ao-tac-do') || PIECES[0];
   const initialTopVariant = initialTop;
 
+  const topXanh = PIECES.find((p) => p.id === 'piece-ao-tac-xanh') || initialTop;
+  const bottomTay = PIECES.find((p) => p.id === 'piece-quan-tay');
+  const footwearLoafer = PIECES.find((p) => p.id === 'piece-loafer');
+
   const initialBottom = PIECES.find((p) => p.id === 'piece-quan-lua');
   const initialBottomVariant = initialBottom;
 
@@ -63,8 +67,8 @@ export function App() {
     styleFilter: 'all',
   });
 
-  // Saved outfits (starts with 1 initial sample in lookbook for exploration)
-  const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([
+  // Sample Outfits for Gallery with Staggered Masonry Heights
+  const sampleOutfits: SavedOutfit[] = [
     {
       id: 'outfit-default-1',
       name: 'Lễ Hội Cung Đình Huế',
@@ -75,24 +79,106 @@ export function App() {
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
+      tryOnImage: '/assets/test-composite-preview.png',
+      tryOnImages: ['/assets/test-composite-preview.png'],
+      aspectRatio: 'tall',
       aiAnalysis: {
-        totalScore: 9.6,
+        totalScore: 9.8,
         criteria: {
-          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.5, maxScore: 10, comment: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc.' },
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.8, maxScore: 10, comment: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc rực rỡ sắc xuân.' },
           eventFit: { name: 'Phù hợp sự kiện', score: 10.0, maxScore: 10, comment: 'Tuyệt đối trang nghiêm trong không khí Tết cổ truyền.' },
-          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.3, maxScore: 10, comment: 'Đoan chính, tôn ti trật tự theo điển lễ triều Nguyễn.' }
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.7, maxScore: 10, comment: 'Đoan chính, tôn ti trật tự theo điển lễ triều Nguyễn.' },
         },
         colorHarmony: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc.',
         eventFit: 'Tuyệt đối trang nghiêm trong không khí Tết cổ truyền.',
         culturalStatus: 'suitable',
         explanation: 'Bộ lễ phục áo tấc đi cùng quần lụa trắng và hài thêu thể hiện trọn vẹn nét trang trọng truyền thống của phụ nữ Việt.',
         source: 'Bảo tàng Lịch sử Quốc gia',
+        mascotQuote: 'Tuyệt phẩm đầu xuân! Áo tấc đỏ gấm cùng lụa ngà tôn vinh phúc lộc hoàng triều!',
       },
     },
-  ]);
+    {
+      id: 'outfit-default-2',
+      name: 'Thanh Tao Nho Gia',
+      createdAt: '2026-09-30',
+      gender: 'men',
+      top: { piece: topXanh, variant: topXanh },
+      bottom: { piece: initialBottom!, variant: initialBottomVariant! },
+      footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
+      event: EVENTS[0],
+      aspectRatio: 'medium',
+      aiAnalysis: {
+        totalScore: 9.6,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.6, maxScore: 10, comment: 'Sắc xanh cổ vịt quý tộc đi cùng lụa ngà, toát lên vẻ đĩnh đạc.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.5, maxScore: 10, comment: 'Trang nghiêm, thanh nhã cho du xuân đầu năm.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.6, maxScore: 10, comment: 'Chuẩn mực phong thái Nho gia triều Nguyễn.' },
+        },
+        colorHarmony: 'Sắc xanh cổ vịt quý tộc đi cùng lụa trắng ngà.',
+        eventFit: 'Trang nghiêm, thanh nhã cho sự kiện văn hóa truyền thống.',
+        culturalStatus: 'suitable',
+        explanation: 'Sắc xanh cổ vịt quý tộc đem lại vẻ trầm tĩnh, trí thức của giới học giả xưa.',
+        source: 'Bảo tàng Lịch sử Quốc gia',
+        mascotQuote: 'Sắc xanh cổ vịt thanh tao, phong thái Nho gia đĩnh đạc trí thức uyên bác!',
+      },
+    },
+    {
+      id: 'outfit-default-3',
+      name: 'Dạ Yến Remix Đương Đại',
+      createdAt: '2026-09-28',
+      gender: 'men',
+      top: { piece: initialTop!, variant: initialTopVariant! },
+      bottom: { piece: bottomTay || initialBottom!, variant: bottomTay || initialBottom! },
+      footwear: { piece: footwearLoafer || initialFootwear!, variant: footwearLoafer || initialFootwear! },
+      event: EVENTS[1] || EVENTS[0],
+      aspectRatio: 'short',
+      aiAnalysis: {
+        totalScore: 8.8,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.0, maxScore: 10, comment: 'Áo tấc gấm đỏ nổi bật trên nền âu phục Tây phương tối màu.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.2, maxScore: 10, comment: 'Ấn tượng cho dạ hội, sự kiện nghệ thuật hoặc tiệc tối.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 7.9, maxScore: 10, comment: 'Giao thoa giữa tà áo thụng và âu phục đương đại.' },
+        },
+        colorHarmony: 'Phối màu Menswear hiện đại cá tính.',
+        eventFit: 'Rất ấn tượng cho dạ hội học sinh hoặc sự kiện nghệ thuật.',
+        culturalStatus: 'caution',
+        explanation: 'Cách phối Remix sáng tạo giữa tà áo thụng triều Nguyễn và âu phục Tây phương.',
+        source: 'Chuyên khảo Văn hóa Mặc đương đại',
+        mascotQuote: 'Phối đồ Remix rất phá cách và có gu! Rất hợp cho dạ tiệc nghệ thuật!',
+      },
+    },
+    {
+      id: 'outfit-default-4',
+      name: 'Hương Sắc Cố Đô',
+      createdAt: '2026-09-25',
+      gender: 'women',
+      top: { piece: topXanh, variant: topXanh },
+      bottom: { piece: initialBottom!, variant: initialBottomVariant! },
+      footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
+      accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
+      event: EVENTS[0],
+      tryOnImage: '/assets/test-composite-preview.png',
+      tryOnImages: ['/assets/test-composite-preview.png'],
+      aspectRatio: 'tall',
+      aiAnalysis: {
+        totalScore: 9.7,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.7, maxScore: 10, comment: 'Hài hòa nhã nhặn, tôn vinh chiếc nón lá chóp bạc duyên dáng.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.8, maxScore: 10, comment: 'Duyên dáng dịu dàng cho dạo bước phố cổ.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.6, maxScore: 10, comment: 'Nét đẹp kín đáo, thuần hậu của phụ nữ Việt.' },
+        },
+        colorHarmony: 'Sắc xanh ngọc kết hợp cùng nón lá chóp bạc.',
+        eventFit: 'Hoàn hảo cho du xuân phố cổ và lễ hội hoa.',
+        culturalStatus: 'suitable',
+        explanation: 'Tổ hợp áo tấc và nón lá chóp bạc tạo nên hình ảnh người phụ nữ đoan trang, dịu dàng.',
+        source: 'Bảo tàng Phụ nữ Nam Bộ',
+        mascotQuote: 'Nón lá chóp bạc nghiêng che tà áo xanh, phong nhã đượm hồn cố đô!',
+      },
+    },
+  ];
 
-  // Session outfits (saved when guest)
-  const [sessionOutfits, setSessionOutfits] = useState<SavedOutfit[]>([]);
+  const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>(sampleOutfits);
+  const [sessionOutfits, setSessionOutfits] = useState<SavedOutfit[]>(sampleOutfits.slice(0, 2));
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);

@@ -92,6 +92,8 @@ export interface SavedOutfit {
   event: EventBackground;
   aiAnalysis?: AIOverviewResult;
   tryOnImage?: string;
+  tryOnImages?: string[];
+  aspectRatio?: 'tall' | 'medium' | 'short';
 }
 
 export interface AICriterionScore {
