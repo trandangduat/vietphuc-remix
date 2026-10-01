@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Sparkles, Heart, CheckCircle2, AlertCircle, ChevronDown, Plus } from 'lucide-react';
+import { Download, Sparkles, Heart, CheckCircle2, ChevronDown, Plus } from 'lucide-react';
 import { ActiveOutfitState, EventBackground, GenderSelection } from '../types';
 
 interface StudioCanvas2DProps {
@@ -167,171 +167,170 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         )}
       </div>
 
-      {/* TOP OVERLAY CONTROLS (Square, large text, vintage border) */}
-      <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between gap-3 pointer-events-auto flex-wrap">
-        {/* Left Side: Mannequin Gender Switcher + Event Dropdown */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Gender Square Toggle */}
-          <div className="flex items-center p-1 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border shadow-lg">
-            <button
-              onClick={() => onSelectGender('men')}
-              className={`py-2 px-4 rounded-none text-xs sm:text-sm font-bold transition-all ${
-                outfit.mannequinGender === 'men'
-                  ? 'bg-imperial-gold text-lacquer shadow-sm font-extrabold'
-                  : 'text-silk-muted hover:text-silk-ivory'
-              }`}
-            >
-              Men (Nam)
-            </button>
-            <button
-              onClick={() => onSelectGender('women')}
-              className={`py-2 px-4 rounded-none text-xs sm:text-sm font-bold transition-all ${
-                outfit.mannequinGender === 'women'
-                  ? 'bg-rose-300 text-lacquer shadow-sm font-extrabold'
-                  : 'text-silk-muted hover:text-silk-ivory'
-              }`}
-            >
-              Women (Nữ)
-            </button>
-          </div>
+      {/* TOP-LEFT: Mannequin Gender Switcher (Vietnamese label & Gender symbols) */}
+      <div className="absolute top-4 left-4 z-40 pointer-events-auto">
+        <div className="flex items-center p-1 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border shadow-xl">
+          {/* Nút Nam (Male ♂) */}
+          <button
+            onClick={() => onSelectGender('men')}
+            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-xs sm:text-sm font-bold transition-all uppercase tracking-wider ${
+              outfit.mannequinGender === 'men'
+                ? 'bg-imperial-gold text-lacquer shadow font-extrabold'
+                : 'text-silk-muted hover:text-silk-ivory'
+            }`}
+            title="Mẫu Ma-nơ-canh Nam"
+          >
+            <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24">
+              <circle cx="10" cy="14" r="5" />
+              <path d="M19 5l-5.4 5.4M19 5h-5M19 5v5" />
+            </svg>
+            <span>Nam</span>
+          </button>
 
-          {/* Event Dropdown Picker */}
-          <div className="relative">
-            <button
-              onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-              className="flex items-center gap-2.5 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border text-xs sm:text-sm font-bold text-silk-ivory hover:border-imperial-gold/60 shadow-lg transition-all"
-            >
-              <span className="w-2.5 h-2.5 rounded-none bg-imperial-gold" />
-              <span>Bối cảnh: {outfit.event.name}</span>
-              <ChevronDown className={`w-4 h-4 text-silk-muted transition-transform ${isEventDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isEventDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-64 rounded-none bg-lacquer/95 backdrop-blur-xl border-2 border-imperial-gold/60 shadow-2xl p-2 z-50 animate-fadeIn">
-                <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-silk-muted border-b border-lacquer-border mb-1">
-                  Chọn bối cảnh sự kiện
-                </div>
-                {allEvents.map((evt) => (
-                  <button
-                    key={evt.id}
-                    onClick={() => {
-                      onSelectEvent(evt);
-                      setIsEventDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${
-                      outfit.event.id === evt.id
-                        ? 'bg-imperial-gold/20 text-imperial-gold font-bold border-l-2 border-imperial-gold'
-                        : 'text-silk-ivory hover:bg-lacquer-surface'
-                    }`}
-                  >
-                    <span>{evt.name}</span>
-                    {outfit.event.id === evt.id && <span className="w-2 h-2 rounded-none bg-imperial-gold" />}
-                  </button>
-                ))}
-
-                <div className="pt-2 mt-1 border-t border-lacquer-border">
-                  <button
-                    onClick={() => {
-                      setIsEventDropdownOpen(false);
-                      onOpenCustomEventModal();
-                    }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>+ Tạo Event AI mới</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Nút Nữ (Female ♀) */}
+          <button
+            onClick={() => onSelectGender('women')}
+            className={`flex items-center gap-1.5 py-2 px-3.5 rounded-none text-xs sm:text-sm font-bold transition-all uppercase tracking-wider ${
+              outfit.mannequinGender === 'women'
+                ? 'bg-rose-300 text-lacquer shadow font-extrabold'
+                : 'text-silk-muted hover:text-silk-ivory'
+            }`}
+            title="Mẫu Ma-nơ-canh Nữ"
+          >
+            <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24">
+              <circle cx="12" cy="9" r="5" />
+              <path d="M12 14v7M9 18h6" />
+            </svg>
+            <span>Nữ</span>
+          </button>
         </div>
-
-        {/* Right Side: Download Canvas Mockup Button */}
-        <button
-          onClick={handleDownloadMockup}
-          disabled={isExporting}
-          className="flex items-center gap-2 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border text-silk-ivory hover:text-imperial-gold hover:border-imperial-gold/60 shadow-lg text-xs sm:text-sm font-bold transition-all group"
-          title="Tải ảnh kết quả phối đồ 2D (PNG)"
-        >
-          {downloadSuccess ? (
-            <>
-              <CheckCircle2 className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 font-bold">Đã tải ảnh!</span>
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 text-imperial-gold group-hover:scale-110 transition-transform" />
-              <span>Tải ảnh Mockup</span>
-            </>
-          )}
-        </button>
       </div>
 
-      {/* BOTTOM OVERLAY HUD (Square, large text, high contrast) */}
-      <div className="absolute bottom-4 inset-x-4 z-40 flex flex-col gap-3 pointer-events-auto max-w-xl mx-auto w-[calc(100%-2rem)]">
-        {/* Floating Outfit Pieces Status Badge Bar */}
-        <div className="p-3 sm:p-4 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border shadow-2xl">
-          <div className="flex items-center justify-between text-xs sm:text-sm text-silk-muted mb-2">
-            <span className="font-bold text-silk-ivory uppercase tracking-wider text-xs">Trang phục đang thử:</span>
-            <span className={canTryOn ? 'text-green-400 font-bold flex items-center gap-1.5' : 'text-amber-400 font-semibold flex items-center gap-1.5'}>
-              {canTryOn ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" /> Đủ 3 món bắt buộc
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-4 h-4" /> Cần đủ Áo, Quần, Giày
-                </>
-              )}
-            </span>
-          </div>
+      {/* TOP-RIGHT: Event Background Dropdown Selector */}
+      <div className="absolute top-4 right-4 z-40 pointer-events-auto">
+        <div className="relative">
+          <button
+            onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
+            className="flex items-center gap-2.5 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border text-xs sm:text-sm font-bold text-silk-ivory hover:border-imperial-gold shadow-xl transition-all"
+          >
+            <span className="w-2.5 h-2.5 rounded-none bg-imperial-gold" />
+            <span>Bối cảnh: {outfit.event.name}</span>
+            <ChevronDown className={`w-4 h-4 text-silk-muted transition-transform ${isEventDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
 
-          <div className="flex flex-wrap gap-2">
-            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.topVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
-              Áo: {outfit.topVariant ? outfit.topVariant.colorName : 'Chưa chọn'}
-            </span>
-            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.bottomVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
-              Quần: {outfit.bottomVariant ? outfit.bottomVariant.colorName : 'Chưa chọn'}
-            </span>
-            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.footwearVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
-              Giày: {outfit.footwearVariant ? outfit.footwearVariant.colorName : 'Chưa chọn'}
-            </span>
-            {outfit.accessoryVariant && (
-              <span className="px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border bg-imperial-teal/20 text-teal-300 border-imperial-teal/50">
-                Phụ kiện: {outfit.accessoryPiece?.name}
-              </span>
-            )}
-          </div>
+          {/* Dropdown Menu (Opens towards left/bottom from right edge) */}
+          {isEventDropdownOpen && (
+            <div className="absolute right-0 mt-1 w-64 rounded-none bg-lacquer/95 backdrop-blur-xl border-2 border-imperial-gold shadow-2xl p-2 z-50 animate-fadeIn">
+              <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-silk-muted border-b border-lacquer-border mb-1">
+                Chọn bối cảnh sự kiện
+              </div>
+              {allEvents.map((evt) => (
+                <button
+                  key={evt.id}
+                  onClick={() => {
+                    onSelectEvent(evt);
+                    setIsEventDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${
+                    outfit.event.id === evt.id
+                      ? 'bg-imperial-gold/20 text-imperial-gold font-bold border-l-2 border-imperial-gold'
+                      : 'text-silk-ivory hover:bg-lacquer-surface'
+                  }`}
+                >
+                  <span>{evt.name}</span>
+                  {outfit.event.id === evt.id && <span className="w-2 h-2 rounded-none bg-imperial-gold" />}
+                </button>
+              ))}
+
+              <div className="pt-2 mt-1 border-t border-lacquer-border">
+                <button
+                  onClick={() => {
+                    setIsEventDropdownOpen(false);
+                    onOpenCustomEventModal();
+                  }}
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Tạo Event AI mới</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Action Buttons Directly Overlaid on Canvas Stage (Wireframe [Try on] [SAVE OUTFIT]) */}
-        <div className="grid grid-cols-2 gap-3">
+      {/* BOTTOM-RIGHT: Vertical Action Dock (TikTok-Style Action Stack) */}
+      <div className="absolute bottom-6 right-5 z-40 flex flex-col items-center gap-4 pointer-events-auto">
+        {/* Action 1: AI Try on */}
+        <div className="relative group flex items-center justify-center">
           <button
             onClick={onTryOn}
             disabled={!canTryOn}
-            className={`flex items-center justify-center gap-2 py-3.5 px-5 rounded-none font-bold text-sm sm:text-base tracking-wider transition-all shadow-xl uppercase ${
+            aria-label="AI Try on"
+            className={`w-12 h-12 flex items-center justify-center transition-all duration-200 ${
               canTryOn
-                ? 'bg-gradient-to-r from-imperial-red via-cinnabar to-imperial-red-bright text-silk-ivory hover:brightness-110 shadow-imperial-red/40 border border-imperial-red-bright active:scale-[0.99]'
-                : 'bg-lacquer/85 backdrop-blur-md text-silk-muted border border-lacquer-border cursor-not-allowed opacity-50'
+                ? 'text-white hover:scale-120 active:scale-95 cursor-pointer'
+                : 'text-white/40 cursor-not-allowed'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-imperial-gold-light" />
-            <span>Try on</span>
+            <Sparkles className="w-8 h-8 fill-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_0_2px_rgba(0,0,0,0.9)] transition-transform" />
           </button>
 
+          {/* Left-floating Tooltip */}
+          <div className="absolute right-full mr-3.5 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
+            <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-bold px-3 py-1.5 rounded-none border border-imperial-gold/60 shadow-2xl backdrop-blur-md whitespace-nowrap">
+              {canTryOn ? 'Thử trang phục trên người thật (AI Try on)' : 'Chọn đủ Áo, Quần, Giày để thử đồ'}
+            </div>
+            <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-imperial-gold/60" />
+          </div>
+        </div>
+
+        {/* Action 2: Save Outfit */}
+        <div className="relative group flex items-center justify-center">
           <button
             onClick={onSaveOutfit}
             disabled={!canTryOn}
-            className={`flex items-center justify-center gap-2 py-3.5 px-5 rounded-none font-bold text-sm sm:text-base tracking-wider transition-all border-2 shadow-xl uppercase ${
+            aria-label="Lưu outfit"
+            className={`w-12 h-12 flex items-center justify-center transition-all duration-200 ${
               canTryOn
-                ? 'bg-imperial-gold hover:bg-imperial-gold-light text-lacquer border-imperial-gold shadow-imperial-gold/20 active:scale-[0.99]'
-                : 'bg-lacquer/85 backdrop-blur-md text-silk-muted border-lacquer-border cursor-not-allowed opacity-50'
+                ? 'text-white hover:scale-120 active:scale-95 cursor-pointer'
+                : 'text-white/40 cursor-not-allowed'
             }`}
           >
-            <Heart className="w-4 h-4 fill-current" />
-            <span>SAVE OUTFIT</span>
+            <Heart className="w-8 h-8 fill-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_0_2px_rgba(0,0,0,0.9)] transition-transform" />
           </button>
+
+          {/* Left-floating Tooltip */}
+          <div className="absolute right-full mr-3.5 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
+            <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-bold px-3 py-1.5 rounded-none border border-imperial-gold/60 shadow-2xl backdrop-blur-md whitespace-nowrap">
+              {canTryOn ? (isLoggedIn ? 'Lưu vào Lookbook cá nhân' : 'Lưu tạm vào phiên hiện tại') : 'Chọn đủ Áo, Quần, Giày để lưu'}
+            </div>
+            <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-imperial-gold/60" />
+          </div>
+        </div>
+
+        {/* Action 3: Download Canvas Mockup (PNG) */}
+        <div className="relative group flex items-center justify-center">
+          <button
+            onClick={handleDownloadMockup}
+            disabled={isExporting}
+            aria-label="Tải ảnh phối đồ"
+            className="w-12 h-12 flex items-center justify-center text-white hover:scale-120 active:scale-95 transition-all duration-200 cursor-pointer"
+          >
+            {downloadSuccess ? (
+              <CheckCircle2 className="w-8 h-8 text-green-400 fill-green-400 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_0_2px_rgba(0,0,0,0.9)]" />
+            ) : (
+              <Download className="w-8 h-8 text-white stroke-[2.5] drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_0_2px_rgba(0,0,0,0.9)]" />
+            )}
+          </button>
+
+          {/* Left-floating Tooltip */}
+          <div className="absolute right-full mr-3.5 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
+            <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-bold px-3 py-1.5 rounded-none border border-imperial-gold/60 shadow-2xl backdrop-blur-md whitespace-nowrap">
+              {downloadSuccess ? 'Đã tải ảnh mockup thành công!' : 'Tải ảnh phối đồ 2D (PNG)'}
+            </div>
+            <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-imperial-gold/60" />
+          </div>
         </div>
       </div>
     </div>

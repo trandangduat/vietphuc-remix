@@ -57,6 +57,12 @@ export function App() {
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
       aiAnalysis: {
+        totalScore: 9.6,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.5, maxScore: 10, comment: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 10.0, maxScore: 10, comment: 'Tuyệt đối trang nghiêm trong không khí Tết cổ truyền.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.3, maxScore: 10, comment: 'Đoan chính, tôn ti trật tự theo điển lễ triều Nguyễn.' }
+        },
         colorHarmony: 'Tương phản Đỏ gấm và Lụa trắng ngà hoàng tộc.',
         eventFit: 'Tuyệt đối trang nghiêm trong không khí Tết cổ truyền.',
         culturalStatus: 'suitable',

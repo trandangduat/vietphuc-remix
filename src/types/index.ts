@@ -1,5 +1,5 @@
 export type PieceCategory = 'top' | 'bottom' | 'footwear' | 'accessory';
-export type StyleFilter = 'all' | 'traditional' | 'modern' | 'remix';
+export type StyleFilter = 'all' | 'traditional' | 'modern';
 export type GenderSelection = 'men' | 'women';
 
 export interface CulturalInfo {
@@ -84,7 +84,20 @@ export interface SavedOutfit {
   tryOnImage?: string;
 }
 
+export interface AICriterionScore {
+  name: string;
+  score: number;
+  maxScore: number;
+  comment: string;
+}
+
 export interface AIOverviewResult {
+  totalScore: number;
+  criteria: {
+    colorHarmony: AICriterionScore;
+    eventFit: AICriterionScore;
+    culturalNorm: AICriterionScore;
+  };
   colorHarmony: string;
   eventFit: string;
   culturalStatus: 'suitable' | 'caution' | 'not-recommended';
