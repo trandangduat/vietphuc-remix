@@ -72,7 +72,7 @@ export function App() {
     {
       id: 'outfit-default-1',
       name: 'Lễ Hội Cung Đình Huế',
-      createdAt: '2026-10-01',
+      createdAt: '2026-10-01T14:30:00',
       gender: 'women',
       top: { piece: initialTop!, variant: initialTopVariant! },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
@@ -98,7 +98,7 @@ export function App() {
     {
       id: 'outfit-default-2',
       name: 'Thanh Tao Nho Gia',
-      createdAt: '2026-09-30',
+      createdAt: '2026-09-30T10:15:00',
       gender: 'men',
       top: { piece: topXanh, variant: topXanh },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
@@ -123,7 +123,7 @@ export function App() {
     {
       id: 'outfit-default-3',
       name: 'Dạ Yến Remix Đương Đại',
-      createdAt: '2026-09-28',
+      createdAt: '2026-09-28T18:45:00',
       gender: 'men',
       top: { piece: initialTop!, variant: initialTopVariant! },
       bottom: { piece: bottomTay || initialBottom!, variant: bottomTay || initialBottom! },
@@ -148,7 +148,7 @@ export function App() {
     {
       id: 'outfit-default-4',
       name: 'Hương Sắc Cố Đô',
-      createdAt: '2026-09-25',
+      createdAt: '2026-09-25T08:20:00',
       gender: 'women',
       top: { piece: topXanh, variant: topXanh },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
@@ -194,7 +194,7 @@ export function App() {
     const newSaved: SavedOutfit = {
       id: `outfit-${Date.now()}`,
       name: `${activeOutfit.topPiece.name} • ${activeOutfit.event.name}`,
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString(),
       gender: activeOutfit.mannequinGender,
       top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant || activeOutfit.topPiece },
       bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant || activeOutfit.bottomPiece },
@@ -219,7 +219,7 @@ export function App() {
     const tryOnOutfit: SavedOutfit = {
       id: `outfit-tryon-${Date.now()}`,
       name: `AI Try on: ${activeOutfit.topPiece.name}`,
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString(),
       gender: activeOutfit.mannequinGender,
       top: { piece: activeOutfit.topPiece, variant: activeOutfit.topVariant || activeOutfit.topPiece },
       bottom: { piece: activeOutfit.bottomPiece, variant: activeOutfit.bottomVariant || activeOutfit.bottomPiece },

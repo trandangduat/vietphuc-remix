@@ -7,11 +7,9 @@ import {
   Edit2,
   Check,
   X,
-  Maximize2,
   Calendar,
   Layers,
   Download,
-  Filter,
   ArrowRight,
   ShieldCheck,
   Plus,
@@ -44,11 +42,11 @@ const OutfitMannequinComposite: React.FC<{
           <img
             src={outfit.event.bgUrl}
             alt={outfit.event.name}
-            className={`w-full h-full object-cover filter blur-[0.5px] transition-transform duration-700 ${
-              isModal ? 'opacity-60' : 'opacity-50 group-hover:scale-105'
+            className={`w-full h-full object-cover transition-transform duration-700 ${
+              isModal ? 'opacity-95' : 'opacity-90 group-hover:scale-105'
             }`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
         </div>
       )}
 
@@ -152,34 +150,9 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   // Active view inside modal: '2d' or index of AI image
   const [activeMediaIndex, setActiveMediaIndex] = useState<number>(0);
 
-  // Filter state: 'all' | 'ai_only' | '2d_only'
-  const [mediaFilter, setMediaFilter] = useState<'all' | 'ai_only' | '2d_only'>('all');
-
-  // Event filter: 'all' or eventId
-  const [eventFilter, setEventFilter] = useState<string>('all');
-
   // Inline rename state in modal
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameText, setEditNameText] = useState('');
-
-  // Filtered outfits
-  const filteredOutfits = outfits.filter((outfit) => {
-    // Media filter
-    if (mediaFilter === 'ai_only' && !outfit.tryOnImage && (!outfit.tryOnImages || outfit.tryOnImages.length === 0)) {
-      return false;
-    }
-    if (mediaFilter === '2d_only' && (outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0))) {
-      return false;
-    }
-    // Event filter
-    if (eventFilter !== 'all' && outfit.event.id !== eventFilter) {
-      return false;
-    }
-    return true;
-  });
-
-  // Unique events from outfits for filtering
-  const availableEvents = Array.from(new Set(outfits.map((o) => o.event.name)));
 
   // Open detail modal for outfit
   const handleOpenDetail = (outfit: SavedOutfit) => {
@@ -234,18 +207,21 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
     return list;
   };
 
-  // Format relative or date string
-  const formatDisplayDate = (dateStr: string) => {
+  // Format creation date and time: DD/MM/YYYY • HH:mm
+  const formatCreationDateTime = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) return dateStr;
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays === 0) return 'Hôm nay';
-      if (diffDays === 1) return 'Hôm qua';
-      if (diffDays < 7) return `${diffDays} ngày trước`;
-      return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const day = date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const hasTime = dateStr.includes('T') || dateStr.includes(':');
+      const time = hasTime
+        ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+        : '09:00';
+      return `${day} • ${time}`;
     } catch {
       return dateStr;
     }
@@ -271,9 +247,9 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </div>
       )}
 
-      {/* 2. GALLERY HERO HEADER & MINIMAL EDITORIAL CONTROLS */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-6 sm:pt-8 pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-lacquer-border/60">
+      {/* 2. GALLERY HERO HEADER (No separator) */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-6 sm:pt-8 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-serif font-extrabold text-2xl sm:text-3xl text-silk-ivory tracking-tight">
               Bộ Sưu Tập Outfit
@@ -291,73 +267,11 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             </button>
           </div>
         </div>
-
-        {/* 3. MINIMAL 1-LINE FILTER PILLS */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-5">
-          {/* Source filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
-            <button
-              onClick={() => setMediaFilter('all')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                mediaFilter === 'all'
-                  ? 'bg-imperial-gold text-lacquer font-bold shadow-md'
-                  : 'bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
-              }`}
-            >
-              Tất cả ({outfits.length})
-            </button>
-
-            <button
-              onClick={() => setMediaFilter('ai_only')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                mediaFilter === 'ai_only'
-                  ? 'bg-imperial-gold text-lacquer font-bold shadow-md'
-                  : 'bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
-              }`}
-            >
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>Có ảnh AI</span>
-            </button>
-
-            <button
-              onClick={() => setMediaFilter('2d_only')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                mediaFilter === '2d_only'
-                  ? 'bg-imperial-gold text-lacquer font-bold shadow-md'
-                  : 'bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
-              }`}
-            >
-              Bản phối 2D
-            </button>
-          </div>
-
-          {/* Event filter pills */}
-          {availableEvents.length > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-silk-muted font-medium flex items-center gap-1">
-                <Filter className="w-3 h-3 text-imperial-gold" />
-                <span>Bối cảnh:</span>
-              </span>
-              <select
-                value={eventFilter}
-                onChange={(e) => setEventFilter(e.target.value)}
-                className="bg-lacquer-surface border border-lacquer-border text-xs text-silk-ivory px-3 py-1.5 rounded-full focus:outline-none focus:border-imperial-gold"
-              >
-                <option value="all">Tất cả bối cảnh</option>
-                {availableEvents.map((eventName) => (
-                  <option key={eventName} value={outfits.find((o) => o.event.name === eventName)?.event.id}>
-                    {eventName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* 4. GALLERY OUTFITS GRID (Full Width & Uniform 9:16 Ratio) */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
-        {filteredOutfits.length === 0 ? (
+      {/* 3. GALLERY OUTFITS GRID (Full Width, Uniform 9:16 Ratio, Compact Sizing) */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-3">
+        {outfits.length === 0 ? (
           /* Empty State */
           <div className="text-center py-24 p-8 rounded-2xl bg-lacquer-surface/40 border border-lacquer-border">
             <Layers className="w-16 h-16 text-silk-muted mx-auto mb-4 opacity-30" />
@@ -375,17 +289,16 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             </button>
           </div>
         ) : (
-          /* Responsive Grid with Uniform 9:16 Aspect Ratio Cards */
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5 sm:gap-6">
-            {filteredOutfits.map((outfit) => {
+          /* Responsive Grid with Compact Uniform 9:16 Cards (5-7 cards per row on larger screens) */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3.5 sm:gap-4.5">
+            {outfits.map((outfit) => {
               const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
-              const displayImage = outfit.tryOnImage || outfit.top.piece.assetUrl || (outfit.top.variant as Piece)?.assetUrl;
 
               return (
                 <div
                   key={outfit.id}
                   onClick={() => handleOpenDetail(outfit)}
-                  className="group relative rounded-2xl overflow-hidden border border-lacquer-border/80 hover:border-imperial-gold/70 bg-lacquer-surface shadow-lg hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-all duration-300 cursor-pointer"
+                  className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-lacquer-border/80 hover:border-imperial-gold/70 bg-lacquer-surface shadow-md hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-all duration-300 cursor-pointer"
                 >
                   {/* Photo Canvas Container with uniform 9:16 aspect ratio */}
                   <div className="relative w-full aspect-[9/16] overflow-hidden bg-lacquer-card">
@@ -397,50 +310,18 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                           alt={outfit.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                       </div>
                     ) : (
                       /* Full Mannequin Composite Stage */
                       <OutfitMannequinComposite outfit={outfit} />
                     )}
 
-                    {/* Top Badges: Event Pill & AI Badge */}
-                    <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-silk-ivory border border-white/10 shadow-sm">
-                        {outfit.event.name}
+                    {/* MINIMAL BOTTOM OVERLAY: Only Date and Time of Creation */}
+                    <div className="absolute bottom-0 inset-x-0 z-20 py-2 sm:py-2.5 px-2 bg-gradient-to-t from-black/80 via-black/35 to-transparent flex items-center justify-center text-center pointer-events-none">
+                      <span className="text-[10px] sm:text-[11px] text-silk-ivory/85 font-mono tracking-wider">
+                        {formatCreationDateTime(outfit.createdAt)}
                       </span>
-
-                      {hasAIImage && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-imperial-gold/25 backdrop-blur-md text-amber-300 border border-imperial-gold/50 flex items-center gap-1 shadow-sm">
-                          <Sparkles className="w-3 h-3 text-imperial-gold animate-pulse" />
-                          <span>AI Try-on</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* MINIMAL BOTTOM OVERLAY (Exactly like user's reference photo) */}
-                    <div className="absolute bottom-0 inset-x-0 z-20 p-3.5 sm:p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center justify-between gap-3">
-                      {/* Left: Minimal Author / Outfit Title & Date */}
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {/* Minimal avatar seal */}
-                        <div className="w-7 h-7 rounded-full bg-imperial-gold/20 border border-imperial-gold/50 flex items-center justify-center flex-shrink-0 text-[10px] font-serif font-bold text-imperial-gold">
-                          {isLoggedIn ? 'MA' : 'VP'}
-                        </div>
-
-                        <div className="min-w-0">
-                          <h4 className="font-serif font-bold text-xs sm:text-sm text-silk-ivory truncate group-hover:text-imperial-gold transition-colors">
-                            {outfit.name}
-                          </h4>
-                          <span className="text-[10px] text-silk-muted/90 block font-normal">
-                            {formatDisplayDate(outfit.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Right: Minimal Circular Expand Icon */}
-                      <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-imperial-gold text-silk-ivory group-hover:text-lacquer flex items-center justify-center flex-shrink-0 transition-all shadow-md">
-                        <Maximize2 className="w-3.5 h-3.5" />
-                      </div>
                     </div>
                   </div>
                 </div>
