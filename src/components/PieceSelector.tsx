@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Piece, PieceCategory, PieceVariant, StyleFilter, PresetOutfit } from '../types';
+import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
 import { Sparkles, X, Check, BookOpen, Layers, Ban } from 'lucide-react';
 
 interface PieceSelectorProps {
@@ -341,74 +341,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         )}
       </div>
 
-      {/* ACTIVE PIECE INSPECTOR BAR: Fixed at bottom of selection area (above AI Overview) */}
-      {activeCategory !== 'presets' && (
-        currentActivePiece ? (
-          <div className="border-t border-imperial-gold/30 bg-gradient-to-r from-lacquer-surface via-lacquer/95 to-lacquer-surface px-4 py-2.5 sm:px-5 flex-shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.4)] animate-fadeIn">
-            {/* Left: Active Piece Info & Provenance */}
-            <div className="flex items-center gap-3 min-w-0">
-              {/* Thumbnail with lacquer frame */}
-              <div className="w-11 h-11 rounded-none border border-imperial-gold/50 bg-lacquer p-1 flex items-center justify-center flex-shrink-0 shadow-inner group">
-                <img
-                  src={currentActivePiece.thumbnailUrl || currentActivePiece.assetUrl}
-                  alt={currentActivePiece.name}
-                  className="max-h-full max-w-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                />
-              </div>
 
-              {/* Title & Era Tag */}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-serif font-bold text-base sm:text-[17px] text-silk-ivory tracking-wide leading-tight truncate">
-                    {currentActivePiece.name}
-                  </h4>
-                  {/* Subtle era capsule */}
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/30 whitespace-nowrap">
-                    {currentActivePiece.culturalInfo.period.split('(')[0].trim()}
-                  </span>
-                </div>
-                <p className="text-[11px] text-silk-muted font-normal mt-0.5 truncate max-w-md">
-                  {currentActivePiece.culturalInfo.meaning}
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Color Tag & Actions */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="flex items-center gap-2 px-2.5 py-1 bg-lacquer/90 border border-imperial-gold/30 shadow-sm">
-                {currentActivePiece.swatchHex && (
-                  <span
-                    className="w-3.5 h-3.5 rounded-full border border-imperial-gold/60 inline-block shadow-sm flex-shrink-0"
-                    style={{ backgroundColor: currentActivePiece.swatchHex }}
-                  />
-                )}
-                <span className="text-xs font-serif font-medium text-imperial-gold tracking-wide whitespace-nowrap">
-                  {currentActivePiece.colorName}
-                </span>
-              </div>
-
-              {activeCategory === 'accessory' && (
-                <button
-                  onClick={onClearAccessory}
-                  className="text-[11px] text-silk-muted hover:text-imperial-red-bright hover:border-imperial-red/50 border border-lacquer-border px-2 py-1 font-medium transition-all"
-                  title="Bỏ chọn phụ kiện này"
-                >
-                  Bỏ phụ kiện
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="border-t border-lacquer-border/60 bg-lacquer-surface/40 px-5 py-2.5 flex-shrink-0 flex items-center justify-between text-xs text-silk-muted">
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-imperial-gold/40" />
-              <span>
-                Chưa chọn {activeCategory === 'top' ? 'áo' : activeCategory === 'bottom' ? 'quần / váy' : activeCategory === 'footwear' ? 'giày / dép' : 'phụ kiện'}. Nhấn vào một món đồ ở trên để mặc thử.
-              </span>
-            </span>
-          </div>
-        )
-      )}
 
       {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng */}
       {hoveredPiece && (
