@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, BookMarked, UserCheck, LogIn } from 'lucide-react';
+import { BookMarked, UserCheck, LogIn, ChevronRight } from 'lucide-react';
 
 interface NavbarProps {
   currentScreen: 'landing' | 'studio' | 'lookbook';
@@ -16,92 +16,100 @@ export const Navbar: React.FC<NavbarProps> = ({
   isLoggedIn,
   onToggleAuth,
 }) => {
+  const navItems = [
+    { id: 'landing' as const, label: 'Trang chủ' },
+    { id: 'studio' as const, label: 'Studio phối đồ' },
+    { id: 'lookbook' as const, label: 'Lookbook', count: sessionCount },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 bg-lacquer/95 backdrop-blur-md border-b-2 border-lacquer-border transition-all">
-      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <div 
+    <header className="sticky top-0 z-50 bg-lacquer/95 backdrop-blur-md border-b border-imperial-gold/20 shadow-lg transition-all font-sans select-none">
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        {/* Brand Identity: Haute Couture Maison Style */}
+        <div
           onClick={() => onNavigate('landing')}
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group py-1"
         >
-          <div className="w-10 h-10 rounded-none bg-gradient-to-br from-imperial-red to-lacquer border-2 border-imperial-gold flex items-center justify-center shadow-gold-glow group-hover:border-imperial-gold-light transition-all">
-            <span className="font-serif text-xl font-bold text-imperial-gold">VP</span>
+          {/* Imperial Vermilion & Gold Monogram Seal */}
+          <div className="w-8 h-8 rounded-none bg-gradient-to-br from-imperial-red/80 via-lacquer to-lacquer border border-imperial-gold flex items-center justify-center shadow-gold-glow group-hover:border-imperial-gold-light group-hover:scale-105 transition-all flex-shrink-0">
+            <span className="font-serif text-sm font-bold text-imperial-gold tracking-widest">VP</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="font-serif font-bold text-xl tracking-tight text-silk-ivory">Việt phục Remix</span>
-              <span className="text-xs uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-none bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/40 font-sans">
-                Atelier 2D
-              </span>
-            </div>
-            <p className="text-xs text-silk-muted hidden sm:block font-sans font-medium">Di sản cung đình gặp thời trang đương đại</p>
+
+          {/* Typographic Wordmark & Haute Atelier Tag */}
+          <div className="flex items-center gap-2">
+            <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-silk-ivory group-hover:text-imperial-gold transition-colors">
+              Việt phục Remix
+            </span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em] px-2 py-0.5 rounded-none bg-imperial-gold/10 text-imperial-gold border border-imperial-gold/30 hidden xs:inline-block">
+              Atelier 2D
+            </span>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <nav className="flex items-center gap-1.5 sm:gap-2 font-sans">
-          <button
-            onClick={() => onNavigate('landing')}
-            className={`px-3.5 py-2 rounded-none text-sm font-semibold transition-all border ${
-              currentScreen === 'landing'
-                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm font-bold'
-                : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
-            }`}
-          >
-            Trang chủ
-          </button>
+        {/* Center: Haute Couture Atelier Unified Nav Items */}
+        <nav className="h-full flex items-center gap-1 sm:gap-2 lg:gap-4">
+          {navItems.map((item) => {
+            const isActive = currentScreen === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`relative h-full px-2.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-all ${
+                  isActive
+                    ? 'text-imperial-gold font-semibold'
+                    : 'text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface/40'
+                }`}
+              >
+                <span>{item.label}</span>
 
-          <button
-            onClick={() => onNavigate('studio')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold transition-all border ${
-              currentScreen === 'studio'
-                ? 'bg-imperial-gold/20 text-imperial-gold border-imperial-gold shadow-sm font-bold'
-                : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
-            }`}
-          >
-            <Layers className="w-4 h-4 text-imperial-gold" />
-            <span>Studio phối đồ</span>
-          </button>
+                {/* Refined Count Pill for Lookbook */}
+                {item.count !== undefined && item.count > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 text-[10px] font-bold rounded-none transition-all ${
+                      isActive
+                        ? 'bg-imperial-gold text-lacquer shadow-sm font-extrabold'
+                        : 'bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/30'
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                )}
 
-          <button
-            onClick={() => onNavigate('lookbook')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold transition-all relative border ${
-              currentScreen === 'lookbook'
-                ? 'bg-lacquer-card text-imperial-gold border-imperial-gold/50 shadow-sm font-bold'
-                : 'border-transparent text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface'
-            }`}
-          >
-            <BookMarked className="w-4 h-4" />
-            <span>Lookbook</span>
-            {sessionCount > 0 && (
-              <span className="ml-1.5 px-2 py-0.5 text-xs font-bold rounded-none bg-imperial-red text-silk-ivory border border-imperial-red-bright">
-                {sessionCount}
-              </span>
-            )}
-          </button>
+                {/* Active Golden Hairline Indicator */}
+                {isActive && (
+                  <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-imperial-gold shadow-[0_0_10px_rgba(198,155,86,0.9)] animate-fadeIn" />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        {/* User Status / Auth Simulation */}
-        <div className="flex items-center gap-3 font-sans">
+        {/* Right: Atelier Member / Guest Profile (Lacquer & Gold Heritage Palette) */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={onToggleAuth}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-none text-sm font-semibold border transition-all ${
+            className={`flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-none text-xs sm:text-sm font-medium border transition-all ${
               isLoggedIn
-                ? 'bg-imperial-teal/30 text-teal-200 border-imperial-teal-light/60 hover:bg-imperial-teal/40'
-                : 'bg-lacquer-surface text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'
+                ? 'bg-lacquer-surface border-imperial-gold/50 text-silk-ivory hover:border-imperial-gold hover:bg-lacquer-hover'
+                : 'bg-lacquer-surface/70 border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
             }`}
-            title="Nhấn để đổi trạng thái Đăng nhập để kiểm tra phân quyền"
+            title="Nhấp để chuyển đổi trạng thái Đăng nhập / Khách để thử nghiệm"
           >
             {isLoggedIn ? (
               <>
-                <UserCheck className="w-4 h-4 text-teal-400" />
-                <span className="hidden sm:inline">Thành viên: Minh Anh</span>
-                <span className="sm:hidden">Đã login</span>
+                {/* Monogram Avatar Badge */}
+                <div className="w-5 h-5 rounded-none bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-[10px] font-serif font-bold">
+                  MA
+                </div>
+                <span className="hidden sm:inline font-medium text-silk-ivory">Minh Anh</span>
+                <span className="text-[10px] uppercase font-bold text-imperial-gold px-1.5 py-0.2 bg-imperial-gold/15 border border-imperial-gold/30 hidden md:inline">
+                  Thành viên
+                </span>
               </>
             ) : (
               <>
-                <LogIn className="w-4 h-4 text-imperial-gold" />
-                <span>Khách (Đăng nhập)</span>
+                <LogIn className="w-3.5 h-3.5 text-imperial-gold" />
+                <span className="text-silk-ivory">Đăng nhập</span>
               </>
             )}
           </button>
@@ -110,3 +118,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+export default Navbar;
