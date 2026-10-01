@@ -24,57 +24,51 @@ export const DEFAULT_PIECE_ALIGNMENT: PieceAlignment = {
 
 // Base calibrated defaults for production
 export const DEFAULT_PIECE_ALIGNMENTS: AlignmentMap = {
-  // Áo tấc (Tops)
-  'piece-ao-tac': {
-    x: 0,
-    y: 0,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1,
-    rotate: 0,
-  },
-  // Quần lụa trắng (Bottoms)
-  'piece-quan-lua': {
-    x: 0,
-    y: 0,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1,
-    rotate: 0,
-  },
-  // Quần tây ống côn (Bottoms)
-  'piece-quan-tay': {
-    x: 0,
-    y: 0,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1,
-    rotate: 0,
-  },
-  // Hài nhung thêu (Footwear)
-  'piece-hai-nhung': {
-    x: 0,
-    y: 0,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1,
-    rotate: 0,
-  },
-  // Giày Loafer (Footwear)
-  'piece-loafer': {
-    x: 0,
-    y: 0,
-    scale: 1,
-    scaleX: 1,
-    scaleY: 1,
-    rotate: 0,
-  },
-  // Nón lá (Accessories)
   'piece-non-la': {
     x: 0,
-    y: 0,
-    scale: 1,
+    y: -9.11,
+    scale: 0.85,
     scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
+  'piece-quan-tay': {
+    x: 0.24,
+    y: 18.93,
+    scale: 0.66,
+    scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
+  'piece-quan-lua': {
+    x: 0.48,
+    y: 20.54,
+    scale: 0.68,
+    scaleX: 1.02,
+    scaleY: 1,
+    rotate: -0.5,
+  },
+  'piece-hai-nhung': {
+    x: 0.48,
+    y: 11.61,
+    scale: 0.8,
+    scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
+  'piece-ao-tac': {
+    x: 0.24,
+    y: -0.53,
+    scale: 0.8,
+    scaleX: 1,
+    scaleY: 1,
+    rotate: 0,
+  },
+  'piece-loafer': {
+    x: 0.48,
+    y: 12.32,
+    scale: 0.84,
+    scaleX: 1.11,
     scaleY: 1,
     rotate: 0,
   },
@@ -128,6 +122,54 @@ export function savePieceAlignmentsToStorage(map: AlignmentMap): void {
     window.dispatchEvent(new CustomEvent('vietphuc_alignments_updated', { detail: map }));
   } catch (err) {
     console.error('Failed to save piece alignments:', err);
+  }
+}
+
+export interface SaveAlignmentsResult {
+  success: boolean;
+  savedToFile: boolean;
+  message: string;
+}
+
+/**
+ * Save alignment map to both localStorage and the codebase source file (in dev mode)
+ */
+export async function savePieceAlignments(map: AlignmentMap): Promise<SaveAlignmentsResult> {
+  // 1. Immediately save to localStorage for client responsiveness and offline fallback
+  savePieceAlignmentsToStorage(map);
+
+  // 2. In dev mode, write directly to src/data/pieceAlignments.ts via Vite dev server
+  try {
+    const res = await fetch('/api/dev/save-alignments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ alignments: map }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        success: true,
+        savedToFile: true,
+        message: data.message || 'Đã ghi trực tiếp vào src/data/pieceAlignments.ts!',
+      };
+    } else {
+      const data = await res.json().catch(() => ({}));
+      return {
+        success: true,
+        savedToFile: false,
+        message: data.message || 'Đã lưu vào bộ nhớ tạm trình duyệt (localStorage)',
+      };
+    }
+  } catch {
+    // Vite dev server endpoint not available (e.g. static production build)
+    return {
+      success: true,
+      savedToFile: false,
+      message: 'Đã lưu vào bộ nhớ tạm trình duyệt (localStorage)',
+    };
   }
 }
 

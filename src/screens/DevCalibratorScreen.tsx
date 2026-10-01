@@ -7,6 +7,7 @@ import {
   DEFAULT_PIECE_ALIGNMENT,
   getStoredPieceAlignments,
   savePieceAlignmentsToStorage,
+  savePieceAlignments,
   resetPieceAlignments,
   exportAlignmentsAsCode,
   getAlignmentStyle,
@@ -38,7 +39,11 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
   const [alignments, setAlignments] = useState<AlignmentMap>(() => getStoredPieceAlignments());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{
+    type: 'idle' | 'success_file' | 'success_local' | 'error';
+    message: string;
+  }>({ type: 'idle', message: '' });
 
   // Category filter for the pieces list
   const [categoryFilter, setCategoryFilter] = useState<PieceCategory | 'all'>('all');
@@ -164,12 +169,30 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentAlignment, pieceKey]);
 
-  // Save handler
-  const handleSave = () => {
-    savePieceAlignmentsToStorage(alignments);
-    setHasUnsavedChanges(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+  // Save handler - writes directly to file src/data/pieceAlignments.ts and updates localStorage
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const res = await savePieceAlignments(alignments);
+      setHasUnsavedChanges(false);
+      setSaveStatus({
+        type: res.savedToFile ? 'success_file' : 'success_local',
+        message: res.message,
+      });
+      setTimeout(() => {
+        setSaveStatus({ type: 'idle', message: '' });
+      }, 4000);
+    } catch (err: any) {
+      setSaveStatus({
+        type: 'error',
+        message: err?.message || 'Có lỗi xảy ra khi lưu!',
+      });
+      setTimeout(() => {
+        setSaveStatus({ type: 'idle', message: '' });
+      }, 4000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Copy code handler
@@ -257,19 +280,65 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
 
           <button
             onClick={handleSave}
+            disabled={isSaving}
             className={`px-4 py-1.5 text-sm font-bold transition-all flex items-center gap-1.5 shadow-lg ${
-              saveSuccess
+              saveStatus.type === 'success_file'
                 ? 'bg-emerald-600 text-white border-2 border-emerald-400'
+                : saveStatus.type === 'success_local'
+                ? 'bg-amber-600 text-white border-2 border-amber-400'
+                : isSaving
+                ? 'bg-imperial-gold/50 text-lacquer border-2 border-imperial-gold cursor-wait'
                 : hasUnsavedChanges
                 ? 'bg-imperial-gold text-lacquer border-2 border-imperial-gold hover:bg-imperial-gold-hover animate-pulse'
                 : 'bg-imperial-gold/20 text-imperial-gold border-2 border-imperial-gold/40 hover:bg-imperial-gold/30'
             }`}
+            title="Tự động ghi trực tiếp tọa độ căn chỉnh vào file code src/data/pieceAlignments.ts"
           >
-            {saveSuccess ? <Check className="w-4 h-4 stroke-[3]" /> : <Save className="w-4 h-4" />}
-            <span>{saveSuccess ? 'Đã lưu!' : 'Lưu cấu hình'}</span>
+            {isSaving ? (
+              <RotateCw className="w-4 h-4 animate-spin" />
+            ) : saveStatus.type === 'success_file' ? (
+              <Check className="w-4 h-4 stroke-[3]" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span>
+              {isSaving
+                ? 'Đang ghi file...'
+                : saveStatus.type === 'success_file'
+                ? 'Đã ghi vào file code!'
+                : saveStatus.type === 'success_local'
+                ? 'Đã lưu localStorage!'
+                : 'Lưu vào file code'}
+            </span>
           </button>
         </div>
       </header>
+
+      {/* Floating notification toast confirming file write */}
+      {saveStatus.type !== 'idle' && (
+        <div
+          className={`fixed top-16 right-6 z-50 px-4 py-2.5 shadow-2xl border flex items-center gap-2.5 backdrop-blur-md transition-all ${
+            saveStatus.type === 'success_file'
+              ? 'bg-emerald-950/95 text-emerald-200 border-emerald-500 shadow-emerald-950/50'
+              : saveStatus.type === 'success_local'
+              ? 'bg-amber-950/95 text-amber-200 border-amber-500 shadow-amber-950/50'
+              : 'bg-rose-950/95 text-rose-200 border-rose-500 shadow-rose-950/50'
+          }`}
+        >
+          {saveStatus.type === 'success_file' && <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />}
+          {saveStatus.type === 'success_local' && <Info className="w-4 h-4 text-amber-400" />}
+          <div className="flex flex-col">
+            <span className="text-xs font-bold uppercase tracking-wider">
+              {saveStatus.type === 'success_file'
+                ? '✓ Đã đồng bộ mã nguồn'
+                : saveStatus.type === 'success_local'
+                ? 'Thông báo'
+                : 'Lỗi'}
+            </span>
+            <span className="text-xs text-white/90">{saveStatus.message}</span>
+          </div>
+        </div>
+      )}
 
       {/* 3-Column Layout: [Piece Catalog List] | [Isolated 1-on-1 Canvas] | [Sliders & Fine-tuning] */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
