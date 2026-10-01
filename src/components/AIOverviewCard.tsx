@@ -17,6 +17,23 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
 
   // Compute cultural analysis with quantifiable scoring based on verified catalog rules
   const getAnalysis = (): AIOverviewResult => {
+    const hasAnyPiece = Boolean(outfit.topPiece || outfit.bottomPiece || outfit.footwearPiece || outfit.accessoryPiece);
+    if (!hasAnyPiece) {
+      return {
+        totalScore: 0,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 0, maxScore: 10, comment: 'Chưa có trang phục nào được chọn trên ma-nơ-canh.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 0, maxScore: 10, comment: 'Chọn trang phục để đánh giá độ phù hợp với sự kiện.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 0, maxScore: 10, comment: 'Chưa đủ dữ liệu trang phục để đối chiếu văn hóa.' },
+        },
+        colorHarmony: 'Chưa chọn trang phục',
+        eventFit: 'Chưa chọn trang phục',
+        culturalStatus: 'caution',
+        explanation: 'Ma-nơ-canh hiện chưa mặc trang phục nào. Hãy chọn Áo, Quần và Giày ở danh mục phía trên để hoàn tất bộ đồ và nhận đánh giá từ AI.',
+        source: 'Hệ thống tri thức văn hóa Việt phục Remix',
+      };
+    }
+
     const isAoTac = outfit.topPiece?.id === 'piece-ao-tac';
     const isQuanLua = outfit.bottomPiece?.id === 'piece-quan-lua';
     const isQuanTay = outfit.bottomPiece?.id === 'piece-quan-tay';
@@ -159,23 +176,31 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
           <h4 className="font-sans font-bold text-sm uppercase tracking-wider text-silk-ivory">
             AI Overview (Đánh giá văn hóa)
           </h4>
-          <span className="text-xs px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold font-extrabold border border-imperial-gold/40">
-            {analysis.totalScore} / 10
-          </span>
+          {analysis.totalScore > 0 ? (
+            <span className="text-xs px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold font-extrabold border border-imperial-gold/40">
+              {analysis.totalScore} / 10
+            </span>
+          ) : (
+            <span className="text-xs px-2 py-0.5 rounded-none bg-lacquer text-silk-muted font-medium border border-lacquer-border">
+              Chờ phối đồ
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2.5">
-          {analysis.culturalStatus === 'suitable' && (
+          {analysis.totalScore === 0 ? (
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-medium text-silk-muted border border-lacquer-border bg-lacquer/50">
+              Chưa chọn món nào
+            </span>
+          ) : analysis.culturalStatus === 'suitable' ? (
             <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-green-500/15 text-green-400 border border-green-500/40">
               <ShieldCheck className="w-3.5 h-3.5" /> Phù hợp
             </span>
-          )}
-          {analysis.culturalStatus === 'caution' && (
+          ) : analysis.culturalStatus === 'caution' ? (
             <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40">
               <AlertTriangle className="w-3.5 h-3.5" /> Cần lưu ý
             </span>
-          )}
-          {analysis.culturalStatus === 'not-recommended' && (
+          ) : (
             <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none text-xs font-bold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/40">
               <AlertCircle className="w-3.5 h-3.5" /> Chưa khuyến nghị
             </span>

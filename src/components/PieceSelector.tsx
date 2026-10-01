@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Piece, PieceCategory, PieceVariant, StyleFilter, PresetOutfit } from '../types';
-import { Sparkles, X, Check, BookOpen, Layers } from 'lucide-react';
+import { Sparkles, X, Check, BookOpen, Layers, Ban } from 'lucide-react';
 
 interface PieceSelectorProps {
   pieces: Piece[];
@@ -17,6 +17,7 @@ interface PieceSelectorProps {
   };
   onSelectVariant: (piece: Piece, variant: PieceVariant) => void;
   onClearAccessory: () => void;
+  onClearCategory: (category: PieceCategory) => void;
   onSelectPreset: (preset: PresetOutfit) => void;
 }
 
@@ -30,6 +31,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   selectedPieces,
   onSelectVariant,
   onClearAccessory,
+  onClearCategory,
   onSelectPreset,
 }) => {
   const [hoveredPiece, setHoveredPiece] = useState<Piece | null>(null);
@@ -239,8 +241,55 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
             ))}
           </div>
         ) : (
-          /* PURE VISUAL GALLERY: Only Piece Previews, perfectly uniform tiles, zero text clutter */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
+          /* PURE VISUAL GALLERY: Compact uniform tiles with Option 0: Không chọn gì cả */
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-5 gap-2.5">
+            {/* OPTION 0: Không chọn gì cả (Default selection) */}
+            <div
+              onClick={() => onClearCategory(activeCategory)}
+              className={`aspect-square w-full rounded-none border-2 transition-all flex flex-col items-center justify-center p-2 relative cursor-pointer group select-none ${
+                !currentActiveVariant
+                  ? 'bg-lacquer-surface border-imperial-gold shadow-lg ring-1 ring-imperial-gold/50'
+                  : 'bg-lacquer/80 border-lacquer-border hover:border-silk-muted/70 hover:bg-lacquer-surface/60'
+              }`}
+              title={`Không mặc ${
+                activeCategory === 'top'
+                  ? 'áo'
+                  : activeCategory === 'bottom'
+                  ? 'quần'
+                  : activeCategory === 'footwear'
+                  ? 'giày'
+                  : 'phụ kiện'
+              }`}
+            >
+              {/* Selection Indicator Corner Badge */}
+              {!currentActiveVariant && (
+                <div className="absolute top-1.5 right-1.5 z-10 w-4 h-4 bg-imperial-gold text-lacquer flex items-center justify-center shadow">
+                  <Check className="w-3 h-3 stroke-[3]" />
+                </div>
+              )}
+
+              <div className="flex flex-col items-center justify-center gap-1.5">
+                <div
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-dashed flex items-center justify-center transition-colors ${
+                    !currentActiveVariant
+                      ? 'border-imperial-gold text-imperial-gold bg-imperial-gold/10'
+                      : 'border-silk-muted/40 text-silk-muted group-hover:text-silk-ivory group-hover:border-silk-muted'
+                  }`}
+                >
+                  <Ban className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+                <span
+                  className={`text-[10px] sm:text-[11px] font-medium transition-colors text-center ${
+                    !currentActiveVariant
+                      ? 'text-imperial-gold font-semibold'
+                      : 'text-silk-muted group-hover:text-silk-ivory'
+                  }`}
+                >
+                  Không chọn
+                </span>
+              </div>
+            </div>
+
             {filteredPieces.map((piece) => {
               // Check if this piece is the one currently active in this category
               const isPieceActive = piece.variants.some((v) => v.variantId === currentActiveVariant?.variantId);
@@ -263,7 +312,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                   }}
                   onMouseMove={handleMouseMove}
                   onMouseLeave={() => setHoveredPiece(null)}
-                  className={`aspect-square w-full rounded-none border-2 transition-all flex items-center justify-center p-3 relative cursor-pointer group select-none ${
+                  className={`aspect-square w-full rounded-none border-2 transition-all flex items-center justify-center p-2 relative cursor-pointer group select-none ${
                     isPieceActive
                       ? 'bg-lacquer-surface border-imperial-gold shadow-lg ring-1 ring-imperial-gold/50'
                       : 'bg-lacquer/80 border-lacquer-border hover:border-silk-muted/70 hover:bg-lacquer-surface/60'
@@ -272,8 +321,8 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                 >
                   {/* Selection Indicator Corner Badge */}
                   {isPieceActive && (
-                    <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 bg-imperial-gold text-lacquer flex items-center justify-center shadow">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <div className="absolute top-1.5 right-1.5 z-10 w-4 h-4 bg-imperial-gold text-lacquer flex items-center justify-center shadow">
+                      <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   )}
 
@@ -291,75 +340,86 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       </div>
 
       {/* ACTIVE PIECE INSPECTOR BAR: Fixed at bottom of selection area (above AI Overview) */}
-      {activeCategory !== 'presets' && currentActivePiece && currentActiveVariant && (
-        <div className="border-t-2 border-imperial-gold/60 bg-lacquer-surface p-3 sm:p-4 flex-shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl animate-fadeIn">
-          {/* Left: Active Piece Info */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-none border border-imperial-gold/50 p-1 bg-lacquer flex items-center justify-center flex-shrink-0">
-              <img
-                src={currentActiveVariant.thumbnailUrl || currentActivePiece.thumbnailUrl || currentActiveVariant.assetUrl}
-                alt={currentActivePiece.name}
-                className="max-h-full max-w-full object-contain"
-              />
+      {activeCategory !== 'presets' && (
+        currentActivePiece && currentActiveVariant ? (
+          <div className="border-t-2 border-imperial-gold/60 bg-lacquer-surface p-3 sm:p-4 flex-shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl animate-fadeIn">
+            {/* Left: Active Piece Info */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-none border border-imperial-gold/50 p-1 bg-lacquer flex items-center justify-center flex-shrink-0">
+                <img
+                  src={currentActiveVariant.thumbnailUrl || currentActivePiece.thumbnailUrl || currentActiveVariant.assetUrl}
+                  alt={currentActivePiece.name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs uppercase font-bold tracking-wider px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                    Đang chọn
+                  </span>
+                  <h4 className="font-sans font-bold text-base text-silk-ivory">
+                    {currentActivePiece.name}
+                  </h4>
+                </div>
+                <p className="text-xs text-silk-muted font-medium mt-0.5">
+                  {currentActivePiece.culturalInfo.period.split('(')[0]}
+                </p>
+              </div>
             </div>
-            <div>
+
+            {/* Right: Color Swatches & Color Name */}
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-xs uppercase font-bold tracking-wider px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
-                  Đang chọn
-                </span>
-                <h4 className="font-sans font-bold text-base text-silk-ivory">
-                  {currentActivePiece.name}
-                </h4>
+                <span className="text-xs font-bold text-silk-muted uppercase tracking-wider">Màu:</span>
+                <div className="flex items-center gap-1.5">
+                  {currentActivePiece.variants.map((v) => {
+                    const isSelectedSwatch = currentActiveVariant.variantId === v.variantId;
+                    return (
+                      <button
+                        key={v.variantId}
+                        onClick={() => onSelectVariant(currentActivePiece, v)}
+                        className={`w-7 h-7 rounded-none border-2 transition-all relative flex items-center justify-center ${
+                          isSelectedSwatch
+                            ? 'border-imperial-gold ring-2 ring-imperial-gold/60 scale-110 shadow-sm'
+                            : 'border-lacquer-border hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: v.swatchHex }}
+                        title={v.colorName}
+                      >
+                        {isSelectedSwatch && (
+                          <Check className={`w-3.5 h-3.5 stroke-[3] ${v.swatchHex === '#F7F4EE' ? 'text-black' : 'text-white'}`} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <p className="text-xs text-silk-muted font-medium mt-0.5">
-                {currentActivePiece.culturalInfo.period.split('(')[0]}
-              </p>
+
+              <span className="text-sm font-semibold text-imperial-gold px-2.5 py-1 bg-lacquer border border-lacquer-border">
+                {currentActiveVariant.colorName}
+              </span>
+
+              {activeCategory === 'accessory' && (
+                <button
+                  onClick={onClearAccessory}
+                  className="text-xs text-imperial-red-bright hover:text-white hover:bg-imperial-red/20 border border-imperial-red/40 px-2 py-1 font-bold uppercase tracking-wider transition-all"
+                  title="Bỏ chọn phụ kiện này"
+                >
+                  Bỏ chọn
+                </button>
+              )}
             </div>
           </div>
-
-          {/* Right: Color Swatches & Color Name */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-silk-muted uppercase tracking-wider">Màu:</span>
-              <div className="flex items-center gap-1.5">
-                {currentActivePiece.variants.map((v) => {
-                  const isSelectedSwatch = currentActiveVariant.variantId === v.variantId;
-                  return (
-                    <button
-                      key={v.variantId}
-                      onClick={() => onSelectVariant(currentActivePiece, v)}
-                      className={`w-7 h-7 rounded-none border-2 transition-all relative flex items-center justify-center ${
-                        isSelectedSwatch
-                          ? 'border-imperial-gold ring-2 ring-imperial-gold/60 scale-110 shadow-sm'
-                          : 'border-lacquer-border hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: v.swatchHex }}
-                      title={v.colorName}
-                    >
-                      {isSelectedSwatch && (
-                        <Check className={`w-3.5 h-3.5 stroke-[3] ${v.swatchHex === '#F7F4EE' ? 'text-black' : 'text-white'}`} />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <span className="text-sm font-semibold text-imperial-gold px-2.5 py-1 bg-lacquer border border-lacquer-border">
-              {currentActiveVariant.colorName}
+        ) : (
+          <div className="border-t border-lacquer-border bg-lacquer-surface/60 px-4 py-2.5 flex-shrink-0 flex items-center justify-between text-xs text-silk-muted">
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-silk-muted/40" />
+              <span>
+                Chưa chọn {activeCategory === 'top' ? 'áo' : activeCategory === 'bottom' ? 'quần / váy' : activeCategory === 'footwear' ? 'giày / dép' : 'phụ kiện'}. Nhấn vào một món đồ ở trên để mặc thử.
+              </span>
             </span>
-
-            {activeCategory === 'accessory' && (
-              <button
-                onClick={onClearAccessory}
-                className="text-xs text-imperial-red-bright hover:text-white hover:bg-imperial-red/20 border border-imperial-red/40 px-2 py-1 font-bold uppercase tracking-wider transition-all"
-                title="Bỏ chọn phụ kiện này"
-              >
-                Bỏ chọn
-              </button>
-            )}
           </div>
-        </div>
+        )
       )}
 
       {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng */}

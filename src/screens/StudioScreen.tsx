@@ -74,14 +74,26 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
     });
   };
 
-  // Clear accessory
-  const handleClearAccessory = () => {
-    setOutfit((prev) => ({
-      ...prev,
-      accessoryPiece: undefined,
-      accessoryVariant: undefined,
-    }));
+  // Clear piece by category
+  const handleClearCategory = (category: PieceCategory) => {
+    setOutfit((prev) => {
+      switch (category) {
+        case 'top':
+          return { ...prev, topPiece: undefined, topVariant: undefined };
+        case 'bottom':
+          return { ...prev, bottomPiece: undefined, bottomVariant: undefined };
+        case 'footwear':
+          return { ...prev, footwearPiece: undefined, footwearVariant: undefined };
+        case 'accessory':
+          return { ...prev, accessoryPiece: undefined, accessoryVariant: undefined };
+        default:
+          return prev;
+      }
+    });
   };
+
+  // Clear accessory (shortcut)
+  const handleClearAccessory = () => handleClearCategory('accessory');
 
   // Load Preset Outfit
   const handleSelectPreset = (preset: PresetOutfit) => {
@@ -161,6 +173,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           }}
           onSelectVariant={handleSelectVariant}
           onClearAccessory={handleClearAccessory}
+          onClearCategory={handleClearCategory}
           onSelectPreset={handleSelectPreset}
         />
 

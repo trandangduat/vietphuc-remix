@@ -50,14 +50,14 @@ export function App() {
   const initialAccessoryVariant = initialAccessory?.variants[0];
 
   const [activeOutfit, setActiveOutfit] = useState<ActiveOutfitState>({
-    topPiece: initialTop,
-    topVariant: initialTopVariant,
-    bottomPiece: initialBottom,
-    bottomVariant: initialBottomVariant,
-    footwearPiece: initialFootwear,
-    footwearVariant: initialFootwearVariant,
-    accessoryPiece: initialAccessory,
-    accessoryVariant: initialAccessoryVariant,
+    topPiece: undefined,
+    topVariant: undefined,
+    bottomPiece: undefined,
+    bottomVariant: undefined,
+    footwearPiece: undefined,
+    footwearVariant: undefined,
+    accessoryPiece: undefined,
+    accessoryVariant: undefined,
     event: EVENTS[0],
     mannequinGender: 'women',
     styleFilter: 'all',
