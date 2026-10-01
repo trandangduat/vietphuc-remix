@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Shield, Upload, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { X, Sparkles, Shield, Upload } from 'lucide-react';
 import { ActiveOutfitState } from '../types';
 
 interface AITryOnModalProps {
@@ -35,42 +35,41 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
     // Simulate AI Image-to-Image / Inpainting generation
     setTimeout(() => {
       setIsGenerating(false);
-      // In this demo, composite result or high quality sample
       setGeneratedResult('/assets/test-composite-preview.png');
     }, 2000);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/85 backdrop-blur-md">
-      <div className="max-w-xl w-full bg-lacquer-card border border-imperial-gold/40 rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
+      <div className="max-w-xl w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all"
+          className="absolute top-4 right-4 p-2 rounded-none text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all border border-lacquer-border"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Title */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-2 rounded-xl bg-imperial-red/20 text-imperial-red-bright border border-imperial-red/30">
-            <Sparkles className="w-5 h-5" />
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2.5 rounded-none bg-imperial-red/20 text-imperial-red-bright border border-imperial-red/40">
+            <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-serif font-bold text-lg text-silk-ivory">
+            <h3 className="font-serif font-bold text-xl sm:text-2xl text-silk-ivory">
               Thử trang phục trên người thật (AI Try on)
             </h3>
-            <p className="text-xs text-silk-muted">
+            <p className="text-xs sm:text-sm text-silk-muted mt-0.5">
               Kết hợp chân dung của bạn + Outfit hiện tại + Nền {outfit.event.name}
             </p>
           </div>
         </div>
 
         {/* Privacy Notice Banner */}
-        <div className="my-4 p-3 rounded-xl bg-lacquer-surface border border-lacquer-border flex items-start gap-2.5 text-xs text-silk-muted">
-          <Shield className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5" />
+        <div className="my-4 p-3.5 rounded-none bg-lacquer-surface border-l-4 border-l-teal-400 border border-lacquer-border flex items-start gap-3 text-xs sm:text-sm text-silk-muted">
+          <Shield className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <span className="font-semibold text-silk-ivory">Cam kết bảo mật tuyệt đối: </span>
+            <span className="font-bold text-silk-ivory">Cam kết bảo mật tuyệt đối: </span>
             Ảnh gốc của bạn chỉ được xử lý tạm thời để tạo kết quả và bị xóa ngay lập tức. Không sử dụng hình ảnh của bạn để huấn luyện mô hình AI.
           </div>
         </div>
@@ -79,7 +78,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
           <div className="space-y-4">
             {/* Step 1: Choose / Upload Photo */}
             <div>
-              <label className="block text-xs font-semibold text-silk-ivory mb-2">
+              <label className="block text-xs sm:text-sm font-bold text-silk-ivory mb-2 uppercase tracking-wider">
                 1. Chọn ảnh chân dung của bạn hoặc ảnh mẫu:
               </label>
               <div className="grid grid-cols-2 gap-3 mb-3">
@@ -87,40 +86,40 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   <div
                     key={face.id}
                     onClick={() => setSelectedPhoto(face.url)}
-                    className={`p-2 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
+                    className={`p-3 rounded-none border-2 cursor-pointer transition-all flex items-center gap-3 ${
                       selectedPhoto === face.url
-                        ? 'border-imperial-gold bg-imperial-gold/10'
-                        : 'border-lacquer-border bg-lacquer-surface hover:border-lacquer-border/80'
+                        ? 'border-imperial-gold bg-imperial-gold/15'
+                        : 'border-lacquer-border bg-lacquer-surface hover:border-silk-muted/60'
                     }`}
                   >
                     <img
                       src={face.url}
                       alt={face.label}
-                      className="w-12 h-12 rounded-lg object-cover"
+                      className="w-12 h-12 rounded-none object-cover border border-lacquer-border"
                     />
-                    <span className="text-xs text-silk-ivory font-medium">{face.label}</span>
+                    <span className="text-xs sm:text-sm text-silk-ivory font-semibold">{face.label}</span>
                   </div>
                 ))}
               </div>
 
               {/* Upload trigger simulation */}
-              <div className="border border-dashed border-lacquer-border rounded-xl p-4 text-center hover:border-imperial-gold/50 cursor-pointer transition-all bg-lacquer-surface/40">
-                <Upload className="w-6 h-6 text-silk-muted mx-auto mb-1.5" />
-                <span className="text-xs text-silk-ivory font-medium block">Tải ảnh từ máy tính hoặc điện thoại</span>
-                <span className="text-[10px] text-silk-muted">Hỗ trợ JPG, PNG (tối đa 10MB)</span>
+              <div className="border-2 border-dashed border-lacquer-border rounded-none p-5 text-center hover:border-imperial-gold/60 cursor-pointer transition-all bg-lacquer-surface/40">
+                <Upload className="w-7 h-7 text-imperial-gold mx-auto mb-2" />
+                <span className="text-sm text-silk-ivory font-bold block">Tải ảnh từ máy tính hoặc điện thoại</span>
+                <span className="text-xs text-silk-muted mt-1 block">Hỗ trợ định dạng JPG, PNG (tối đa 10MB)</span>
               </div>
             </div>
 
             {/* Step 2: Parental Consent for Minors */}
-            <div className="p-3 rounded-xl bg-lacquer-surface/80 border border-lacquer-border">
-              <label className="flex items-start gap-2.5 cursor-pointer text-xs">
+            <div className="p-3.5 rounded-none bg-lacquer-surface border border-lacquer-border">
+              <label className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm">
                 <input
                   type="checkbox"
                   checked={isMinorConsent}
                   onChange={(e) => setIsMinorConsent(e.target.checked)}
-                  className="mt-0.5 rounded border-lacquer-border text-imperial-gold focus:ring-imperial-gold"
+                  className="mt-1 rounded-none border-lacquer-border text-imperial-gold focus:ring-imperial-gold w-4 h-4"
                 />
-                <span className="text-silk-muted leading-relaxed">
+                <span className="text-silk-muted leading-relaxed font-medium">
                   Đối với học sinh dưới 16 tuổi: Tôi xác nhận đã có sự đồng ý của cha mẹ hoặc người giám hộ hợp pháp khi tải ảnh chân dung lên ứng dụng.
                 </span>
               </label>
@@ -130,20 +129,20 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
             <button
               onClick={handleStartGeneration}
               disabled={!selectedPhoto || isGenerating}
-              className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-3.5 rounded-none font-bold text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 selectedPhoto && !isGenerating
-                  ? 'bg-gradient-to-r from-imperial-red to-imperial-red-bright text-white shadow-lg hover:brightness-110'
+                  ? 'bg-gradient-to-r from-imperial-red to-imperial-red-bright text-silk-ivory border border-imperial-red-bright hover:brightness-110'
                   : 'bg-lacquer-surface text-silk-muted border border-lacquer-border cursor-not-allowed opacity-60'
               }`}
             >
               {isGenerating ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>AI đang dệt trang phục lên ảnh thật...</span>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-none animate-spin" />
+                  <span>AI đang xử lý ghép trang phục lên ảnh thật...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-imperial-gold-light" />
+                  <Sparkles className="w-5 h-5 text-imperial-gold-light" />
                   <span>Tạo ảnh AI Try on ngay</span>
                 </>
               )}
@@ -152,26 +151,26 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
         ) : (
           /* Step 3: Generated Result View */
           <div className="space-y-4 text-center">
-            <div className="relative aspect-[3/4] max-w-[320px] mx-auto rounded-xl overflow-hidden border border-imperial-gold/50 shadow-2xl">
+            <div className="relative aspect-[3/4] max-w-[320px] mx-auto rounded-none overflow-hidden border-2 border-imperial-gold shadow-2xl">
               <img
                 src={generatedResult}
                 alt="AI Try-on result"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-lacquer/80 backdrop-blur-md border border-imperial-gold/40 text-[11px] font-semibold text-imperial-gold flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3" />
+              <div className="absolute top-3 left-3 px-3 py-1 rounded-none bg-lacquer/90 backdrop-blur-md border border-imperial-gold text-xs font-bold text-imperial-gold flex items-center gap-1.5 uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
                 <span>AI Generated Try-on</span>
               </div>
             </div>
 
-            <p className="text-xs text-silk-muted max-w-sm mx-auto">
+            <p className="text-xs sm:text-sm text-silk-muted max-w-sm mx-auto leading-relaxed">
               Bức ảnh mô phỏng hoàn tất! Ảnh này chỉ được lưu trữ lâu dài nếu bạn chọn "Lưu vào Lookbook".
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setGeneratedResult(null)}
-                className="py-2.5 px-4 rounded-xl bg-lacquer-surface border border-lacquer-border text-xs font-semibold text-silk-muted hover:text-silk-ivory"
+                className="py-3 px-4 rounded-none bg-lacquer-surface border border-lacquer-border text-xs sm:text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
               >
                 Thử lại ảnh khác
               </button>
@@ -180,7 +179,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   onSaveToLookbook(generatedResult);
                   onClose();
                 }}
-                className="py-2.5 px-4 rounded-xl bg-imperial-gold text-lacquer font-bold text-xs hover:bg-imperial-gold-light shadow-md"
+                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-xs sm:text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
               >
                 Lưu vào Lookbook
               </button>

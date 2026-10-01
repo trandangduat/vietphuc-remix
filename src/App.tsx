@@ -264,35 +264,35 @@ export function App() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 py-3 px-5 rounded-xl bg-lacquer-card border border-imperial-gold/50 shadow-2xl text-xs font-semibold text-silk-ivory flex items-center gap-2 animate-bounce">
-          <Sparkles className="w-4 h-4 text-imperial-gold" />
+        <div className="fixed bottom-6 right-6 z-50 py-3.5 px-6 rounded-none bg-lacquer-card border-2 border-imperial-gold shadow-2xl text-sm font-bold text-silk-ivory flex items-center gap-2.5 font-sans animate-bounce">
+          <Sparkles className="w-5 h-5 text-imperial-gold" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Session Migration Dialog (FR-02 & AC-08) */}
       {showMigrateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/85 backdrop-blur-md">
-          <div className="max-w-md w-full bg-lacquer-card border border-imperial-gold/40 rounded-2xl p-6 shadow-2xl text-center">
-            <div className="w-12 h-12 rounded-full bg-imperial-gold/20 text-imperial-gold flex items-center justify-center mx-auto mb-3">
-              <Sparkles className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
+          <div className="max-w-md w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-7 shadow-2xl text-center">
+            <div className="w-14 h-14 rounded-none bg-imperial-gold/20 text-imperial-gold flex items-center justify-center mx-auto mb-4 border border-imperial-gold/40">
+              <Sparkles className="w-7 h-7" />
             </div>
-            <h3 className="font-serif font-bold text-lg text-silk-ivory mb-2">
+            <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
               Đồng bộ trang phục vào Lookbook?
             </h3>
-            <p className="text-xs text-silk-muted leading-relaxed mb-6">
-              Bạn đang có <strong className="text-imperial-gold">{sessionOutfits.length} bộ trang phục</strong> đã phối trong phiên làm việc này. Bạn có muốn chuyển các bộ trang phục này vào Lookbook cá nhân vĩnh viễn không?
+            <p className="text-sm text-silk-muted leading-relaxed mb-6">
+              Bạn đang có <strong className="text-imperial-gold font-bold">{sessionOutfits.length} bộ trang phục</strong> đã phối trong phiên làm việc này. Bạn có muốn chuyển các bộ trang phục này vào Lookbook cá nhân vĩnh viễn không?
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleConfirmMigration(false)}
-                className="py-2.5 px-4 rounded-xl bg-lacquer-surface border border-lacquer-border text-xs font-semibold text-silk-muted hover:text-silk-ivory"
+                className="py-3 px-4 rounded-none bg-lacquer-surface border-2 border-lacquer-border text-xs sm:text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
               >
                 Bỏ qua
               </button>
               <button
                 onClick={() => handleConfirmMigration(true)}
-                className="py-2.5 px-4 rounded-xl bg-imperial-gold text-lacquer font-bold text-xs hover:bg-imperial-gold-light shadow-md"
+                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-xs sm:text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
               >
                 Đồng ý lưu vào Lookbook
               </button>

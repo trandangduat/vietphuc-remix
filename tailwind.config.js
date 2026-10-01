@@ -25,16 +25,27 @@ export default {
         },
         silk: {
           ivory: '#F7F4EE',
-          muted: '#8B94A0',
+          muted: '#9DA6B2',
           dark: '#484F58',
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Fraunces"', 'Georgia', 'serif'],
+        sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      borderRadius: {
+        none: '0px',
+        sm: '0px',
+        DEFAULT: '0px',
+        md: '0px',
+        lg: '0px',
+        xl: '0px',
+        '2xl': '0px',
+        '3xl': '0px',
+        full: '9999px',
       },
       boxShadow: {
-        'atrium': '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(198, 155, 86, 0.08)',
+        'atrium': '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(198, 155, 86, 0.1)',
         'gold-glow': '0 0 20px rgba(198, 155, 86, 0.25)',
       }
     },

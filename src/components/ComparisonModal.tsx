@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, ShieldCheck, AlertTriangle, AlertCircle } from 'lucide-react';
+import { X, ExternalLink, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { SavedOutfit } from '../types';
 
 interface ComparisonModalProps {
@@ -18,42 +18,42 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/85 backdrop-blur-md">
-      <div className="max-w-4xl w-full bg-lacquer-card border border-imperial-gold/40 rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
+      <div className="max-w-5xl w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all"
+          className="absolute top-4 right-4 p-2 rounded-none text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all border border-lacquer-border"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h3 className="font-serif font-bold text-lg text-silk-ivory mb-1">
+        <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-1">
           So sánh phương án phối đồ
         </h3>
-        <p className="text-xs text-silk-muted mb-4">
+        <p className="text-sm text-silk-muted mb-5">
           Đối chiếu trực quan {outfits.length} phương án đã chọn để tìm ra bộ trang phục ưng ý nhất
         </p>
 
         {/* Comparison Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto border-2 border-lacquer-border">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-lacquer-border">
-                <th className="py-3 px-3 text-silk-muted font-semibold w-32">Tiêu chí</th>
+              <tr className="border-b-2 border-lacquer-border bg-lacquer-surface">
+                <th className="py-3.5 px-4 text-silk-muted font-bold uppercase tracking-wider text-xs w-36">Tiêu chí</th>
                 {outfits.map((outfit) => (
-                  <th key={outfit.id} className="py-3 px-3 font-serif font-bold text-silk-ivory min-w-[200px]">
+                  <th key={outfit.id} className="py-3.5 px-4 font-sans font-bold text-silk-ivory min-w-[220px] text-base border-l border-lacquer-border">
                     {outfit.name}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-lacquer-border/50">
+            <tbody className="divide-y divide-lacquer-border">
               {/* Row 1: Visual Mockup */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Hình ảnh</td>
+                <td className="py-4 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Hình ảnh</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
-                    <div className="relative aspect-[3/4] w-28 rounded-lg overflow-hidden border border-lacquer-border shadow">
+                  <td key={outfit.id} className="py-4 px-4 border-l border-lacquer-border">
+                    <div className="relative aspect-[3/4] w-32 rounded-none overflow-hidden border-2 border-lacquer-border shadow">
                       <img
                         src={outfit.tryOnImage || outfit.top.variant.assetUrl}
                         alt={outfit.name}
@@ -66,9 +66,9 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 2: Event */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Bối cảnh (Event)</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Bối cảnh</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3 text-silk-ivory font-medium">
+                  <td key={outfit.id} className="py-3.5 px-4 text-silk-ivory font-semibold border-l border-lacquer-border">
                     {outfit.event.name}
                   </td>
                 ))}
@@ -76,42 +76,42 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 3: Top */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Áo</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Áo</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
-                    <span className="text-silk-ivory font-medium block">{outfit.top.piece.name}</span>
-                    <span className="text-[11px] text-silk-muted">{outfit.top.variant.colorName}</span>
+                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
+                    <span className="text-silk-ivory font-bold block">{outfit.top.piece.name}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.top.variant.colorName}</span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 4: Bottom */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Quần / Chân váy</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Quần / Váy</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
-                    <span className="text-silk-ivory font-medium block">{outfit.bottom.piece.name}</span>
-                    <span className="text-[11px] text-silk-muted">{outfit.bottom.variant.colorName}</span>
+                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
+                    <span className="text-silk-ivory font-bold block">{outfit.bottom.piece.name}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.bottom.variant.colorName}</span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 5: Footwear */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Giày / Dép</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Giày / Dép</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
-                    <span className="text-silk-ivory font-medium block">{outfit.footwear.piece.name}</span>
-                    <span className="text-[11px] text-silk-muted">{outfit.footwear.variant.colorName}</span>
+                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
+                    <span className="text-silk-ivory font-bold block">{outfit.footwear.piece.name}</span>
+                    <span className="text-xs text-silk-muted font-medium">{outfit.footwear.variant.colorName}</span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 6: Accessory */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Phụ kiện</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Phụ kiện</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3 text-silk-ivory">
+                  <td key={outfit.id} className="py-3.5 px-4 text-silk-ivory font-semibold border-l border-lacquer-border">
                     {outfit.accessory ? outfit.accessory.piece.name : <span className="text-silk-muted">Không chọn</span>}
                   </td>
                 ))}
@@ -119,27 +119,27 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 7: AI Overview Culture */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Đánh giá AI</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Đánh giá AI</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
+                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
                     {outfit.aiAnalysis ? (
                       <div>
                         {outfit.aiAnalysis.culturalStatus === 'suitable' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-400 mb-1">
-                            <ShieldCheck className="w-3 h-3" /> Phù hợp
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-green-400 mb-1.5 uppercase tracking-wider">
+                            <ShieldCheck className="w-4 h-4" /> Phù hợp
                           </span>
                         )}
                         {outfit.aiAnalysis.culturalStatus === 'caution' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 mb-1">
-                            <AlertTriangle className="w-3 h-3" /> Cần lưu ý
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wider">
+                            <AlertTriangle className="w-4 h-4" /> Cần lưu ý
                           </span>
                         )}
-                        <p className="text-[11px] text-silk-muted leading-relaxed line-clamp-3">
+                        <p className="text-xs text-silk-muted leading-relaxed line-clamp-3">
                           {outfit.aiAnalysis.explanation}
                         </p>
                       </div>
                     ) : (
-                      <span className="text-silk-muted text-[11px]">Chưa phân tích</span>
+                      <span className="text-silk-muted text-xs">Chưa phân tích</span>
                     )}
                   </td>
                 ))}
@@ -147,17 +147,17 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 8: Action */}
               <tr>
-                <td className="py-3 px-3 text-silk-muted font-medium">Thao tác</td>
+                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Thao tác</td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3 px-3">
+                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
                     <button
                       onClick={() => {
                         onLoadOutfitIntoStudio(outfit);
                         onClose();
                       }}
-                      className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-imperial-gold/20 text-imperial-gold hover:bg-imperial-gold hover:text-lacquer border border-imperial-gold/40 text-xs font-semibold transition-all"
+                      className="flex items-center gap-2 py-2 px-4 rounded-none bg-imperial-gold text-lacquer hover:bg-imperial-gold-light text-xs font-bold transition-all uppercase tracking-wider"
                     >
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                       <span>Mở trong Studio</span>
                     </button>
                   </td>

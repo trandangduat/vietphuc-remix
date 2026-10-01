@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Download, Sparkles, Heart, CheckCircle2, AlertCircle, ChevronDown, Plus } from 'lucide-react';
 import { ActiveOutfitState, EventBackground, GenderSelection } from '../types';
 
@@ -75,11 +75,14 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
       }
 
       // Watermark / signature
-      ctx.fillStyle = 'rgba(10, 13, 18, 0.75)';
-      ctx.fillRect(20, canvas.height - 65, 340, 45);
+      ctx.fillStyle = 'rgba(10, 13, 18, 0.85)';
+      ctx.fillRect(20, canvas.height - 70, 360, 50);
+      ctx.strokeStyle = '#C69B56';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, canvas.height - 70, 360, 50);
       ctx.fillStyle = '#C69B56';
-      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('Việt phục Remix — Atelier 2D', 35, canvas.height - 36);
+      ctx.font = 'bold 18px "Inter", sans-serif';
+      ctx.fillText('Việt phục Remix — Atelier 2D', 35, canvas.height - 38);
 
       const link = document.createElement('a');
       link.download = `vietphuc-remix-${Date.now()}.png`;
@@ -96,7 +99,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[500px] lg:min-h-0 bg-lacquer-surface flex items-center justify-center overflow-hidden select-none">
+    <div className="relative w-full h-full min-h-[500px] lg:min-h-0 bg-lacquer-surface flex items-center justify-center overflow-hidden select-none font-sans">
       {/* Layer 0: Full-bleed Event Background */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
@@ -106,7 +109,6 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         />
         {/* Cinematic Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-lacquer via-transparent to-lacquer/60 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-vignette opacity-50 pointer-events-none" />
       </div>
 
       {/* Layer 1 - 5: Scaled 3:4 Mannequin & Clothes Composite Stage */}
@@ -165,17 +167,17 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         )}
       </div>
 
-      {/* TOP OVERLAY CONTROLS (Directly on canvas background) */}
+      {/* TOP OVERLAY CONTROLS (Square, large text, vintage border) */}
       <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between gap-3 pointer-events-auto flex-wrap">
-        {/* Left Side: Mannequin Gender Switcher + Event Dropdown (Wireframe SCR-02) */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Gender Pill Toggle */}
-          <div className="flex items-center p-1 rounded-xl bg-lacquer/85 backdrop-blur-md border border-lacquer-border/80 shadow-lg">
+        {/* Left Side: Mannequin Gender Switcher + Event Dropdown */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Gender Square Toggle */}
+          <div className="flex items-center p-1 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border shadow-lg">
             <button
               onClick={() => onSelectGender('men')}
-              className={`py-1.5 px-3.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`py-2 px-4 rounded-none text-xs sm:text-sm font-bold transition-all ${
                 outfit.mannequinGender === 'men'
-                  ? 'bg-imperial-gold text-lacquer shadow-sm font-bold'
+                  ? 'bg-imperial-gold text-lacquer shadow-sm font-extrabold'
                   : 'text-silk-muted hover:text-silk-ivory'
               }`}
             >
@@ -183,9 +185,9 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
             </button>
             <button
               onClick={() => onSelectGender('women')}
-              className={`py-1.5 px-3.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`py-2 px-4 rounded-none text-xs sm:text-sm font-bold transition-all ${
                 outfit.mannequinGender === 'women'
-                  ? 'bg-rose-300 text-lacquer shadow-sm font-bold'
+                  ? 'bg-rose-300 text-lacquer shadow-sm font-extrabold'
                   : 'text-silk-muted hover:text-silk-ivory'
               }`}
             >
@@ -197,17 +199,17 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           <div className="relative">
             <button
               onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-              className="flex items-center gap-2 py-1.5 px-3.5 rounded-xl bg-lacquer/85 backdrop-blur-md border border-lacquer-border/80 text-xs font-semibold text-silk-ivory hover:border-imperial-gold/50 shadow-lg transition-all"
+              className="flex items-center gap-2.5 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border text-xs sm:text-sm font-bold text-silk-ivory hover:border-imperial-gold/60 shadow-lg transition-all"
             >
-              <span className="w-2 h-2 rounded-full bg-imperial-gold animate-pulse" />
-              <span>{outfit.event.name}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-silk-muted transition-transform ${isEventDropdownOpen ? 'rotate-180' : ''}`} />
+              <span className="w-2.5 h-2.5 rounded-none bg-imperial-gold" />
+              <span>Bối cảnh: {outfit.event.name}</span>
+              <ChevronDown className={`w-4 h-4 text-silk-muted transition-transform ${isEventDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
             {isEventDropdownOpen && (
-              <div className="absolute left-0 mt-2 w-56 rounded-xl bg-lacquer/95 backdrop-blur-xl border border-imperial-gold/40 shadow-2xl p-1.5 z-50 animate-fadeIn">
-                <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-silk-muted border-b border-lacquer-border/60 mb-1">
+              <div className="absolute left-0 mt-1 w-64 rounded-none bg-lacquer/95 backdrop-blur-xl border-2 border-imperial-gold/60 shadow-2xl p-2 z-50 animate-fadeIn">
+                <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-silk-muted border-b border-lacquer-border mb-1">
                   Chọn bối cảnh sự kiện
                 </div>
                 {allEvents.map((evt) => (
@@ -217,26 +219,26 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
                       onSelectEvent(evt);
                       setIsEventDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-between ${
+                    className={`w-full text-left px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-semibold transition-all flex items-center justify-between ${
                       outfit.event.id === evt.id
-                        ? 'bg-imperial-gold/20 text-imperial-gold font-bold'
+                        ? 'bg-imperial-gold/20 text-imperial-gold font-bold border-l-2 border-imperial-gold'
                         : 'text-silk-ivory hover:bg-lacquer-surface'
                     }`}
                   >
                     <span>{evt.name}</span>
-                    {outfit.event.id === evt.id && <span className="w-1.5 h-1.5 rounded-full bg-imperial-gold" />}
+                    {outfit.event.id === evt.id && <span className="w-2 h-2 rounded-none bg-imperial-gold" />}
                   </button>
                 ))}
 
-                <div className="pt-1 mt-1 border-t border-lacquer-border/60">
+                <div className="pt-2 mt-1 border-t border-lacquer-border">
                   <button
                     onClick={() => {
                       setIsEventDropdownOpen(false);
                       onOpenCustomEventModal();
                     }}
-                    className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
+                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-none text-xs sm:text-sm font-bold text-imperial-gold hover:bg-imperial-gold/15 transition-all"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-4 h-4" />
                     <span>+ Tạo Event AI mới</span>
                   </button>
                 </div>
@@ -249,13 +251,13 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         <button
           onClick={handleDownloadMockup}
           disabled={isExporting}
-          className="flex items-center gap-2 py-1.5 px-3.5 rounded-xl bg-lacquer/85 backdrop-blur-md border border-lacquer-border/80 text-silk-ivory hover:text-imperial-gold hover:border-imperial-gold/50 shadow-lg text-xs font-medium transition-all group"
+          className="flex items-center gap-2 py-2 px-4 rounded-none bg-lacquer/90 backdrop-blur-md border border-lacquer-border text-silk-ivory hover:text-imperial-gold hover:border-imperial-gold/60 shadow-lg text-xs sm:text-sm font-bold transition-all group"
           title="Tải ảnh kết quả phối đồ 2D (PNG)"
         >
           {downloadSuccess ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 font-semibold">Đã tải ảnh!</span>
+              <span className="text-green-400 font-bold">Đã tải ảnh!</span>
             </>
           ) : (
             <>
@@ -266,37 +268,37 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         </button>
       </div>
 
-      {/* BOTTOM OVERLAY HUD (Directly on canvas background) */}
-      <div className="absolute bottom-4 inset-x-4 z-40 flex flex-col gap-2.5 pointer-events-auto max-w-xl mx-auto w-[calc(100%-2rem)]">
+      {/* BOTTOM OVERLAY HUD (Square, large text, high contrast) */}
+      <div className="absolute bottom-4 inset-x-4 z-40 flex flex-col gap-3 pointer-events-auto max-w-xl mx-auto w-[calc(100%-2rem)]">
         {/* Floating Outfit Pieces Status Badge Bar */}
-        <div className="p-2.5 sm:p-3 rounded-xl bg-lacquer/85 backdrop-blur-md border border-lacquer-border/80 shadow-2xl text-xs">
-          <div className="flex items-center justify-between text-[11px] text-silk-muted mb-1.5">
-            <span className="font-semibold text-silk-ivory">Trang phục đang thử:</span>
-            <span className={canTryOn ? 'text-green-400 font-semibold flex items-center gap-1' : 'text-amber-400 font-medium flex items-center gap-1'}>
+        <div className="p-3 sm:p-4 rounded-none bg-lacquer/90 backdrop-blur-md border-2 border-lacquer-border shadow-2xl">
+          <div className="flex items-center justify-between text-xs sm:text-sm text-silk-muted mb-2">
+            <span className="font-bold text-silk-ivory uppercase tracking-wider text-xs">Trang phục đang thử:</span>
+            <span className={canTryOn ? 'text-green-400 font-bold flex items-center gap-1.5' : 'text-amber-400 font-semibold flex items-center gap-1.5'}>
               {canTryOn ? (
                 <>
-                  <CheckCircle2 className="w-3 h-3" /> Đủ 3 món bắt buộc
+                  <CheckCircle2 className="w-4 h-4" /> Đủ 3 món bắt buộc
                 </>
               ) : (
                 <>
-                  <AlertCircle className="w-3 h-3" /> Cần chọn đủ Áo, Quần, Giày
+                  <AlertCircle className="w-4 h-4" /> Cần đủ Áo, Quần, Giày
                 </>
               )}
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${outfit.topVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/40' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
+          <div className="flex flex-wrap gap-2">
+            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.topVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
               Áo: {outfit.topVariant ? outfit.topVariant.colorName : 'Chưa chọn'}
             </span>
-            <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${outfit.bottomVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/40' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
+            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.bottomVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
               Quần: {outfit.bottomVariant ? outfit.bottomVariant.colorName : 'Chưa chọn'}
             </span>
-            <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${outfit.footwearVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/40' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
+            <span className={`px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border ${outfit.footwearVariant ? 'bg-imperial-gold/15 text-imperial-gold border-imperial-gold/50' : 'bg-lacquer-surface text-silk-muted border-lacquer-border'}`}>
               Giày: {outfit.footwearVariant ? outfit.footwearVariant.colorName : 'Chưa chọn'}
             </span>
             {outfit.accessoryVariant && (
-              <span className="px-2 py-0.5 rounded text-[11px] font-medium border bg-imperial-teal/20 text-teal-300 border-imperial-teal/40">
+              <span className="px-2.5 py-1 rounded-none text-xs sm:text-sm font-semibold border bg-imperial-teal/20 text-teal-300 border-imperial-teal/50">
                 Phụ kiện: {outfit.accessoryPiece?.name}
               </span>
             )}
@@ -304,14 +306,14 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         </div>
 
         {/* Action Buttons Directly Overlaid on Canvas Stage (Wireframe [Try on] [SAVE OUTFIT]) */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onTryOn}
             disabled={!canTryOn}
-            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all shadow-xl ${
+            className={`flex items-center justify-center gap-2 py-3.5 px-5 rounded-none font-bold text-sm sm:text-base tracking-wider transition-all shadow-xl uppercase ${
               canTryOn
-                ? 'bg-gradient-to-r from-imperial-red via-cinnabar to-imperial-red-bright text-white hover:brightness-110 shadow-imperial-red/40 active:scale-[0.98]'
-                : 'bg-lacquer/80 backdrop-blur-md text-silk-muted border border-lacquer-border cursor-not-allowed opacity-50'
+                ? 'bg-gradient-to-r from-imperial-red via-cinnabar to-imperial-red-bright text-silk-ivory hover:brightness-110 shadow-imperial-red/40 border border-imperial-red-bright active:scale-[0.99]'
+                : 'bg-lacquer/85 backdrop-blur-md text-silk-muted border border-lacquer-border cursor-not-allowed opacity-50'
             }`}
           >
             <Sparkles className="w-4 h-4 text-imperial-gold-light" />
@@ -321,10 +323,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           <button
             onClick={onSaveOutfit}
             disabled={!canTryOn}
-            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all border shadow-xl ${
+            className={`flex items-center justify-center gap-2 py-3.5 px-5 rounded-none font-bold text-sm sm:text-base tracking-wider transition-all border-2 shadow-xl uppercase ${
               canTryOn
-                ? 'bg-imperial-gold hover:bg-imperial-gold-light text-lacquer border-imperial-gold shadow-imperial-gold/20 active:scale-[0.98]'
-                : 'bg-lacquer/80 backdrop-blur-md text-silk-muted border-lacquer-border cursor-not-allowed opacity-50'
+                ? 'bg-imperial-gold hover:bg-imperial-gold-light text-lacquer border-imperial-gold shadow-imperial-gold/20 active:scale-[0.99]'
+                : 'bg-lacquer/85 backdrop-blur-md text-silk-muted border-lacquer-border cursor-not-allowed opacity-50'
             }`}
           >
             <Heart className="w-4 h-4 fill-current" />

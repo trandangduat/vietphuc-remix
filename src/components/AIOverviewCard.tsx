@@ -59,24 +59,24 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
 
   if (!isLoggedIn) {
     return (
-      <div className="border-t border-lacquer-border bg-lacquer-surface/90 backdrop-blur-md p-4 sm:p-5 flex-shrink-0 text-center relative overflow-hidden">
-        <div className="flex items-center justify-between mb-2">
+      <div className="border-t-2 border-lacquer-border bg-lacquer-surface/95 backdrop-blur-md p-4 sm:p-5 flex-shrink-0 text-center relative overflow-hidden font-sans">
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-imperial-gold" />
-            <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-silk-ivory">
+            <h4 className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-silk-ivory">
               AI Overview (Cố vấn Văn hóa)
             </h4>
           </div>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-imperial-gold/15 text-imperial-gold font-semibold border border-imperial-gold/30">
+          <span className="text-xs px-2.5 py-1 rounded-none bg-imperial-gold/20 text-imperial-gold font-bold border border-imperial-gold/40 uppercase">
             Khóa tính năng
           </span>
         </div>
-        <p className="text-xs text-silk-muted mb-3 leading-relaxed">
-          Đăng nhập để nhận đánh giá chi tiết về sự hài hòa màu sắc, tính trang trọng với bối cảnh và chuẩn mực lễ nghi trích xuất từ bảo tàng.
+        <p className="text-xs sm:text-sm text-silk-muted mb-3.5 leading-relaxed max-w-lg mx-auto">
+          Đăng nhập để nhận đánh giá chi tiết về độ hài hòa màu sắc, tính trang trọng với bối cảnh và chuẩn mực lễ nghi trích xuất từ bảo tàng.
         </p>
         <button
           onClick={onLoginPrompt}
-          className="py-1.5 px-5 rounded-lg bg-imperial-gold text-lacquer font-bold text-xs hover:bg-imperial-gold-light transition-all shadow-md"
+          className="py-2.5 px-6 rounded-none bg-imperial-gold text-lacquer font-bold text-xs sm:text-sm hover:bg-imperial-gold-light transition-all shadow-md uppercase tracking-wider"
         >
           Đăng nhập ngay
         </button>
@@ -85,63 +85,63 @@ export const AIOverviewCard: React.FC<AIOverviewCardProps> = ({
   }
 
   return (
-    <div className="border-t border-lacquer-border bg-lacquer-surface/95 backdrop-blur-md p-4 sm:p-5 flex-shrink-0 relative overflow-hidden">
+    <div className="border-t-2 border-lacquer-border bg-lacquer-surface/95 backdrop-blur-md p-4 sm:p-5 flex-shrink-0 relative overflow-hidden font-sans">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-lacquer-border/60">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between pb-3 mb-3 border-b border-lacquer-border">
+        <div className="flex items-center gap-2.5">
           <Sparkles className="w-4 h-4 text-imperial-gold" />
-          <h4 className="font-serif font-bold text-sm text-silk-ivory">
+          <h4 className="font-sans font-bold text-sm sm:text-base text-silk-ivory uppercase tracking-wider">
             AI Overview (Đánh giá văn hóa)
           </h4>
         </div>
 
         {/* Status Badge */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {analysis.culturalStatus === 'suitable' && (
-            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-green-500/15 text-green-400 border border-green-500/30">
-              <ShieldCheck className="w-3 h-3" /> Phù hợp
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider bg-green-500/15 text-green-400 border border-green-500/40">
+              <ShieldCheck className="w-3.5 h-3.5" /> Phù hợp
             </span>
           )}
           {analysis.culturalStatus === 'caution' && (
-            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-              <AlertTriangle className="w-3 h-3" /> Cần lưu ý
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/40">
+              <AlertTriangle className="w-3.5 h-3.5" /> Cần lưu ý
             </span>
           )}
           {analysis.culturalStatus === 'not-recommended' && (
-            <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
-              <AlertCircle className="w-3 h-3" /> Chưa khuyến nghị
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-none text-xs font-bold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/40">
+              <AlertCircle className="w-3.5 h-3.5" /> Chưa khuyến nghị
             </span>
           )}
         </div>
       </div>
 
       {/* Analysis Details */}
-      <div className="space-y-2 text-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="p-2 rounded-lg bg-lacquer/60 border border-lacquer-border/50">
-            <span className="font-semibold text-silk-muted block text-[10px] uppercase">Hài hòa màu sắc:</span>
-            <p className="text-silk-ivory font-medium mt-0.5 truncate" title={analysis.colorHarmony}>
+      <div className="space-y-2.5 text-xs sm:text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
+            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Hài hòa màu sắc:</span>
+            <p className="text-silk-ivory font-semibold mt-1">
               {analysis.colorHarmony}
             </p>
           </div>
 
-          <div className="p-2 rounded-lg bg-lacquer/60 border border-lacquer-border/50">
-            <span className="font-semibold text-silk-muted block text-[10px] uppercase">Phù hợp sự kiện:</span>
-            <p className="text-silk-ivory font-medium mt-0.5 truncate" title={analysis.eventFit}>
+          <div className="p-2.5 rounded-none bg-lacquer border border-lacquer-border">
+            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Phù hợp sự kiện:</span>
+            <p className="text-silk-ivory font-semibold mt-1">
               {analysis.eventFit}
             </p>
           </div>
         </div>
 
-        <div className="p-2.5 rounded-lg bg-lacquer/40 border border-lacquer-border/40 text-silk-muted leading-relaxed">
-          <p className="text-silk-ivory/90">{analysis.explanation}</p>
+        <div className="p-3 rounded-none bg-lacquer/60 border border-lacquer-border text-silk-muted leading-relaxed">
+          <p className="text-silk-ivory font-medium leading-relaxed">{analysis.explanation}</p>
           {analysis.suggestion && (
-            <p className="mt-1 text-imperial-gold font-medium">💡 Gợi ý: {analysis.suggestion}</p>
+            <p className="mt-2 text-imperial-gold font-bold">💡 Gợi ý: {analysis.suggestion}</p>
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-[11px] text-silk-muted pt-1">
-          <BookCheck className="w-3.5 h-3.5 text-imperial-gold flex-shrink-0" />
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-silk-muted pt-1 font-medium">
+          <BookCheck className="w-4 h-4 text-imperial-gold flex-shrink-0" />
           <span className="truncate">Nguồn kiểm chứng: {analysis.source}</span>
         </div>
       </div>
