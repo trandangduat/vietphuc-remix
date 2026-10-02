@@ -38,56 +38,82 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   onSelectPreset,
 }) => {
   const [hoveredPiece, setHoveredPiece] = useState<Piece | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const posRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const rafIdRef = useRef<number | null>(null);
+  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Helper to calculate bounded coordinates within viewport
+  const calculateTooltipCoords = (clientX: number, clientY: number) => {
+    const offset = 18;
+    const tooltipWidth = 350;
+    const tooltipHeight = 360;
+
+    let x = clientX + offset;
+    let y = clientY + offset;
+
+    // Boundary flip: right edge
+    if (x + tooltipWidth > window.innerWidth - 12) {
+      x = clientX - tooltipWidth - 12;
+    }
+    if (x < 10) x = 10;
+
+    // Boundary flip: bottom edge
+    if (y + tooltipHeight > window.innerHeight - 12) {
+      y = clientY - tooltipHeight - 12;
+    }
+    if (y < 10) y = 10;
+
+    return { x, y };
+  };
 
   useEffect(() => {
     return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
+      if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
+      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
     };
   }, []);
 
   const handleMouseEnterPiece = useCallback((piece: Piece, e: React.MouseEvent<HTMLDivElement>) => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
     }
-    const target = e.currentTarget;
-    hoverTimeoutRef.current = setTimeout(() => {
-      const rect = target.getBoundingClientRect();
-      const tooltipWidth = 350;
-      const tooltipHeight = 360;
 
-      let x = rect.right + 12;
-      // If overflowing right side, flip to left of card
-      if (x + tooltipWidth > window.innerWidth - 12) {
-        x = rect.left - tooltipWidth - 12;
-      }
-      // If screen is narrow
-      if (x < 10) {
-        x = Math.max(10, (window.innerWidth - tooltipWidth) / 2);
-      }
+    const { x, y } = calculateTooltipCoords(e.clientX, e.clientY);
+    posRef.current = { x, y };
 
-      // Vertical alignment: aligned with card, clamped within viewport
-      let y = rect.top + rect.height / 2 - 80;
-      if (y + tooltipHeight > window.innerHeight - 12) {
-        y = window.innerHeight - tooltipHeight - 12;
-      }
-      if (y < 12) {
-        y = 12;
-      }
+    if (tooltipRef.current) {
+      tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
+    setHoveredPiece(piece);
+  }, []);
 
-      setTooltipPos({ x, y });
-      setHoveredPiece(piece);
-    }, 35);
+  // Zero-react-render mouse movement: directly mutates DOM via requestAnimationFrame
+  const handleMouseMovePiece = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    if (rafIdRef.current !== null) return;
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      if (!tooltipRef.current) return;
+
+      const { x, y } = calculateTooltipCoords(clientX, clientY);
+      posRef.current = { x, y };
+      tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    });
   }, []);
 
   const handleMouseLeavePiece = useCallback(() => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
     }
-    setHoveredPiece(null);
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHoveredPiece(null);
+    }, 40);
   }, []);
 
   const handleSelect = (piece: Piece) => {
@@ -342,6 +368,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                     }
                   }}
                   onMouseEnter={(e) => handleMouseEnterPiece(piece, e)}
+                  onMouseMove={handleMouseMovePiece}
                   onMouseLeave={handleMouseLeavePiece}
                   className={`aspect-square w-full rounded-none border-2 transition-all flex items-center justify-center p-2 relative cursor-pointer group select-none ${
                     isPieceActive
@@ -375,13 +402,14 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng (Exact Match to Heritage Design) */}
       {hoveredPiece && (
         <div
+          ref={tooltipRef}
           style={{
-            transform: `translate3d(${tooltipPos.x}px, ${tooltipPos.y}px, 0)`,
+            transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`,
             top: 0,
             left: 0,
             willChange: 'transform',
           }}
-          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in duration-100"
+          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in duration-75"
         >
           <HeritageCulturalCard piece={hoveredPiece} />
         </div>
