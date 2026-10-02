@@ -10,6 +10,36 @@ import {
 import html2canvas from 'html2canvas';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
 
+// Bespoke traditional gold line-art icons for outfit composition
+const TraditionalRobeIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 text-[#D4AF37] flex-shrink-0">
+    <path d="M4 4 L10 6 L12 11 L14 6 L20 4 L22 8 L18 10 L18 20 L6 20 L6 10 L2 8 Z" strokeLinejoin="round" />
+    <path d="M10 6 L14 14" strokeLinecap="round" />
+    <path d="M14 6 L10 14" strokeLinecap="round" />
+  </svg>
+);
+
+const TraditionalPantsIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 text-[#D4AF37] flex-shrink-0">
+    <path d="M6 3 L18 3 L19 21 L13 21 L12 11 L11 21 L5 21 Z" strokeLinejoin="round" />
+    <line x1="6" y1="6" x2="18" y2="6" strokeLinecap="round" />
+  </svg>
+);
+
+const TraditionalShoesIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 text-[#D4AF37] flex-shrink-0">
+    <path d="M3 14 C3 10 7 10 11 11 C15 12 19 11 21 14 C21 17 18 18 13 18 C7 18 3 17 3 14 Z" strokeLinejoin="round" />
+    <path d="M5 14 C8 11 12 12 14 14" strokeLinecap="round" />
+  </svg>
+);
+
+const TraditionalHatIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4 text-[#D4AF37] flex-shrink-0">
+    <path d="M12 4 L2 18 C7 19 17 19 22 18 Z" strokeLinejoin="round" />
+    <circle cx="12" cy="4" r="1" fill="currentColor" />
+  </svg>
+);
+
 interface LookbookDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,33 +99,54 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
   const footwearPiece = outfit.footwear.piece || (outfit.footwear.variant as Piece | undefined);
   const accessoryPiece = outfit.accessory?.piece || (outfit.accessory?.variant as Piece | undefined);
 
-  // Dynamic color palette adapting to outfit pieces
-  const isBlueTop = topPiece?.id?.includes('xanh') || topPiece?.name?.toLowerCase().includes('xanh');
-  const isRedTop = topPiece?.id?.includes('do') || topPiece?.name?.toLowerCase().includes('đỏ');
+  // Dynamic color palette adapting to user's actual outfit pieces
+  const getDynamicSwatches = (o: SavedOutfit) => {
+    const top = o.top.piece || (o.top.variant as Piece | undefined);
+    const bottom = o.bottom.piece || (o.bottom.variant as Piece | undefined);
 
-  const colors = [
-    {
-      hex: outfit.colorPalette?.[0] || (isBlueTop ? '#1A4B54' : '#7D1128'),
-      name: isBlueTop ? 'Xanh cổ vịt' : isRedTop ? 'Đỏ đô' : 'Sắc chủ đạo',
-      part: `(${topPiece?.name || 'áo tấc'})`,
-    },
-    {
-      hex: outfit.colorPalette?.[2] || '#B89758',
-      name: 'Vàng cổ',
-      part: '(thêu)',
-    },
-    {
-      hex: outfit.colorPalette?.[1] || (bottomPiece?.name?.includes('tây') ? '#374151' : '#EAE4D9'),
-      name: bottomPiece?.name?.includes('tây') ? 'Xám trầm' : 'Ngà',
-      part: `(${bottomPiece?.name || 'quần lĩnh'})`,
-    },
-  ];
+    let swatch1Hex = o.colorPalette?.[0] || '#7D1128';
+    let swatch1Name = 'Đỏ đô';
+    if (top?.id?.includes('xanh') || top?.name?.toLowerCase().includes('xanh')) {
+      swatch1Hex = '#1A4B54';
+      swatch1Name = 'Xanh cổ vịt';
+    } else if (top?.id?.includes('do') || top?.name?.toLowerCase().includes('đỏ')) {
+      swatch1Hex = '#7D1128';
+      swatch1Name = 'Đỏ đô';
+    } else if (top?.swatchHex) {
+      swatch1Hex = top.swatchHex;
+      swatch1Name = top.colorName || 'Sắc áo';
+    }
+
+    const swatch2Hex = o.colorPalette?.[2] || '#B89758';
+    const swatch2Name = 'Vàng cổ';
+
+    let swatch3Hex = o.colorPalette?.[1] || '#EAE4D9';
+    let swatch3Name = 'Ngà';
+    if (bottom?.id?.includes('tay') || bottom?.name?.toLowerCase().includes('tây') || bottom?.name?.toLowerCase().includes('xám')) {
+      swatch3Hex = '#374151';
+      swatch3Name = 'Xám than';
+    } else if (bottom?.name?.toLowerCase().includes('lụa') || bottom?.name?.toLowerCase().includes('trắng')) {
+      swatch3Hex = '#EAE4D9';
+      swatch3Name = 'Ngà';
+    } else if (bottom?.swatchHex) {
+      swatch3Hex = bottom.swatchHex;
+      swatch3Name = bottom.colorName || 'Sắc quần';
+    }
+
+    return [
+      { hex: swatch1Hex, name: swatch1Name, part: `(${top?.name || 'áo tấc'})` },
+      { hex: swatch2Hex, name: swatch2Name, part: '(thêu)' },
+      { hex: swatch3Hex, name: swatch3Name, part: `(${bottom?.name || 'quần lĩnh'})` },
+    ];
+  };
+
+  const colors = getDynamicSwatches(outfit);
 
   // Alignments for 2D composite
   const bottomAlign = getPieceAlignment(bottomPiece?.id);
   const footwearAlign = getPieceAlignment(footwearPiece?.id);
   const topAlign = getPieceAlignment(topPiece?.id);
-  const accessoryAlign = getPieceAlignment(accessoryPiece?.id || 'piece-non-la');
+  const accessoryAlign = getPieceAlignment(accessoryPiece?.id);
 
   // Format title into 2 poetic calligraphic lines
   const formatLookTitle = (raw: string): string[] => {
@@ -155,15 +206,15 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/92 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200 select-none font-sans"
       onClick={onClose}
     >
-      {/* Outer Floating Modal Shell */}
+      {/* Outer Floating Modal Shell (Clean, sleek, border gold with soft glow) */}
       <div
-        className="w-full max-w-7xl max-h-[96vh] flex flex-col bg-[#0A0D12] border-2 border-imperial-gold/80 shadow-[0_24px_80px_rgba(0,0,0,0.98)] overflow-hidden relative animate-in zoom-in-95 duration-200"
+        className="w-full max-w-7xl max-h-[96vh] flex flex-col bg-[#0A0D12] border-2 border-[#D4AF37]/80 shadow-[0_24px_80px_rgba(0,0,0,0.98)] overflow-hidden relative animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Floating Top-Right Close Button */}
+        {/* Floating Top-Right Close Button (Discreet, no clunky header) */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-40 w-8 h-8 rounded-full bg-black/70 hover:bg-black/95 border border-white/20 hover:border-imperial-gold text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
+          className="absolute top-3.5 right-3.5 z-40 w-8 h-8 rounded-full bg-black/75 hover:bg-black/95 border border-white/20 hover:border-[#D4AF37] text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
           title="Đóng (ESC)"
         >
           <X className="w-4 h-4" />
@@ -177,7 +228,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
               onClose();
             }
           }}
-          className="absolute top-3.5 right-13 z-40 w-8 h-8 rounded-full bg-black/70 hover:bg-rose-950/80 border border-white/20 hover:border-rose-500/60 text-white/60 hover:text-rose-400 flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
+          className="absolute top-3.5 right-13 z-40 w-8 h-8 rounded-full bg-black/75 hover:bg-rose-950/80 border border-white/20 hover:border-rose-500/60 text-white/60 hover:text-rose-400 flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
           title="Xóa Lookbook này"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -192,18 +243,18 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
           className="relative w-full flex-1 min-h-[580px] lg:min-h-[660px] bg-[#0A0D12] text-[#F7F4EE] flex flex-col lg:flex-row overflow-hidden"
         >
           {/* ============================================================ */}
-          {/* LEFT HALF (56%): CINEMATIC SCENE & MANNEQUIN STANDING          */}
+          {/* LEFT HALF (56%): CINEMATIC OUTFIT STAGE & CALLIGRAPHY          */}
           {/* ============================================================ */}
           <div className="relative w-full lg:w-[56%] min-h-[500px] lg:min-h-full flex items-center justify-center overflow-hidden border-b lg:border-b-0 lg:border-r border-[#D4AF37]/20">
-            {/* 1. Atmospheric Background (Serene Ancient Town with Glowing Lanterns & River) */}
+            {/* 1. Atmospheric Event Scene Background (User outfit's event or fallback) */}
             <img
-              src="/assets/lookbook/editorial-bg.jpg"
-              alt="Phố cổ Hội An hoàng hôn"
+              src={outfit.event?.bgUrl || '/assets/backgrounds/gallery-bg.jpg'}
+              alt={outfit.event?.name}
               className="absolute inset-0 w-full h-full object-cover object-center filter brightness-95 contrast-105 select-none pointer-events-none"
             />
 
-            {/* Subtle Gradient Overlays for Fashion Editorial Depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40 pointer-events-none" />
+            {/* Depth vignette overlays for editorial mood */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-[#0A0D12] pointer-events-none" />
 
             {/* Seamless transition on the right edge blending into lacquer panel */}
@@ -219,7 +270,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
             ) : (
               /* High-fidelity Grounded 2D Mannequin Composite */
               <div className="relative z-10 w-full h-full max-h-[95%] aspect-[3/4] flex items-center justify-center pointer-events-none select-none py-2">
-                {/* Soft Ground Shadow underneath mannequin on cobblestones */}
+                {/* Soft Ground Shadow underneath mannequin on floor */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 h-6 bg-black/75 rounded-full blur-md" />
 
                 {/* Layer 1: Mannequin Base (Head, Neck, Torso, Legs, Stand) */}
@@ -273,26 +324,24 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
                   </div>
                 )}
 
-                {/* Layer 5: Phụ kiện (Z=50) - Nón lá truyền thống đội trên đầu mannequin */}
-                <div
-                  className="absolute inset-0 z-50 pointer-events-none"
-                  style={
-                    accessoryPiece?.assetUrl
-                      ? getAlignmentStyle(accessoryAlign)
-                      : getAlignmentStyle(getPieceAlignment('piece-non-la'))
-                  }
-                >
-                  <img
-                    src={accessoryPiece?.assetUrl || '/assets/pieces/accessories/acc-non-la-traditional.png'}
-                    alt={accessoryPiece?.name || 'Nón lá truyền thống'}
-                    className="w-full h-full object-contain filter drop-shadow-[0_8px_18px_rgba(0,0,0,0.7)]"
-                  />
-                </div>
+                {/* Layer 5: Phụ kiện (Z=50) - Nón lá / Khăn */}
+                {accessoryPiece?.assetUrl && (
+                  <div
+                    className="absolute inset-0 z-50 pointer-events-none"
+                    style={getAlignmentStyle(accessoryAlign)}
+                  >
+                    <img
+                      src={accessoryPiece.assetUrl}
+                      alt={accessoryPiece.name}
+                      className="w-full h-full object-contain filter drop-shadow-[0_8px_18px_rgba(0,0,0,0.7)]"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
             {/* 3. Text Overlay on Left Side (MATCHING USER REFERENCE DESIGN) */}
-            <div className="absolute top-10 sm:top-14 left-7 sm:left-11 z-20 flex flex-col items-start select-none pointer-events-none max-w-[55%]">
+            <div className="absolute top-10 sm:top-14 left-7 sm:left-11 z-20 flex flex-col items-start select-none pointer-events-none max-w-[50%]">
               {/* LOOK 01 Tag */}
               <div className="flex items-center gap-2.5 mb-1.5">
                 <span className="font-serif tracking-[0.28em] text-xs uppercase font-black text-[#E8C87B] drop-shadow-md">
@@ -393,7 +442,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
                 </p>
               </div>
 
-              {/* SECTION 2: BẢNG MÀU */}
+              {/* SECTION 2: BẢNG MÀU (Dynamic to user's outfit pieces) */}
               <div className="space-y-2.5">
                 <div className="flex items-center gap-2">
                   <h3 className="font-serif font-black text-xs sm:text-sm uppercase tracking-[0.2em] text-[#E8C87B]">
@@ -426,78 +475,78 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
 
               {/* SECTION 3: CHI TIẾT TRANG PHỤC & THÀNH PHẦN OUTFIT */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#D4AF37]/20">
-                {/* Left: CHI TIẾT TRANG PHỤC (3 Macro Photography Close-up Cards) */}
+                {/* Left: CHI TIẾT TRANG PHỤC (User's actual outfit piece detail cards) */}
                 <div className="space-y-2">
                   <h4 className="font-serif font-black text-[11px] uppercase tracking-wider text-[#E8C87B]">
                     CHI TIẾT TRANG PHỤC
                   </h4>
 
                   <div className="grid grid-cols-3 gap-2">
-                    {/* Detail 1: Cổ áo thêu hoa văn */}
+                    {/* Detail 1: Cổ áo & Hoa văn (User's top piece) */}
                     <div className="flex flex-col items-center">
-                      <div className="w-full aspect-square rounded-xl bg-black/60 border border-[#D4AF37]/50 p-0.5 overflow-hidden shadow-md group">
+                      <div className="w-full aspect-square rounded-xl bg-gradient-to-b from-[#1c212c] to-[#0d1017] border border-[#D4AF37]/50 p-1.5 overflow-hidden shadow-md group flex items-center justify-center">
                         <img
-                          src="/assets/lookbook/detail-collar.jpg"
+                          src={topPiece?.thumbnailUrl || topPiece?.assetUrl}
                           alt="Cổ áo thêu hoa văn"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                          className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] group-hover:scale-115 transition-transform duration-500 rounded-lg"
                         />
                       </div>
                       <span className="text-[9px] font-serif text-[#F7F4EE]/90 text-center mt-1 leading-tight line-clamp-2">
-                        Cổ áo thêu hoa văn
+                        Cổ áo & Hoa văn
                       </span>
                     </div>
 
-                    {/* Detail 2: Tay áo rộng, thêu viền */}
+                    {/* Detail 2: Vạt áo & Tay áo (User's top piece) */}
                     <div className="flex flex-col items-center">
-                      <div className="w-full aspect-square rounded-xl bg-black/60 border border-[#D4AF37]/50 p-0.5 overflow-hidden shadow-md group">
+                      <div className="w-full aspect-square rounded-xl bg-gradient-to-b from-[#1c212c] to-[#0d1017] border border-[#D4AF37]/50 p-1.5 overflow-hidden shadow-md group flex items-center justify-center">
                         <img
-                          src="/assets/lookbook/detail-sleeve.jpg"
-                          alt="Tay áo rộng thêu viền"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                          src={topPiece?.assetUrl || topPiece?.thumbnailUrl}
+                          alt="Vạt áo & Thân áo"
+                          className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] scale-110 group-hover:scale-120 transition-transform duration-500 rounded-lg"
                         />
                       </div>
                       <span className="text-[9px] font-serif text-[#F7F4EE]/90 text-center mt-1 leading-tight line-clamp-2">
-                        Tay áo rộng, thêu viền
+                        Vạt áo & Thân áo
                       </span>
                     </div>
 
-                    {/* Detail 3: Hài thêu truyền thống */}
+                    {/* Detail 3: Hài / Giày (User's footwear piece) */}
                     <div className="flex flex-col items-center">
-                      <div className="w-full aspect-square rounded-xl bg-black/60 border border-[#D4AF37]/50 p-0.5 overflow-hidden shadow-md group">
+                      <div className="w-full aspect-square rounded-xl bg-gradient-to-b from-[#1c212c] to-[#0d1017] border border-[#D4AF37]/50 p-1.5 overflow-hidden shadow-md group flex items-center justify-center">
                         <img
-                          src="/assets/lookbook/detail-shoes.jpg"
-                          alt="Hài thêu truyền thống"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-lg"
+                          src={footwearPiece?.thumbnailUrl || footwearPiece?.assetUrl}
+                          alt={footwearPiece?.name || 'Giày / Hài'}
+                          className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] group-hover:scale-115 transition-transform duration-500 rounded-lg"
                         />
                       </div>
                       <span className="text-[9px] font-serif text-[#F7F4EE]/90 text-center mt-1 leading-tight line-clamp-2">
-                        Hài thêu truyền thống
+                        {footwearPiece?.name || 'Hài thêu'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Right: THÀNH PHẦN OUTFIT */}
+                {/* Right: THÀNH PHẦN OUTFIT (Bespoke gold SVG line icons) */}
                 <div className="space-y-2 border-t sm:border-t-0 sm:border-l border-[#D4AF37]/20 sm:pl-3">
                   <h4 className="font-serif font-black text-[11px] uppercase tracking-wider text-[#E8C87B]">
                     THÀNH PHẦN OUTFIT
                   </h4>
 
-                  <ul className="space-y-1.5 text-xs text-[#F7F4EE]/90 font-serif">
-                    <li className="flex items-center gap-2 truncate">
-                      <span className="w-4 text-center text-[#D4AF37]">👘</span>
-                      <span className="truncate">{topPiece?.name || 'Áo tấc đỏ đô'}</span>
+                  <ul className="space-y-2 text-xs text-[#F7F4EE]/90 font-serif">
+                    <li className="flex items-center gap-2.5 truncate">
+                      <TraditionalRobeIcon />
+                      <span className="truncate">{topPiece?.name || 'Áo tấc'}</span>
                     </li>
-                    <li className="flex items-center gap-2 truncate">
-                      <span className="w-4 text-center text-[#D4AF37]">👖</span>
-                      <span className="truncate">{bottomPiece?.name || 'Quần lĩnh màu ngà'}</span>
+                    <li className="flex items-center gap-2.5 truncate">
+                      <TraditionalPantsIcon />
+                      <span className="truncate">{bottomPiece?.name || 'Quần truyền thống'}</span>
                     </li>
-                    <li className="flex items-center gap-2 truncate">
-                      <span className="w-4 text-center text-[#D4AF37]">🥿</span>
-                      <span className="truncate">{footwearPiece?.name || 'Hài thêu truyền thống'}</span>
+                    <li className="flex items-center gap-2.5 truncate">
+                      <TraditionalShoesIcon />
+                      <span className="truncate">{footwearPiece?.name || 'Hài / Giày'}</span>
                     </li>
-                    <li className="flex items-center gap-2 truncate">
-                      <span className="w-4 text-center text-[#D4AF37]">👒</span>
+                    <li className="flex items-center gap-2.5 truncate">
+                      <TraditionalHatIcon />
                       <span className="truncate">{accessoryPiece?.name || 'Nón lá truyền thống'}</span>
                     </li>
                   </ul>
