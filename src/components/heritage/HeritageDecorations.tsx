@@ -2,9 +2,10 @@ import React from 'react';
 
 /**
  * 1. TOP-LEFT CORNER: Antique Brass Filigree with Royal Vermilion Silk Tassel (Tua rua đỏ hoàng gia)
+ * Performance: Memoized, zero inline software filter thrashing, GPU-accelerated.
  */
-export const CornerTopLeftTassel: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`absolute -top-1.5 -left-1.5 pointer-events-none select-none z-20 ${className}`}>
+export const CornerTopLeftTassel: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
+  <div className={`absolute -top-1.5 -left-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] ${className}`}>
     <svg width="68" height="88" viewBox="0 0 68 88" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         {/* Antique Gold Gradient */}
@@ -36,7 +37,6 @@ export const CornerTopLeftTassel: React.FC<{ className?: string }> = ({ classNam
         fill="url(#brassGoldGrad)"
         stroke="#F5DA88"
         strokeWidth="0.75"
-        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))"
       />
       {/* Cloud scroll filigree on bracket */}
       <path
@@ -58,7 +58,7 @@ export const CornerTopLeftTassel: React.FC<{ className?: string }> = ({ classNam
       />
 
       {/* --- Auspicious Red Chinese/Vietnamese Knot (Nút Cát Tường) --- */}
-      <g filter="drop-shadow(0 2px 5px rgba(0,0,0,0.9))">
+      <g>
         {/* Center Diamond Loop */}
         <rect
           x="14"
@@ -93,7 +93,7 @@ export const CornerTopLeftTassel: React.FC<{ className?: string }> = ({ classNam
       <circle cx="18" cy="40" r="2.8" fill="url(#goldBead)" stroke="#3A2606" strokeWidth="0.5" />
 
       {/* --- Flowing Red Silk Tassel (Tua rua dài rủ xuống) --- */}
-      <g filter="drop-shadow(1px 3px 6px rgba(0,0,0,0.85))">
+      <g>
         {/* Main tassel skirt */}
         <path
           d="M16 42 L13 74 Q18 78 23 74 L20 42 Z"
@@ -110,13 +110,14 @@ export const CornerTopLeftTassel: React.FC<{ className?: string }> = ({ classNam
       </g>
     </svg>
   </div>
-);
+));
 
 /**
  * 2. TOP-RIGHT CORNER: Antique Brass Bracket with Blooming Peach Blossoms (Cành đào phai nở hoa)
+ * Performance: Memoized, clean vector paths.
  */
-export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`absolute -top-2.5 -right-2.5 pointer-events-none select-none z-20 ${className}`}>
+export const CornerTopRightBlossom: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
+  <div className={`absolute -top-2.5 -right-2.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)] ${className}`}>
     <svg width="86" height="74" viewBox="0 0 86 74" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         {/* Brass Gold Gradient */}
@@ -147,7 +148,6 @@ export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ classN
         fill="url(#brassCornerRight)"
         stroke="#F5DA88"
         strokeWidth="0.75"
-        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))"
       />
       <circle cx="76" cy="8" r="1.5" fill="#FFF2BF" />
 
@@ -158,7 +158,6 @@ export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ classN
         strokeWidth="2.4"
         strokeLinecap="round"
         fill="none"
-        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.9))"
       />
       {/* Small side twigs */}
       <path d="M52 12 Q45 22 42 26" stroke="#4E342E" strokeWidth="1.6" strokeLinecap="round" fill="none" />
@@ -166,7 +165,7 @@ export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ classN
       <path d="M68 8 Q65 18 62 20" stroke="#4E342E" strokeWidth="1.5" strokeLinecap="round" fill="none" />
 
       {/* --- Flower 1: Main Large Blooming Peach Flower on Right --- */}
-      <g transform="translate(68, 16)" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.9))">
+      <g transform="translate(68, 16)">
         {/* 5 rounded petals */}
         <circle cx="0" cy="-6" r="4.5" fill="url(#petalPink)" />
         <circle cx="6" cy="-2" r="4.5" fill="url(#petalPink)" />
@@ -182,7 +181,7 @@ export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ classN
       </g>
 
       {/* --- Flower 2: Side Blossom Flower in Center --- */}
-      <g transform="translate(44, 24)" filter="drop-shadow(0 2px 5px rgba(0,0,0,0.9))">
+      <g transform="translate(44, 24)">
         <circle cx="0" cy="-5" r="3.8" fill="url(#petalDark)" />
         <circle cx="5" cy="-1" r="3.8" fill="url(#petalDark)" />
         <circle cx="3" cy="4" r="3.8" fill="url(#petalDark)" />
@@ -194,20 +193,20 @@ export const CornerTopRightBlossom: React.FC<{ className?: string }> = ({ classN
 
       {/* --- Flower 3: Delicate Bud on Tip --- */}
       <g transform="translate(18, 20)">
-        <ellipse cx="0" cy="0" rx="3.5" ry="2.5" transform="rotate(-20)" fill="url(#petalDark)" filter="drop-shadow(0 1px 3px rgba(0,0,0,0.8))" />
+        <ellipse cx="0" cy="0" rx="3.5" ry="2.5" transform="rotate(-20)" fill="url(#petalDark)" />
         <path d="M-3 2 C-2 4 1 4 2 2" stroke="#2E7D32" strokeWidth="1" fill="none" />
       </g>
       {/* Tiny red petal falling */}
       <ellipse cx="28" cy="38" rx="2" ry="1.4" transform="rotate(35)" fill="#F06292" opacity="0.8" />
     </svg>
   </div>
-);
+));
 
 /**
  * 3. BOTTOM-RIGHT CORNER: Intricate Brass Cloud & Dragon Filigree Bracket (Miếng bịt đồng mây cuộn)
  */
-export const CornerBottomRightBrass: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`absolute -bottom-1.5 -right-1.5 pointer-events-none select-none z-20 ${className}`}>
+export const CornerBottomRightBrass: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
+  <div className={`absolute -bottom-1.5 -right-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${className}`}>
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="brassBR" x1="100%" y1="100%" x2="0%" y2="0%">
@@ -224,7 +223,6 @@ export const CornerBottomRightBrass: React.FC<{ className?: string }> = ({ class
         fill="url(#brassBR)"
         stroke="#F5DA88"
         strokeWidth="0.75"
-        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))"
       />
       {/* Traditional cloud scroll carving */}
       <path
@@ -237,13 +235,13 @@ export const CornerBottomRightBrass: React.FC<{ className?: string }> = ({ class
       <circle cx="38" cy="40" r="1.5" fill="#FFF2BF" />
     </svg>
   </div>
-);
+));
 
 /**
  * 4. BOTTOM-LEFT CORNER: Antique Brass Bracket with Soft Ink-wash Brush Flourish (Mực tàu loang nhẹ)
  */
-export const CornerBottomLeft: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`absolute -bottom-1.5 -left-1.5 pointer-events-none select-none z-20 ${className}`}>
+export const CornerBottomLeft: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
+  <div className={`absolute -bottom-1.5 -left-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${className}`}>
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="brassBL" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -260,7 +258,6 @@ export const CornerBottomLeft: React.FC<{ className?: string }> = ({ className =
         fill="url(#brassBL)"
         stroke="#F5DA88"
         strokeWidth="0.75"
-        filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))"
       />
       {/* Cloud swirl carving */}
       <path
@@ -273,12 +270,12 @@ export const CornerBottomLeft: React.FC<{ className?: string }> = ({ className =
       <circle cx="10" cy="40" r="1.5" fill="#FFF2BF" />
     </svg>
   </div>
-);
+));
 
 /**
  * 5. ANCIENT CALLIGRAPHIC DIVIDER: Tapered gold line with central cloud scroll motif
  */
-export const AncientCloudDivider: React.FC<{ className?: string }> = ({ className = '' }) => (
+export const AncientCloudDivider: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
   <div className={`relative w-full flex items-center justify-center my-3 pointer-events-none select-none ${className}`}>
     {/* Left tapered line */}
     <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/60 to-[#F9E29D]" />
@@ -299,14 +296,14 @@ export const AncientCloudDivider: React.FC<{ className?: string }> = ({ classNam
     {/* Right tapered line */}
     <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-[#C5A059]/60 to-[#F9E29D]" />
   </div>
-);
+));
 
 /**
  * 6. HERITAGE GOLD CREST ICONS: Exact Match to Reference Image
  */
 
 // Crown / Dynasty Emblem for "THỜI KỲ LỊCH SỬ"
-export const HeritageDynastyIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
+export const HeritageDynastyIcon: React.FC<{ className?: string }> = React.memo(({ className = 'w-6 h-6' }) => (
   <svg viewBox="0 0 28 28" fill="none" className={`text-[#D4AF37] flex-shrink-0 ${className}`}>
     <defs>
       <linearGradient id="goldIconGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -331,10 +328,10 @@ export const HeritageDynastyIcon: React.FC<{ className?: string }> = ({ classNam
     {/* Traditional cloud curve below */}
     <path d="M9 20 C11 22 17 22 19 20" stroke="url(#goldIconGrad1)" strokeWidth="1.2" strokeLinecap="round" />
   </svg>
-);
+));
 
 // Incense Burner / Sacred Lotus Crest for "Ý NGHĨA VĂN HÓA"
-export const HeritageCulturalIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
+export const HeritageCulturalIcon: React.FC<{ className?: string }> = React.memo(({ className = 'w-6 h-6' }) => (
   <svg viewBox="0 0 28 28" fill="none" className={`text-[#D4AF37] flex-shrink-0 ${className}`}>
     <defs>
       <linearGradient id="goldIconGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -368,10 +365,10 @@ export const HeritageCulturalIcon: React.FC<{ className?: string }> = ({ classNa
     <path d="M7 19 H21 L19 23 H9 Z" stroke="url(#goldIconGrad2)" strokeWidth="1.4" strokeLinejoin="round" />
     <line x1="14" y1="17" x2="14" y2="19" stroke="url(#goldIconGrad2)" strokeWidth="1.4" />
   </svg>
-);
+));
 
 // Temple Pavilion / Festival Gate for "BỐI CẢNH CHUẨN MỰC"
-export const HeritageContextIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
+export const HeritageContextIcon: React.FC<{ className?: string }> = React.memo(({ className = 'w-6 h-6' }) => (
   <svg viewBox="0 0 28 28" fill="none" className={`text-[#D4AF37] flex-shrink-0 ${className}`}>
     <defs>
       <linearGradient id="goldIconGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -398,10 +395,10 @@ export const HeritageContextIcon: React.FC<{ className?: string }> = ({ classNam
     {/* Base steps */}
     <line x1="5" y1="23" x2="23" y2="23" stroke="url(#goldIconGrad3)" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
-);
+));
 
 // Open Ancient Manuscript / Book Icon for "Nguồn"
-export const HeritageBookIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+export const HeritageBookIcon: React.FC<{ className?: string }> = React.memo(({ className = 'w-5 h-5' }) => (
   <svg viewBox="0 0 24 24" fill="none" className={`text-[#D4AF37] flex-shrink-0 ${className}`}>
     <defs>
       <linearGradient id="goldIconGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -419,4 +416,4 @@ export const HeritageBookIcon: React.FC<{ className?: string }> = ({ className =
     />
     <line x1="12" y1="7" x2="12" y2="20" stroke="url(#goldIconGrad4)" strokeWidth="1.6" />
   </svg>
-);
+));

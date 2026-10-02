@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
 import { Sparkles, X, Check, BookOpen, Layers, Ban } from 'lucide-react';
 import { HeritageCulturalCard } from './heritage/HeritageCulturalCard';
@@ -39,6 +39,56 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
 }) => {
   const [hoveredPiece, setHoveredPiece] = useState<Piece | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleMouseEnterPiece = useCallback((piece: Piece, e: React.MouseEvent<HTMLDivElement>) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    const target = e.currentTarget;
+    hoverTimeoutRef.current = setTimeout(() => {
+      const rect = target.getBoundingClientRect();
+      const tooltipWidth = 350;
+      const tooltipHeight = 360;
+
+      let x = rect.right + 12;
+      // If overflowing right side, flip to left of card
+      if (x + tooltipWidth > window.innerWidth - 12) {
+        x = rect.left - tooltipWidth - 12;
+      }
+      // If screen is narrow
+      if (x < 10) {
+        x = Math.max(10, (window.innerWidth - tooltipWidth) / 2);
+      }
+
+      // Vertical alignment: aligned with card, clamped within viewport
+      let y = rect.top + rect.height / 2 - 80;
+      if (y + tooltipHeight > window.innerHeight - 12) {
+        y = window.innerHeight - tooltipHeight - 12;
+      }
+      if (y < 12) {
+        y = 12;
+      }
+
+      setTooltipPos({ x, y });
+      setHoveredPiece(piece);
+    }, 35);
+  }, []);
+
+  const handleMouseLeavePiece = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredPiece(null);
+  }, []);
 
   const handleSelect = (piece: Piece) => {
     if (onSelectPiece) {
@@ -88,24 +138,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       icon: <Sparkles className="w-3.5 h-3.5 text-imperial-gold" />,
     },
   ];
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    // Keep tooltip visible within viewport boundaries
-    const offset = 18;
-    const tooltipWidth = 360;
-    const tooltipHeight = 360;
-    let x = e.clientX + offset;
-    let y = e.clientY + offset;
-
-    if (x + tooltipWidth > window.innerWidth) {
-      x = e.clientX - tooltipWidth - 10;
-    }
-    if (y + tooltipHeight > window.innerHeight) {
-      y = e.clientY - tooltipHeight - 10;
-    }
-
-    setTooltipPos({ x, y });
-  };
 
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-lacquer-card overflow-hidden font-sans relative">
@@ -309,12 +341,8 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                       handleSelect(piece);
                     }
                   }}
-                  onMouseEnter={(e) => {
-                    setHoveredPiece(piece);
-                    handleMouseMove(e);
-                  }}
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={() => setHoveredPiece(null)}
+                  onMouseEnter={(e) => handleMouseEnterPiece(piece, e)}
+                  onMouseLeave={handleMouseLeavePiece}
                   className={`aspect-square w-full rounded-none border-2 transition-all flex items-center justify-center p-2 relative cursor-pointer group select-none ${
                     isPieceActive
                       ? 'bg-lacquer-surface border-imperial-gold shadow-lg ring-1 ring-imperial-gold/50'
@@ -333,6 +361,8 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                   <img
                     src={piece.thumbnailUrl || piece.assetUrl}
                     alt={piece.name}
+                    loading="lazy"
+                    decoding="async"
                     className="max-h-full max-w-full object-contain filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform"
                   />
                 </div>
@@ -342,13 +372,16 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         )}
       </div>
 
-
-
       {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng (Exact Match to Heritage Design) */}
       {hoveredPiece && (
         <div
-          style={{ top: tooltipPos.y, left: tooltipPos.x }}
-          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in zoom-in-95 duration-150"
+          style={{
+            transform: `translate3d(${tooltipPos.x}px, ${tooltipPos.y}px, 0)`,
+            top: 0,
+            left: 0,
+            willChange: 'transform',
+          }}
+          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in duration-100"
         >
           <HeritageCulturalCard piece={hoveredPiece} />
         </div>

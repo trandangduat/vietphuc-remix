@@ -28,7 +28,7 @@ export interface HeritageFrameProps {
  * - Bottom-Right: Brass cloud and dragon bracket
  * - Bottom-Left: Brass bracket with ink-wash brush flourish
  */
-export const HeritageFrame: React.FC<HeritageFrameProps> = ({
+export const HeritageFrame: React.FC<HeritageFrameProps> = React.memo(({
   children,
   title,
   badge = 'CỔ PHONG',
@@ -117,7 +117,9 @@ export const HeritageFrame: React.FC<HeritageFrameProps> = ({
       </div>
     </div>
   );
-};
+});
+
+HeritageFrame.displayName = 'HeritageFrame';
 
 export interface HeritageModalProps extends HeritageFrameProps {
   isOpen: boolean;

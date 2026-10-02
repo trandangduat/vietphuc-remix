@@ -21,7 +21,7 @@ interface HeritageCulturalCardProps {
  * - 3 structured heritage sections with gold crest icons
  * - Verified source citation footer
  */
-export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = ({
+export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = React.memo(({
   piece,
   className = '',
   onClose,
@@ -87,4 +87,6 @@ export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = ({
       </div>
     </HeritageFrame>
   );
-};
+});
+
+HeritageCulturalCard.displayName = 'HeritageCulturalCard';
