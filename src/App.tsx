@@ -4,6 +4,15 @@ import { LandingScreen } from './screens/LandingScreen';
 import { StudioScreen } from './screens/StudioScreen';
 import { LookbookScreen } from './screens/LookbookScreen';
 import { DevCalibratorScreen } from './screens/DevCalibratorScreen';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './context/AuthContext';
+import {
+  fetchUserOutfits,
+  saveOutfitToDb,
+  updateOutfitInDb,
+  deleteOutfitFromDb,
+  migrateGuestOutfitsToDb,
+} from './services/outfitService';
 import { PIECES, EVENTS, PRESET_OUTFITS } from './data/catalog';
 import {
   ActiveOutfitState,
@@ -15,8 +24,9 @@ import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<'landing' | 'studio' | 'lookbook' | 'dev-calibrate'>('landing');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showMigrateModal, setShowMigrateModal] = useState(false);
+  const { user, profile } = useAuth();
+  const isLoggedIn = Boolean(user);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Dev-only hotkeys & URL params
   useEffect(() => {
@@ -252,6 +262,28 @@ export function App() {
   const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>(sampleOutfits);
   const [sessionOutfits, setSessionOutfits] = useState<SavedOutfit[]>(sampleOutfits.slice(0, 2));
 
+  // Sync outfits with Supabase when user logs in
+  useEffect(() => {
+    if (user) {
+      fetchUserOutfits(user.id).then((dbOutfits) => {
+        if (dbOutfits && dbOutfits.length > 0) {
+          setSavedOutfits(dbOutfits);
+        }
+      });
+
+      // Migrate session outfits from guest session if any exist
+      if (sessionOutfits.length > 0) {
+        migrateGuestOutfitsToDb(user.id, sessionOutfits).then((migrated) => {
+          if (migrated && migrated.length > 0) {
+            setSavedOutfits((prev) => [...migrated, ...prev]);
+            setSessionOutfits([]);
+            showToast(`✨ Đã đồng bộ ${migrated.length} outfit vào tài khoản của bạn!`);
+          }
+        });
+      }
+    }
+  }, [user?.id]);
+
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -261,7 +293,7 @@ export function App() {
   };
 
   // Save active outfit
-  const handleSaveOutfit = () => {
+  const handleSaveOutfit = async () => {
     if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) {
       showToast('⚠️ Vui lòng chọn đủ Áo, Quần và Giày để hoàn tất outfit!');
       return;
@@ -277,11 +309,21 @@ export function App() {
       footwear: { piece: activeOutfit.footwearPiece, variant: activeOutfit.footwearVariant || activeOutfit.footwearPiece },
       accessory: activeOutfit.accessoryPiece ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant || activeOutfit.accessoryPiece } : undefined,
       event: activeOutfit.event,
+      colorPalette: ['#8B1E1E', '#F7F4EE', '#9A7332'],
+      decorStamp: 'blossom',
+      tiltAngle: 0,
+      isFavorite: false,
     };
 
-    if (isLoggedIn) {
-      setSavedOutfits((prev) => [newSaved, ...prev]);
-      showToast('✨ Đã lưu outfit thành công vào Lookbook cá nhân!');
+    if (user) {
+      try {
+        const persisted = await saveOutfitToDb(user.id, newSaved);
+        setSavedOutfits((prev) => [persisted, ...prev]);
+        showToast('✨ Đã lưu outfit thành công vào Database cá nhân!');
+      } catch (e: any) {
+        setSavedOutfits((prev) => [newSaved, ...prev]);
+        showToast('✨ Đã lưu outfit vào Lookbook!');
+      }
     } else {
       setSessionOutfits((prev) => [newSaved, ...prev]);
       showToast('📌 Đã lưu tạm outfit vào phiên làm việc hiện tại!');
@@ -289,7 +331,7 @@ export function App() {
   };
 
   // Save AI Try-on image into Lookbook
-  const handleSaveTryOnToLookbook = (tryOnImgUrl: string) => {
+  const handleSaveTryOnToLookbook = async (tryOnImgUrl: string) => {
     if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) return;
 
     const tryOnOutfit: SavedOutfit = {
@@ -303,10 +345,26 @@ export function App() {
       accessory: activeOutfit.accessoryPiece ? { piece: activeOutfit.accessoryPiece, variant: activeOutfit.accessoryVariant || activeOutfit.accessoryPiece } : undefined,
       event: activeOutfit.event,
       tryOnImage: tryOnImgUrl,
+      tryOnImages: [tryOnImgUrl],
+      colorPalette: ['#8B1E1E', '#F7F4EE', '#9A7332'],
+      decorStamp: 'moon',
+      tiltAngle: 1.5,
+      isFavorite: false,
     };
 
-    setSavedOutfits((prev) => [tryOnOutfit, ...prev]);
-    showToast('✨ Ảnh AI Try on đã được lưu vào Lookbook cá nhân!');
+    if (user) {
+      try {
+        const persisted = await saveOutfitToDb(user.id, tryOnOutfit);
+        setSavedOutfits((prev) => [persisted, ...prev]);
+        showToast('✨ Ảnh AI Try on đã được lưu vào Database!');
+      } catch {
+        setSavedOutfits((prev) => [tryOnOutfit, ...prev]);
+        showToast('✨ Ảnh AI Try on đã được lưu vào Lookbook cá nhân!');
+      }
+    } else {
+      setSessionOutfits((prev) => [tryOnOutfit, ...prev]);
+      showToast('✨ Ảnh AI Try on đã được lưu vào phiên khách!');
+    }
   };
 
   // Load a saved outfit into studio for editing / remixing
@@ -364,32 +422,6 @@ export function App() {
     setCurrentScreen('studio');
   };
 
-  // Toggle Auth with session migration detection (FR-02)
-  const handleToggleAuth = () => {
-    if (!isLoggedIn) {
-      if (sessionOutfits.length > 0) {
-        setShowMigrateModal(true);
-      } else {
-        setIsLoggedIn(true);
-        showToast('Chào mừng bạn quay lại, Minh Anh!');
-      }
-    } else {
-      setIsLoggedIn(false);
-      showToast('Đã đăng xuất. Bạn đang ở chế độ Khách.');
-    }
-  };
-
-  const handleConfirmMigration = (migrate: boolean) => {
-    setIsLoggedIn(true);
-    if (migrate && sessionOutfits.length > 0) {
-      setSavedOutfits((prev) => [...sessionOutfits, ...prev]);
-      setSessionOutfits([]);
-      showToast(`Đã chuyển thành công ${sessionOutfits.length} outfit vào Lookbook!`);
-    } else {
-      showToast('Đăng nhập thành công!');
-    }
-    setShowMigrateModal(false);
-  };
 
   const currentDisplayOutfits = isLoggedIn ? savedOutfits : sessionOutfits;
 
@@ -405,8 +437,7 @@ export function App() {
             currentScreen={currentScreen}
             onNavigate={setCurrentScreen}
             sessionCount={isLoggedIn ? savedOutfits.length : sessionOutfits.length}
-            isLoggedIn={isLoggedIn}
-            onToggleAuth={handleToggleAuth}
+            onOpenAuth={() => setShowAuthModal(true)}
           />
 
           {/* Screen Routing */}
@@ -420,7 +451,7 @@ export function App() {
                 outfit={activeOutfit}
                 setOutfit={setActiveOutfit}
                 isLoggedIn={isLoggedIn}
-                onLoginPrompt={() => handleToggleAuth()}
+                onLoginPrompt={() => setShowAuthModal(true)}
                 onSaveOutfit={handleSaveOutfit}
                 onSaveTryOnToLookbook={handleSaveTryOnToLookbook}
               />
@@ -430,24 +461,37 @@ export function App() {
               <LookbookScreen
                 outfits={currentDisplayOutfits}
                 isLoggedIn={isLoggedIn}
-                onLoginPrompt={() => handleToggleAuth()}
+                onLoginPrompt={() => setShowAuthModal(true)}
                 onLoadOutfitIntoStudio={handleLoadOutfitIntoStudio}
                 onDeleteOutfit={(id) => {
-                  if (isLoggedIn) {
+                  if (user) {
+                    deleteOutfitFromDb(id);
                     setSavedOutfits((prev) => prev.filter((o) => o.id !== id));
                   } else {
                     setSessionOutfits((prev) => prev.filter((o) => o.id !== id));
                   }
-                  showToast('Đã xóa outfit');
+                  showToast('Đã xóa outfit khỏi bộ sưu tập');
                 }}
                 onRenameOutfit={(id, newName) => {
                   setSavedOutfits((prev) =>
                     prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
                   );
+                  if (user) {
+                    updateOutfitInDb(id, { name: newName });
+                  }
                 }}
                 onToggleFavorite={(id) => {
                   setSavedOutfits((prev) =>
-                    prev.map((o) => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
+                    prev.map((o) => {
+                      if (o.id === id) {
+                        const newFav = !o.isFavorite;
+                        if (user) {
+                          updateOutfitInDb(id, { isFavorite: newFav });
+                        }
+                        return { ...o, isFavorite: newFav };
+                      }
+                      return o;
+                    })
                   );
                   setSessionOutfits((prev) =>
                     prev.map((o) => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
@@ -459,6 +503,15 @@ export function App() {
           </main>
         </>
       )}
+
+      {/* Real Supabase Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          showToast(`✨ Chào mừng bạn, ${profile?.display_name || 'Đăng nhập thành công!'}!`);
+        }}
+      />
 
       {/* Floating Developer Calibrator Launcher (Only visible in DEV mode, never in production) */}
       {import.meta.env.DEV && currentScreen !== 'dev-calibrate' && (
@@ -481,36 +534,6 @@ export function App() {
         </div>
       )}
 
-      {/* Session Migration Dialog (FR-02 & AC-08) */}
-      {showMigrateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
-          <div className="max-w-md w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-7 shadow-2xl text-center">
-            <div className="w-14 h-14 rounded-none bg-imperial-gold/20 text-imperial-gold flex items-center justify-center mx-auto mb-4 border border-imperial-gold/40">
-              <Sparkles className="w-7 h-7" />
-            </div>
-            <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
-              Đồng bộ trang phục vào Lookbook?
-            </h3>
-            <p className="text-sm text-silk-muted leading-relaxed mb-6">
-              Bạn đang có <strong className="text-imperial-gold font-bold">{sessionOutfits.length} bộ trang phục</strong> đã phối trong phiên làm việc này. Bạn có muốn chuyển các bộ trang phục này vào Lookbook cá nhân vĩnh viễn không?
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleConfirmMigration(false)}
-                className="py-3 px-4 rounded-none bg-lacquer-surface border-2 border-lacquer-border text-sm font-bold text-silk-muted hover:text-silk-ivory uppercase tracking-wider"
-              >
-                Bỏ qua
-              </button>
-              <button
-                onClick={() => handleConfirmMigration(true)}
-                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
-              >
-                Đồng ý lưu vào Lookbook
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

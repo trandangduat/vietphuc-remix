@@ -1,21 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BookMarked, User, LogOut, LogIn, ChevronDown } from 'lucide-react';
+import { BookMarked, User, LogOut, LogIn, ChevronDown, Sparkles } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   currentScreen: 'landing' | 'studio' | 'lookbook';
   onNavigate: (screen: 'landing' | 'studio' | 'lookbook') => void;
   sessionCount: number;
-  isLoggedIn: boolean;
-  onToggleAuth: () => void;
+  onOpenAuth: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentScreen,
   onNavigate,
   sessionCount,
-  isLoggedIn,
-  onToggleAuth,
+  onOpenAuth,
 }) => {
+  const { user, profile, signOut } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +33,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [isUserMenuOpen]);
+
+  // Compute initials from display name
+  const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Tài khoản';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('') || 'VP';
 
   const navItems = [
     { id: 'landing' as const, label: 'Trang chủ' },
@@ -73,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 /* Constant font-medium & fixed paddings to ensure zero horizontal shift */
-                className={`relative h-full px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                className={`relative h-full px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-colors cursor-pointer ${
                   isActive
                     ? 'text-imperial-gold'
                     : 'text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface/40'
@@ -105,12 +114,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: User Profile (Avatar + Name + Chevron Toggle with Dropdown) */}
         <div ref={userMenuRef} className="relative flex items-center">
-          {isLoggedIn ? (
+          {user ? (
             <div>
               {/* Trigger Button: Avatar + Name + Chevron */}
               <button
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`flex items-center gap-2.5 px-2.5 py-1.5 transition-all cursor-pointer ${
+                className={`flex items-center gap-2.5 px-2.5 py-1.5 transition-all cursor-pointer rounded-md ${
                   isUserMenuOpen
                     ? 'bg-lacquer-surface text-imperial-gold'
                     : 'text-silk-ivory hover:bg-lacquer-surface/80'
@@ -118,12 +127,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 {/* Avatar circle with monogram */}
                 <div className="w-7 h-7 rounded-full bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-xs font-serif font-bold shadow-sm">
-                  MA
+                  {initials}
                 </div>
 
                 {/* Name */}
-                <span className="text-sm font-medium text-silk-ivory hidden sm:inline">
-                  Minh Anh
+                <span className="text-sm font-medium text-silk-ivory hidden sm:inline max-w-[120px] truncate">
+                  {displayName}
                 </span>
 
                 {/* Chevron Toggle */}
@@ -136,28 +145,34 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-lacquer-card border-2 border-imperial-gold/60 shadow-2xl rounded-none p-1.5 z-50 animate-fadeIn font-sans">
+                <div className="absolute right-0 top-full mt-2 w-52 bg-lacquer-card border border-imperial-gold/60 shadow-2xl rounded-lg p-1.5 z-50 animate-fadeIn font-sans">
+                  {/* User info banner */}
+                  <div className="px-3 py-2 border-b border-lacquer-border/80 mb-1">
+                    <p className="text-xs font-bold text-silk-ivory truncate">{displayName}</p>
+                    <p className="text-[11px] text-silk-muted truncate">{user.email}</p>
+                  </div>
+
                   {/* User Profile Action */}
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
                       onNavigate('lookbook');
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-silk-ivory hover:text-imperial-gold hover:bg-lacquer-surface transition-all text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-silk-ivory hover:text-imperial-gold hover:bg-lacquer-surface rounded-md transition-all text-left cursor-pointer"
                   >
                     <User className="w-4 h-4 text-imperial-gold flex-shrink-0" />
-                    <span>Trang cá nhân</span>
+                    <span>Bộ sưu tập cá nhân</span>
                   </button>
 
                   <div className="my-1 border-t border-lacquer-border" />
 
                   {/* Logout Action */}
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setIsUserMenuOpen(false);
-                      onToggleAuth();
+                      await signOut();
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-imperial-red-bright hover:bg-imperial-red/15 transition-all text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium text-imperial-red-bright hover:bg-imperial-red/15 rounded-md transition-all text-left cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 flex-shrink-0" />
                     <span>Đăng xuất</span>
@@ -168,8 +183,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             /* Guest / Login Button */
             <button
-              onClick={onToggleAuth}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold/60 text-silk-muted hover:text-silk-ivory transition-all"
+              onClick={onOpenAuth}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium bg-lacquer-surface border border-lacquer-border hover:border-imperial-gold/60 text-silk-muted hover:text-silk-ivory transition-all rounded-md cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5 text-imperial-gold" />
               <span>Đăng nhập</span>
