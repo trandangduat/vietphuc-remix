@@ -125,3 +125,17 @@ export interface AIOverviewResult {
   mascotQuote?: string;
   mascotMood?: 'happy' | 'thinking' | 'curious' | 'reverent';
 }
+
+export interface Lookbook {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  coverImageUrl?: string;
+  coverOutfitId?: string;
+  outfitIds: string[];
+  decorStamp?: 'cloud' | 'blossom' | 'moon' | 'seal';
+  isPublic?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}

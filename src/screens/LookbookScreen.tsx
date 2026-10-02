@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { SavedOutfit, Piece } from '../types';
+import { SavedOutfit, Piece, Lookbook } from '../types';
 import {
   Sparkles,
   ExternalLink,
@@ -16,8 +16,11 @@ import {
   ChevronRight,
   Heart,
   BookOpen,
+  Plus,
 } from 'lucide-react';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
+import { CreateLookbookModal } from '../components/CreateLookbookModal';
+import { LookbookDetailModal } from '../components/LookbookDetailModal';
 
 
 /**
@@ -314,8 +317,111 @@ const ScrapbookPostcardCard: React.FC<{
   );
 };
 
+/**
+ * Lookbook Album Card (Bộ sưu tập chuyên đề)
+ */
+const LookbookAlbumCard: React.FC<{
+  lookbook: Lookbook;
+  allOutfits: SavedOutfit[];
+  onOpen: () => void;
+  onDelete?: () => void;
+}> = ({ lookbook, allOutfits, onOpen, onDelete }) => {
+  const outfitsInLookbook = allOutfits.filter((o) =>
+    lookbook.outfitIds.includes(o.id)
+  );
+  const coverOutfit =
+    outfitsInLookbook.find((o) => o.id === lookbook.coverOutfitId) ||
+    outfitsInLookbook[0];
+  const coverImage =
+    lookbook.coverImageUrl ||
+    coverOutfit?.tryOnImage ||
+    coverOutfit?.top?.piece?.thumbnailUrl ||
+    coverOutfit?.top?.piece?.assetUrl ||
+    '';
+
+  return (
+    <div
+      onClick={onOpen}
+      className="group relative bg-lacquer-surface border-2 border-imperial-gold/60 hover:border-imperial-gold p-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(216,175,101,0.25)] flex flex-col justify-between cursor-pointer select-none"
+    >
+      {/* Visual Cover Stage */}
+      <div className="relative aspect-[3/4] w-full bg-lacquer overflow-hidden border border-lacquer-border/80 flex items-center justify-center">
+        {coverImage ? (
+          <img
+            src={coverImage}
+            alt={lookbook.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <div className="text-center p-4">
+            <BookOpen className="w-12 h-12 text-imperial-gold/40 mx-auto mb-2" />
+            <span className="text-xs text-silk-muted">Chưa có ảnh bìa</span>
+          </div>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none" />
+
+        {/* Corner Decor Stamp */}
+        <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
+          <DecorWatermark type={lookbook.decorStamp || 'seal'} />
+        </div>
+
+        {/* Outfit count badge */}
+        <div className="absolute top-2.5 left-2.5 z-10">
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-black/75 backdrop-blur-md text-imperial-gold border border-imperial-gold/40">
+            {outfitsInLookbook.length} bộ trang phục
+          </span>
+        </div>
+
+        {/* Bottom Title on Image */}
+        <div className="absolute bottom-3 inset-x-3 z-10">
+          <h3 className="font-serif font-extrabold text-base sm:text-lg text-silk-ivory leading-snug drop-shadow-md group-hover:text-imperial-gold transition-colors line-clamp-2">
+            {lookbook.title}
+          </h3>
+        </div>
+      </div>
+
+      {/* Info & Actions */}
+      <div className="mt-3 pt-2.5 border-t border-lacquer-border/70 flex items-center justify-between">
+        <div className="min-w-0 flex-1 pr-2">
+          {lookbook.description ? (
+            <p className="text-[11px] text-silk-muted italic truncate">
+              "{lookbook.description}"
+            </p>
+          ) : (
+            <p className="text-[11px] text-silk-muted">
+              Tạo lúc {new Date(lookbook.createdAt).toLocaleDateString('vi-VN')}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm(`Bạn có chắc muốn xóa bộ sưu tập "${lookbook.title}" không? (Các outfit đơn lẻ vẫn được giữ lại)`)) {
+                  onDelete();
+                }
+              }}
+              className="p-1.5 text-silk-muted hover:text-rose-400 hover:bg-rose-950/40 transition-colors"
+              title="Xóa bộ sưu tập"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <span className="p-1 text-imperial-gold group-hover:translate-x-0.5 transition-transform">
+            <ArrowRight className="w-4 h-4" />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface LookbookScreenProps {
   outfits: SavedOutfit[];
+  lookbooks?: Lookbook[];
   isLoggedIn: boolean;
   onLoginPrompt: () => void;
   onLoadOutfitIntoStudio: (outfit: SavedOutfit) => void;
@@ -323,10 +429,21 @@ interface LookbookScreenProps {
   onRenameOutfit: (id: string, newName: string) => void;
   onToggleFavorite?: (id: string) => void;
   onOpenStudio: () => void;
+  onCreateLookbook?: (data: {
+    title: string;
+    description: string;
+    coverImageUrl: string;
+    coverOutfitId: string;
+    outfitIds: string[];
+    decorStamp: 'blossom' | 'cloud' | 'moon' | 'seal';
+  }) => Promise<void>;
+  onDeleteLookbook?: (id: string) => Promise<void>;
+  showToast?: (msg: string) => void;
 }
 
 export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   outfits,
+  lookbooks = [],
   isLoggedIn,
   onLoginPrompt,
   onLoadOutfitIntoStudio,
@@ -334,7 +451,19 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   onRenameOutfit,
   onToggleFavorite,
   onOpenStudio,
+  onCreateLookbook,
+  onDeleteLookbook,
+  showToast = () => {},
 }) => {
+  // Active Tab: 'lookbooks' (Bộ sưu tập) | 'all-outfits' (Tất cả outfit)
+  const [activeTab, setActiveTab] = useState<'lookbooks' | 'all-outfits'>('lookbooks');
+
+  // Modal create lookbook state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Selected lookbook for detail viewer
+  const [selectedLookbook, setSelectedLookbook] = useState<Lookbook | null>(null);
+
   // Modal detail view for clicked outfit
   const [selectedOutfit, setSelectedOutfit] = useState<SavedOutfit | null>(null);
 
@@ -484,85 +613,171 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 if (!isLoggedIn) {
                   onLoginPrompt();
                 } else {
-                  // Ready for lookbook creator
+                  setIsCreateModalOpen(true);
                 }
               }}
               className="py-2.5 px-6 rounded-none bg-gradient-to-r from-[#d8af65] via-[#f2d89b] to-[#d8af65] text-[#241708] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_6px_22px_rgba(216,175,101,0.4)] hover:brightness-110 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border-2 border-[#fae7be]/70 cursor-pointer flex-shrink-0"
-              title="Tạo Lookbook mới"
+              title="Tạo bộ sưu tập mới"
             >
               <BookOpen className="w-4 h-4 stroke-[2.5]" />
-              <span className="font-extrabold">TẠO LOOKBOOK</span>
-              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              <span className="font-extrabold">TẠO BỘ SƯU TẬP</span>
+              <Plus className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* 3. HORIZONTAL SCRAPBOOK GALLERY SHOWCASE CAROUSEL (With Left & Right Edge Fades) */}
-      <div className="relative z-10 w-full pt-4 pb-8">
-        {outfits.length === 0 ? (
-          /* Empty State */
-          <div className="mx-6 sm:mx-12 text-center py-24 p-8 rounded-2xl bg-lacquer-surface/50 border border-lacquer-border backdrop-blur-md">
-            <Layers className="w-16 h-16 text-silk-muted mx-auto mb-4 opacity-30" />
-            <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
-              Chưa có outfit nào trong bộ sưu tập
-            </h3>
-            <p className="text-sm text-silk-muted max-w-sm mx-auto mb-6 leading-relaxed">
-              Hãy quay lại Studio để bắt đầu phối bộ xiêm y cổ phong đầu tiên của bạn!
-            </p>
-            <button
-              onClick={onOpenStudio}
-              className="py-3 px-6 rounded-xl bg-imperial-gold text-lacquer font-bold text-xs uppercase tracking-wider hover:bg-imperial-gold-light shadow-lg transition-all"
-            >
-              Mở Studio Phối Đồ Ngay
-            </button>
-          </div>
-        ) : (
-          /* Carousel Stage Container with Floating Nav Buttons and Edge Fades */
-          <div className="relative w-full">
-            {/* Left Edge Fade for Overflow Effect */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-lacquer via-lacquer/80 to-transparent z-30" />
+      {/* 3. TABS SELECTOR (Trực quan & dễ hiểu): "Bộ Sưu Tập" & "Tất Cả Outfit" */}
+      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 mt-4 mb-2 flex items-center gap-3">
+        <button
+          onClick={() => setActiveTab('lookbooks')}
+          className={`px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 border cursor-pointer ${
+            activeTab === 'lookbooks'
+              ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow-md'
+              : 'bg-lacquer/80 text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Bộ Sưu Tập</span>
+          <span
+            className={`px-1.5 py-0.2 text-[10px] font-bold ${
+              activeTab === 'lookbooks'
+                ? 'bg-lacquer text-imperial-gold'
+                : 'bg-imperial-gold/20 text-imperial-gold'
+            }`}
+          >
+            {lookbooks.length}
+          </span>
+        </button>
 
-            {/* Right Edge Fade for Overflow Effect */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-lacquer via-lacquer/80 to-transparent z-30" />
+        <button
+          onClick={() => setActiveTab('all-outfits')}
+          className={`px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 border cursor-pointer ${
+            activeTab === 'all-outfits'
+              ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow-md'
+              : 'bg-lacquer/80 text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Tất Cả Outfit</span>
+          <span
+            className={`px-1.5 py-0.2 text-[10px] font-bold ${
+              activeTab === 'all-outfits'
+                ? 'bg-lacquer text-imperial-gold'
+                : 'bg-imperial-gold/20 text-imperial-gold'
+            }`}
+          >
+            {outfits.length}
+          </span>
+        </button>
+      </div>
 
-            {/* Floating Left Arrow Button */}
-            <button
-              onClick={() => handleScroll('left')}
-              className="absolute left-2 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
-              title="Cuộn sang trái"
-            >
-              <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
-            </button>
-
-            {/* Floating Right Arrow Button */}
-            <button
-              onClick={() => handleScroll('right')}
-              className="absolute right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
-              title="Cuộn sang phải"
-            >
-              <ChevronRight className="w-6 h-6 stroke-[2.5]" />
-            </button>
-
-            {/* Horizontal Scroll Reel */}
-            <div
-              ref={sliderRef}
-              className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-6 sm:gap-7 lg:gap-8 px-12 sm:px-20 lg:px-24 py-10"
-            >
-              {outfits.map((outfit) => (
-                <ScrapbookPostcardCard
-                  key={outfit.id}
-                  outfit={outfit}
-                  onSelect={() => handleOpenDetail(outfit)}
-                  onToggleFavorite={onToggleFavorite}
-                  isLoggedIn={isLoggedIn}
-                  onLoginPrompt={onLoginPrompt}
+      {/* 4. MAIN CONTENT AREA: TAB "BỘ SƯU TẬP" HOẶC TAB "TẤT CẢ OUTFIT" */}
+      {activeTab === 'lookbooks' ? (
+        /* TAB 1: BỘ SƯU TẬP (LOOKBOOKS ALBUMS GRID) */
+        <div className="relative z-10 w-full pt-4 pb-8">
+          {lookbooks.length === 0 ? (
+            <div className="mx-6 sm:mx-12 text-center py-20 p-8 rounded-none bg-lacquer-surface/60 border border-lacquer-border backdrop-blur-md">
+              <BookOpen className="w-16 h-16 text-imperial-gold/40 mx-auto mb-4" />
+              <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
+                Chưa có bộ sưu tập nào
+              </h3>
+              <p className="text-sm text-silk-muted max-w-md mx-auto mb-6 leading-relaxed">
+                Bạn đã có {outfits.length} bộ outfit. Hãy tạo bộ sưu tập đầu tiên để gom những bộ xiêm y theo chủ đề (Du xuân, dạo phố, công sở, dạ hội)!
+              </p>
+              <button
+                onClick={() => {
+                  if (!isLoggedIn) onLoginPrompt();
+                  else setIsCreateModalOpen(true);
+                }}
+                className="py-3 px-6 rounded-none bg-gradient-to-r from-imperial-gold to-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
+              >
+                Tạo Bộ Sưu Tập Đầu Tiên
+              </button>
+            </div>
+          ) : (
+            <div className="px-4 sm:px-8 lg:px-12 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {lookbooks.map((lb) => (
+                <LookbookAlbumCard
+                  key={lb.id}
+                  lookbook={lb}
+                  allOutfits={outfits}
+                  onOpen={() => setSelectedLookbook(lb)}
+                  onDelete={
+                    onDeleteLookbook ? () => onDeleteLookbook(lb.id) : undefined
+                  }
                 />
               ))}
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        /* TAB 2: TẤT CẢ OUTFIT (SCRAPBOOK POSTCARDS REEL) */
+        <div className="relative z-10 w-full pt-4 pb-8">
+          {outfits.length === 0 ? (
+            /* Empty State */
+            <div className="mx-6 sm:mx-12 text-center py-24 p-8 rounded-2xl bg-lacquer-surface/50 border border-lacquer-border backdrop-blur-md">
+              <Layers className="w-16 h-16 text-silk-muted mx-auto mb-4 opacity-30" />
+              <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
+                Chưa có outfit nào trong bộ sưu tập
+              </h3>
+              <p className="text-sm text-silk-muted max-w-sm mx-auto mb-6 leading-relaxed">
+                Hãy quay lại Studio để bắt đầu phối bộ xiêm y cổ phong đầu tiên của bạn!
+              </p>
+              <button
+                onClick={onOpenStudio}
+                className="py-3 px-6 rounded-xl bg-imperial-gold text-lacquer font-bold text-xs uppercase tracking-wider hover:bg-imperial-gold-light shadow-lg transition-all"
+              >
+                Mở Studio Phối Đồ Ngay
+              </button>
+            </div>
+          ) : (
+            /* Carousel Stage Container with Floating Nav Buttons and Edge Fades */
+            <div className="relative w-full">
+              {/* Left Edge Fade for Overflow Effect */}
+              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-lacquer via-lacquer/80 to-transparent z-30" />
+
+              {/* Right Edge Fade for Overflow Effect */}
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-lacquer via-lacquer/80 to-transparent z-30" />
+
+              {/* Floating Left Arrow Button */}
+              <button
+                onClick={() => handleScroll('left')}
+                className="absolute left-2 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
+                title="Cuộn sang trái"
+              >
+                <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
+              </button>
+
+              {/* Floating Right Arrow Button */}
+              <button
+                onClick={() => handleScroll('right')}
+                className="absolute right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
+                title="Cuộn sang phải"
+              >
+                <ChevronRight className="w-6 h-6 stroke-[2.5]" />
+              </button>
+
+              {/* Horizontal Scroll Reel */}
+              <div
+                ref={sliderRef}
+                className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-6 sm:gap-7 lg:gap-8 px-12 sm:px-20 lg:px-24 py-10"
+              >
+                {outfits.map((outfit) => (
+                  <ScrapbookPostcardCard
+                    key={outfit.id}
+                    outfit={outfit}
+                    onSelect={() => handleOpenDetail(outfit)}
+                    onToggleFavorite={onToggleFavorite}
+                    isLoggedIn={isLoggedIn}
+                    onLoginPrompt={onLoginPrompt}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 4. THE OUTFIT DETAIL MODAL (Opens when clicking any card) */}
       {selectedOutfit && (
@@ -851,6 +1066,33 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create Lookbook Modal */}
+      {onCreateLookbook && (
+        <CreateLookbookModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          outfits={outfits}
+          onCreateLookbook={onCreateLookbook}
+          onOpenStudio={onOpenStudio}
+        />
+      )}
+
+      {/* Lookbook Detail Viewer Modal */}
+      {selectedLookbook && (
+        <LookbookDetailModal
+          isOpen={Boolean(selectedLookbook)}
+          onClose={() => setSelectedLookbook(null)}
+          lookbook={selectedLookbook}
+          allOutfits={outfits}
+          onLoadOutfitIntoStudio={onLoadOutfitIntoStudio}
+          onDeleteLookbook={(id) => {
+            onDeleteLookbook?.(id);
+            setSelectedLookbook(null);
+          }}
+          showToast={showToast}
+        />
       )}
     </div>
   );
