@@ -407,19 +407,19 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
   return (
     <div className="w-full min-h-[calc(100vh-56px)] bg-lacquer text-silk-ivory font-sans pb-16 relative overflow-hidden">
-      {/* ATMOSPHERIC BACKGROUND ENVIRONMENT: Ancient Street Scene under night lantern glow */}
+      {/* ATMOSPHERIC BACKGROUND ENVIRONMENT: 16:9 Ancient Imperial Palace Courtyard & Veranda at Night */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
         <img
-          src="/assets/events/bg-tet-pho-co.jpg"
-          alt="Không gian cổ phong"
-          className="w-full h-full object-cover object-top opacity-20 filter blur-[1.5px]"
+          src="/assets/backgrounds/gallery-bg.jpg"
+          alt="Không gian cổ lầu hoàng cung"
+          className="w-full h-full object-cover object-center opacity-35 sm:opacity-45 filter brightness-90 contrast-105"
         />
-        {/* Ambient Dark Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-lacquer via-lacquer/85 to-lacquer" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_transparent_20%,_#0A0D12_85%)]" />
-        {/* Soft lantern glow warm highlights */}
-        <div className="absolute top-10 right-1/4 w-96 h-96 rounded-full bg-imperial-red/10 filter blur-[90px]" />
-        <div className="absolute top-20 left-1/4 w-80 h-80 rounded-full bg-imperial-gold/10 filter blur-[80px]" />
+        {/* Ambient Dark Gradient Overlays for High Card Contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-lacquer/80 via-lacquer/50 to-lacquer/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#0A0D12_90%)]" />
+        {/* Warm lantern glow highlights */}
+        <div className="absolute top-12 right-1/4 w-96 h-96 rounded-full bg-imperial-gold/15 filter blur-[100px]" />
+        <div className="absolute top-24 left-1/4 w-80 h-80 rounded-full bg-imperial-red/10 filter blur-[90px]" />
       </div>
 
       {/* 1. GUEST SESSION BANNER (Non-intrusive, allows full browsing) */}
@@ -440,25 +440,25 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </div>
       )}
 
-      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Title without badge, Chim Lac Hong motif next to Outfit) */}
+      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Title without badge, Golden Chim Lac Hong motif next to Outfit) */}
       <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 pt-7 pb-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          {/* Left: Title "Bộ Sưu Tập" over "Outfit" + Chim Lạc Hồng Motif */}
+          {/* Left: Title "Bộ Sưu Tập" over "Outfit" + Golden Chim Lạc Hồng Motif */}
           <div className="flex flex-col">
             {/* Line 1: Bộ Sưu Tập */}
             <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md leading-none">
               Bộ Sưu Tập
             </h1>
 
-            {/* Line 2: Outfit + Chim Lạc Hồng Motif Asset */}
+            {/* Line 2: Outfit + Golden Chim Lạc Hồng Motif Asset (Simplified, Golden) */}
             <div className="flex items-center gap-3.5 sm:gap-4 mt-2">
               <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-2 font-bold drop-shadow-[0_4px_14px_rgba(232,200,123,0.35)] leading-none select-none">
                 Outfit
               </span>
               <img
                 src="/assets/decorations/chim-lac.png"
-                alt="Họa tiết chim Lạc Hồng"
-                className="h-8 sm:h-10 lg:h-11 w-auto object-contain filter drop-shadow-[0_2px_10px_rgba(175,39,41,0.6)] select-none pointer-events-none inline-block hover:scale-105 transition-transform"
+                alt="Họa tiết chim Lạc Hồng vàng kim"
+                className="h-8 sm:h-10 lg:h-11 w-auto object-contain filter drop-shadow-[0_2px_12px_rgba(232,200,123,0.5)] select-none pointer-events-none inline-block hover:scale-105 transition-transform"
               />
             </div>
           </div>
