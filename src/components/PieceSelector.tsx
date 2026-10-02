@@ -40,8 +40,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   const [hoveredPiece, setHoveredPiece] = useState<Piece | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const posRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const rafIdRef = useRef<number | null>(null);
-  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Helper to calculate bounded coordinates within viewport
   const calculateTooltipCoords = (clientX: number, clientY: number) => {
@@ -67,19 +65,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
     return { x, y };
   };
 
-  useEffect(() => {
-    return () => {
-      if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
-      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
-    };
-  }, []);
-
   const handleMouseEnterPiece = useCallback((piece: Piece, e: React.MouseEvent<HTMLDivElement>) => {
-    if (leaveTimeoutRef.current) {
-      clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = null;
-    }
-
     const { x, y } = calculateTooltipCoords(e.clientX, e.clientY);
     posRef.current = { x, y };
 
@@ -89,31 +75,16 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
     setHoveredPiece(piece);
   }, []);
 
-  // Zero-react-render mouse movement: directly mutates DOM via requestAnimationFrame
+  // Instant zero-delay 1:1 cursor tracking via direct GPU transform
   const handleMouseMovePiece = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-
-    if (rafIdRef.current !== null) return;
-
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      if (!tooltipRef.current) return;
-
-      const { x, y } = calculateTooltipCoords(clientX, clientY);
-      posRef.current = { x, y };
-      tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    });
+    if (!tooltipRef.current) return;
+    const { x, y } = calculateTooltipCoords(e.clientX, e.clientY);
+    posRef.current = { x, y };
+    tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   }, []);
 
   const handleMouseLeavePiece = useCallback(() => {
-    if (rafIdRef.current !== null) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-    leaveTimeoutRef.current = setTimeout(() => {
-      setHoveredPiece(null);
-    }, 40);
+    setHoveredPiece(null);
   }, []);
 
   const handleSelect = (piece: Piece) => {
@@ -370,7 +341,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                   onMouseEnter={(e) => handleMouseEnterPiece(piece, e)}
                   onMouseMove={handleMouseMovePiece}
                   onMouseLeave={handleMouseLeavePiece}
-                  className={`aspect-square w-full rounded-none border-2 transition-all flex items-center justify-center p-2 relative cursor-pointer group select-none ${
+                  className={`aspect-square w-full rounded-none border-2 transition-colors duration-100 flex items-center justify-center p-2 relative cursor-pointer group select-none ${
                     isPieceActive
                       ? 'bg-lacquer-surface border-imperial-gold shadow-lg ring-1 ring-imperial-gold/50'
                       : 'bg-lacquer/80 border-lacquer-border hover:border-silk-muted/70 hover:bg-lacquer-surface/60'
@@ -390,7 +361,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                     alt={piece.name}
                     loading="lazy"
                     decoding="async"
-                    className="max-h-full max-w-full object-contain filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform"
+                    className="max-h-full max-w-full object-contain filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform duration-100"
                   />
                 </div>
               );
@@ -409,7 +380,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
             left: 0,
             willChange: 'transform',
           }}
-          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in duration-75"
+          className="fixed z-50 pointer-events-none max-w-sm w-[350px]"
         >
           <HeritageCulturalCard piece={hoveredPiece} />
         </div>
