@@ -125,10 +125,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-silk-ivory hover:bg-lacquer-surface/80'
                 }`}
               >
-                {/* Avatar circle with monogram */}
-                <div className="w-7 h-7 rounded-full bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-xs font-serif font-bold shadow-sm">
-                  {initials}
-                </div>
+                {/* Avatar image or monogram */}
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={displayName}
+                    className="w-7 h-7 rounded-full object-cover border border-imperial-gold/60 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-imperial-gold/20 border border-imperial-gold/60 text-imperial-gold flex items-center justify-center text-xs font-serif font-bold shadow-sm">
+                    {initials}
+                  </div>
+                )}
 
                 {/* Name */}
                 <span className="text-sm font-medium text-silk-ivory hidden sm:inline max-w-[120px] truncate">

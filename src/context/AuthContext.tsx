@@ -16,6 +16,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isConfigured: boolean;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -107,6 +108,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   }, []);
+
+  // Sign in with Google (OAuth)
+  const signInWithGoogle = async () => {
+    if (!isSupabaseConfigured) {
+      // Mock Google Sign In
+      const mockProfile: UserProfile = {
+        id: `mock-google-${Date.now()}`,
+        email: 'user.vietphuc@gmail.com',
+        display_name: 'Nguyễn Văn Việt',
+        avatar_url: '',
+      };
+      localStorage.setItem(LOCAL_MOCK_USER_KEY, JSON.stringify(mockProfile));
+      setUser({ id: mockProfile.id, email: mockProfile.email } as User);
+      setProfile(mockProfile);
+      return { error: null };
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      });
+
+      if (error) return { error: error.message };
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message || 'Lỗi khi kết nối với tài khoản Google' };
+    }
+  };
 
   // Sign up
   const signUp = async (email: string, password: string, displayName?: string) => {
@@ -232,6 +268,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       session,
       isLoading,
       isConfigured: isSupabaseConfigured,
+      signInWithGoogle,
       signUp,
       signIn,
       signOut,
