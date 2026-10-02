@@ -45,7 +45,7 @@ export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = React.m
           <div className="flex items-start gap-3">
             <HeritageDynastyIcon className="w-6 h-6 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] text-[#C5A059] block">
+              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] bg-gradient-to-r from-[#FFE89E] via-[#D4AF37] to-[#C59B4E] bg-clip-text text-transparent block">
                 THỜI KỲ LỊCH SỬ:
               </span>
               <p className="text-[#EDE5D8] font-medium mt-0.5 leading-relaxed font-serif">
@@ -60,7 +60,7 @@ export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = React.m
           <div className="flex items-start gap-3">
             <HeritageCulturalIcon className="w-6 h-6 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] text-[#C5A059] block">
+              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] bg-gradient-to-r from-[#FFE89E] via-[#D4AF37] to-[#C59B4E] bg-clip-text text-transparent block">
                 Ý NGHĨA VĂN HÓA:
               </span>
               <p className="text-[#EDE5D8]/95 font-normal mt-0.5 leading-relaxed text-justify">
@@ -75,7 +75,7 @@ export const HeritageCulturalCard: React.FC<HeritageCulturalCardProps> = React.m
           <div className="flex items-start gap-3">
             <HeritageContextIcon className="w-6 h-6 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] text-[#C5A059] block">
+              <span className="font-serif font-black text-xs uppercase tracking-[0.14em] bg-gradient-to-r from-[#FFE89E] via-[#D4AF37] to-[#C59B4E] bg-clip-text text-transparent block">
                 BỐI CẢNH CHUẨN MỰC:
               </span>
               <p className="text-[#EDE5D8]/95 font-normal mt-0.5 leading-relaxed text-justify">

@@ -1,274 +1,54 @@
 import React from 'react';
 
 /**
- * 1. TOP-LEFT CORNER: Antique Brass Filigree with Royal Vermilion Silk Tassel (Tua rua đỏ hoàng gia)
- * Performance: Memoized, zero inline software filter thrashing, GPU-accelerated.
+ * 1. TOP-LEFT CORNER: Real Antique Brass Filigree with Royal Red Silk Tassel (Image Asset)
  */
 export const CornerTopLeftTassel: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
-  <div className={`absolute -top-1.5 -left-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] ${className}`}>
-    <svg width="68" height="88" viewBox="0 0 68 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        {/* Antique Gold Gradient */}
-        <linearGradient id="brassGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#F9E29D" />
-          <stop offset="40%" stopColor="#C5A059" />
-          <stop offset="80%" stopColor="#8C682E" />
-          <stop offset="100%" stopColor="#4A3412" />
-        </linearGradient>
-
-        {/* Imperial Vermilion Red Gradient */}
-        <linearGradient id="silkRedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#A82020" />
-          <stop offset="50%" stopColor="#7E1515" />
-          <stop offset="100%" stopColor="#4A0B0B" />
-        </linearGradient>
-
-        {/* Gold Bead Gradient */}
-        <radialGradient id="goldBead" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#FFF2BF" />
-          <stop offset="50%" stopColor="#D4AF37" />
-          <stop offset="100%" stopColor="#7D5716" />
-        </radialGradient>
-      </defs>
-
-      {/* --- Antique Brass Corner Bracket --- */}
-      <path
-        d="M2 32 V8 C2 4.686 4.686 2 8 2 H32 C26 5 22 10 20 16 C16 16 12 18 10 22 C6 24 4 28 2 32 Z"
-        fill="url(#brassGoldGrad)"
-        stroke="#F5DA88"
-        strokeWidth="0.75"
-      />
-      {/* Cloud scroll filigree on bracket */}
-      <path
-        d="M6 10 C8 6 14 6 16 9 C18 12 15 15 12 14 C10 13 8 15 10 18"
-        stroke="#3A240A"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <circle cx="10" cy="8" r="1.5" fill="#FFF2BF" />
-
-      {/* --- Red Silk Cord Loop Hanging from Bracket --- */}
-      <path
-        d="M16 14 Q14 26 18 32 Q22 26 20 14"
-        fill="none"
-        stroke="#8B1E1E"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-
-      {/* --- Auspicious Red Chinese/Vietnamese Knot (Nút Cát Tường) --- */}
-      <g>
-        {/* Center Diamond Loop */}
-        <rect
-          x="14"
-          y="28"
-          width="8"
-          height="8"
-          rx="1"
-          transform="rotate(45 18 32)"
-          fill="url(#silkRedGrad)"
-          stroke="#E57373"
-          strokeWidth="0.8"
-        />
-        {/* Left ear loop */}
-        <path
-          d="M14 30 C9 28 8 35 13 35"
-          fill="none"
-          stroke="url(#silkRedGrad)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        {/* Right ear loop */}
-        <path
-          d="M22 30 C27 28 28 35 23 35"
-          fill="none"
-          stroke="url(#silkRedGrad)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </g>
-
-      {/* --- Gold Bead Ring --- */}
-      <circle cx="18" cy="40" r="2.8" fill="url(#goldBead)" stroke="#3A2606" strokeWidth="0.5" />
-
-      {/* --- Flowing Red Silk Tassel (Tua rua dài rủ xuống) --- */}
-      <g>
-        {/* Main tassel skirt */}
-        <path
-          d="M16 42 L13 74 Q18 78 23 74 L20 42 Z"
-          fill="url(#silkRedGrad)"
-        />
-        {/* Detailed silk threads highlight */}
-        <path d="M15 44 L14 73" stroke="#C62828" strokeWidth="0.8" opacity="0.9" />
-        <path d="M17 44 L16 75" stroke="#E57373" strokeWidth="0.7" opacity="0.8" />
-        <path d="M18 44 L18 76" stroke="#EF9A9A" strokeWidth="0.8" opacity="0.85" />
-        <path d="M19 44 L20 75" stroke="#C62828" strokeWidth="0.7" opacity="0.9" />
-        <path d="M21 44 L22 73" stroke="#7E1515" strokeWidth="0.8" opacity="0.9" />
-        {/* Tassel tip fringe */}
-        <path d="M13 74 L14 80 M16 75 L17 83 M18 76 L18 84 M20 75 L20 82 M22 74 L21 79" stroke="#9A1B1B" strokeWidth="1" strokeLinecap="round" />
-      </g>
-    </svg>
+  <div className={`absolute -top-1 -left-1 pointer-events-none select-none z-20 ${className}`}>
+    <img
+      src="/assets/decorations/heritage-corners/corner-top-left.png"
+      alt=""
+      className="w-[64px] h-[84px] object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]"
+    />
   </div>
 ));
 
 /**
- * 2. TOP-RIGHT CORNER: Antique Brass Bracket with Blooming Peach Blossoms (Cành đào phai nở hoa)
- * Performance: Memoized, clean vector paths.
+ * 2. TOP-RIGHT CORNER: Real Blooming Peach Blossom Branch (Image Asset)
  */
 export const CornerTopRightBlossom: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
-  <div className={`absolute -top-2.5 -right-2.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)] ${className}`}>
-    <svg width="86" height="74" viewBox="0 0 86 74" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        {/* Brass Gold Gradient */}
-        <linearGradient id="brassCornerRight" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#F9E29D" />
-          <stop offset="40%" stopColor="#C5A059" />
-          <stop offset="80%" stopColor="#8C682E" />
-          <stop offset="100%" stopColor="#4A3412" />
-        </linearGradient>
-
-        {/* Peach Blossom Petal Radial Gradient */}
-        <radialGradient id="petalPink" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFCCD5" />
-          <stop offset="60%" stopColor="#F06292" />
-          <stop offset="100%" stopColor="#AD1457" />
-        </radialGradient>
-
-        <radialGradient id="petalDark" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFA4B6" />
-          <stop offset="70%" stopColor="#C2185B" />
-          <stop offset="100%" stopColor="#880E4F" />
-        </radialGradient>
-      </defs>
-
-      {/* --- Antique Brass Corner Bracket (Mirrored) --- */}
-      <path
-        d="M84 32 V8 C84 4.686 81.314 2 78 2 H54 C60 5 64 10 66 16 C70 16 74 18 76 22 C80 24 82 28 84 32 Z"
-        fill="url(#brassCornerRight)"
-        stroke="#F5DA88"
-        strokeWidth="0.75"
-      />
-      <circle cx="76" cy="8" r="1.5" fill="#FFF2BF" />
-
-      {/* --- Delicate Brown Blossom Twig --- */}
-      <path
-        d="M86 4 Q65 10 44 14 Q28 17 12 16"
-        stroke="#4E342E"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* Small side twigs */}
-      <path d="M52 12 Q45 22 42 26" stroke="#4E342E" strokeWidth="1.6" strokeLinecap="round" fill="none" />
-      <path d="M30 15 Q26 24 22 28" stroke="#4E342E" strokeWidth="1.4" strokeLinecap="round" fill="none" />
-      <path d="M68 8 Q65 18 62 20" stroke="#4E342E" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-
-      {/* --- Flower 1: Main Large Blooming Peach Flower on Right --- */}
-      <g transform="translate(68, 16)">
-        {/* 5 rounded petals */}
-        <circle cx="0" cy="-6" r="4.5" fill="url(#petalPink)" />
-        <circle cx="6" cy="-2" r="4.5" fill="url(#petalPink)" />
-        <circle cx="4" cy="5" r="4.5" fill="url(#petalPink)" />
-        <circle cx="-4" cy="5" r="4.5" fill="url(#petalPink)" />
-        <circle cx="-6" cy="-2" r="4.5" fill="url(#petalPink)" />
-        {/* Flower Center with Gold Pistil */}
-        <circle cx="0" cy="0" r="3" fill="#880E4F" />
-        <circle cx="0" cy="0" r="1.5" fill="#FFF59D" />
-        <circle cx="-1" cy="-1.5" r="0.6" fill="#FFD54F" />
-        <circle cx="1.5" cy="-1" r="0.6" fill="#FFD54F" />
-        <circle cx="1" cy="1.5" r="0.6" fill="#FFD54F" />
-      </g>
-
-      {/* --- Flower 2: Side Blossom Flower in Center --- */}
-      <g transform="translate(44, 24)">
-        <circle cx="0" cy="-5" r="3.8" fill="url(#petalDark)" />
-        <circle cx="5" cy="-1" r="3.8" fill="url(#petalDark)" />
-        <circle cx="3" cy="4" r="3.8" fill="url(#petalDark)" />
-        <circle cx="-3" cy="4" r="3.8" fill="url(#petalDark)" />
-        <circle cx="-5" cy="-1" r="3.8" fill="url(#petalDark)" />
-        <circle cx="0" cy="0" r="2.2" fill="#4A0020" />
-        <circle cx="0" cy="0" r="1.2" fill="#FFF59D" />
-      </g>
-
-      {/* --- Flower 3: Delicate Bud on Tip --- */}
-      <g transform="translate(18, 20)">
-        <ellipse cx="0" cy="0" rx="3.5" ry="2.5" transform="rotate(-20)" fill="url(#petalDark)" />
-        <path d="M-3 2 C-2 4 1 4 2 2" stroke="#2E7D32" strokeWidth="1" fill="none" />
-      </g>
-      {/* Tiny red petal falling */}
-      <ellipse cx="28" cy="38" rx="2" ry="1.4" transform="rotate(35)" fill="#F06292" opacity="0.8" />
-    </svg>
+  <div className={`absolute -top-3.5 -right-3.5 pointer-events-none select-none z-20 ${className}`}>
+    <img
+      src="/assets/decorations/heritage-corners/corner-top-right.png"
+      alt=""
+      className="w-[84px] h-[70px] object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]"
+    />
   </div>
 ));
 
 /**
- * 3. BOTTOM-RIGHT CORNER: Intricate Brass Cloud & Dragon Filigree Bracket (Miếng bịt đồng mây cuộn)
+ * 3. BOTTOM-RIGHT CORNER: Real Antique Vietnamese Brass Dragon & Lotus Filigree Bracket (Image Asset)
  */
 export const CornerBottomRightBrass: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
-  <div className={`absolute -bottom-1.5 -right-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${className}`}>
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="brassBR" x1="100%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stopColor="#F9E29D" />
-          <stop offset="40%" stopColor="#C5A059" />
-          <stop offset="80%" stopColor="#8C682E" />
-          <stop offset="100%" stopColor="#3E2A0E" />
-        </linearGradient>
-      </defs>
-
-      {/* Outer bracket contour */}
-      <path
-        d="M46 16 V40 C46 43.314 43.314 46 40 46 H16 C22 43 26 38 28 32 C32 32 36 30 38 26 C42 24 44 20 46 16 Z"
-        fill="url(#brassBR)"
-        stroke="#F5DA88"
-        strokeWidth="0.75"
-      />
-      {/* Traditional cloud scroll carving */}
-      <path
-        d="M42 38 C40 42 34 42 32 39 C30 36 33 33 36 34 C38 35 40 33 38 30"
-        stroke="#3A240A"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <circle cx="38" cy="40" r="1.5" fill="#FFF2BF" />
-    </svg>
+  <div className={`absolute -bottom-1 -right-1 pointer-events-none select-none z-20 ${className}`}>
+    <img
+      src="/assets/decorations/heritage-corners/corner-bottom-right.png"
+      alt=""
+      className="w-[50px] h-[46px] object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+    />
   </div>
 ));
 
 /**
- * 4. BOTTOM-LEFT CORNER: Antique Brass Bracket with Soft Ink-wash Brush Flourish (Mực tàu loang nhẹ)
+ * 4. BOTTOM-LEFT CORNER: Real Antique Vietnamese Brass Filigree Bracket (Image Asset)
  */
 export const CornerBottomLeft: React.FC<{ className?: string }> = React.memo(({ className = '' }) => (
-  <div className={`absolute -bottom-1.5 -left-1.5 pointer-events-none select-none z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${className}`}>
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="brassBL" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#F9E29D" />
-          <stop offset="40%" stopColor="#C5A059" />
-          <stop offset="80%" stopColor="#8C682E" />
-          <stop offset="100%" stopColor="#3E2A0E" />
-        </linearGradient>
-      </defs>
-
-      {/* Outer bracket contour */}
-      <path
-        d="M2 16 V40 C2 43.314 4.686 46 8 46 H32 C26 43 22 38 20 32 C16 32 12 30 10 26 C6 24 4 20 2 16 Z"
-        fill="url(#brassBL)"
-        stroke="#F5DA88"
-        strokeWidth="0.75"
-      />
-      {/* Cloud swirl carving */}
-      <path
-        d="M6 38 C8 42 14 42 16 39 C18 36 15 33 12 34 C10 35 8 33 10 30"
-        stroke="#3A240A"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <circle cx="10" cy="40" r="1.5" fill="#FFF2BF" />
-    </svg>
+  <div className={`absolute -bottom-1 -left-1 pointer-events-none select-none z-20 ${className}`}>
+    <img
+      src="/assets/decorations/heritage-corners/corner-bottom-left.png"
+      alt=""
+      className="w-[50px] h-[46px] object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+    />
   </div>
 ));
 
