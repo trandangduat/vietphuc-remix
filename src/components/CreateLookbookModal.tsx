@@ -36,12 +36,20 @@ export const CreateLookbookModal: React.FC<CreateLookbookModalProps> = ({
   // First outfit as default selection if exists
   const initialOutfit = outfits[0];
 
+  const getCleanTitle = (o?: SavedOutfit) => {
+    if (!o) return 'Tết Nguyên Đán';
+    if (o.conceptTag && !o.conceptTag.includes('👑')) return o.conceptTag;
+    if (o.name.includes('•')) {
+      const parts = o.name.split('•').map((s) => s.trim()).filter(Boolean);
+      return parts[parts.length - 1] || parts[0];
+    }
+    return o.name || 'Tết Nguyên Đán';
+  };
+
   const [selectedOutfitId, setSelectedOutfitId] = useState<string>(
     initialOutfit?.id || ''
   );
-  const [title, setTitle] = useState(
-    initialOutfit?.conceptTag || initialOutfit?.name || 'Tết Nguyên Đán'
-  );
+  const [title, setTitle] = useState(getCleanTitle(initialOutfit));
   const [subtitle, setSubtitle] = useState(
     initialOutfit ? `Sắc son ${initialOutfit.top.piece.culturalInfo?.period || 'triều Nguyễn'}` : 'Sắc son triều Nguyễn'
   );
@@ -71,19 +79,13 @@ export const CreateLookbookModal: React.FC<CreateLookbookModalProps> = ({
   // When user selects a different outfit
   const handleSelectOutfit = (o: SavedOutfit) => {
     setSelectedOutfitId(o.id);
-    if (!title || title === 'Tết Nguyên Đán' || title === initialOutfit?.name) {
-      setTitle(o.conceptTag || o.name);
-    }
-    if (!subtitle || subtitle === 'Sắc son triều Nguyễn') {
-      setSubtitle(`Sắc son ${o.top.piece.culturalInfo?.period || 'triều Nguyễn'}`);
-    }
-    if (!description || description.length < 20) {
-      setDescription(
-        o.aiAnalysis?.explanation ||
-          o.aiAnalysis?.mascotQuote ||
-          `Phục sức tôn vinh vẻ đẹp kín đáo, thanh nhã hòa quyện cùng bối cảnh ${o.event.name}.`
-      );
-    }
+    setTitle(getCleanTitle(o));
+    setSubtitle(`Sắc son ${o.top.piece.culturalInfo?.period || 'triều Nguyễn'}`);
+    setDescription(
+      o.aiAnalysis?.explanation ||
+        o.aiAnalysis?.mascotQuote ||
+        `Phục sức tôn vinh vẻ đẹp kín đáo, thanh nhã hòa quyện cùng bối cảnh ${o.event.name}.`
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
