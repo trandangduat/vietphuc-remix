@@ -148,6 +148,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           onSaveOutfit={onSaveOutfit}
           isLoggedIn={isLoggedIn}
           canTryOn={canTryOn}
+          onLoginPrompt={onLoginPrompt}
         />
       </div>
 
@@ -188,6 +189,8 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
         onClose={() => setIsTryOnModalOpen(false)}
         outfit={outfit}
         onSaveToLookbook={onSaveTryOnToLookbook}
+        isLoggedIn={isLoggedIn}
+        onLoginPrompt={onLoginPrompt}
       />
 
       <CustomEventModal

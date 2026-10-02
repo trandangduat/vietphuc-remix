@@ -11,7 +11,6 @@ import {
   saveOutfitToDb,
   updateOutfitInDb,
   deleteOutfitFromDb,
-  migrateGuestOutfitsToDb,
 } from './services/outfitService';
 import { PIECES, EVENTS, PRESET_OUTFITS } from './data/catalog';
 import {
@@ -259,28 +258,18 @@ export function App() {
     },
   ];
 
-  const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>(sampleOutfits);
-  const [sessionOutfits, setSessionOutfits] = useState<SavedOutfit[]>(sampleOutfits.slice(0, 2));
+  const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
 
   // Sync outfits with Supabase when user logs in
   useEffect(() => {
     if (user) {
       fetchUserOutfits(user.id).then((dbOutfits) => {
-        if (dbOutfits && dbOutfits.length > 0) {
+        if (dbOutfits) {
           setSavedOutfits(dbOutfits);
         }
       });
-
-      // Migrate session outfits from guest session if any exist
-      if (sessionOutfits.length > 0) {
-        migrateGuestOutfitsToDb(user.id, sessionOutfits).then((migrated) => {
-          if (migrated && migrated.length > 0) {
-            setSavedOutfits((prev) => [...migrated, ...prev]);
-            setSessionOutfits([]);
-            showToast(`✨ Đã đồng bộ ${migrated.length} outfit vào tài khoản của bạn!`);
-          }
-        });
-      }
+    } else {
+      setSavedOutfits([]);
     }
   }, [user?.id]);
 
@@ -292,8 +281,14 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Save active outfit
+  // Save active outfit (Requires login)
   const handleSaveOutfit = async () => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      showToast('🔒 Vui lòng đăng nhập với Google để lưu outfit vào bộ sưu tập cá nhân!');
+      return;
+    }
+
     if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) {
       showToast('⚠️ Vui lòng chọn đủ Áo, Quần và Giày để hoàn tất outfit!');
       return;
@@ -315,23 +310,24 @@ export function App() {
       isFavorite: false,
     };
 
-    if (user) {
-      try {
-        const persisted = await saveOutfitToDb(user.id, newSaved);
-        setSavedOutfits((prev) => [persisted, ...prev]);
-        showToast('✨ Đã lưu outfit thành công vào Database cá nhân!');
-      } catch (e: any) {
-        setSavedOutfits((prev) => [newSaved, ...prev]);
-        showToast('✨ Đã lưu outfit vào Lookbook!');
-      }
-    } else {
-      setSessionOutfits((prev) => [newSaved, ...prev]);
-      showToast('📌 Đã lưu tạm outfit vào phiên làm việc hiện tại!');
+    try {
+      const persisted = await saveOutfitToDb(user!.id, newSaved);
+      setSavedOutfits((prev) => [persisted, ...prev]);
+      showToast('✨ Đã lưu outfit thành công vào Database cá nhân!');
+    } catch (e: any) {
+      setSavedOutfits((prev) => [newSaved, ...prev]);
+      showToast('✨ Đã lưu outfit vào Lookbook!');
     }
   };
 
-  // Save AI Try-on image into Lookbook
+  // Save AI Try-on image into Lookbook (Requires login)
   const handleSaveTryOnToLookbook = async (tryOnImgUrl: string) => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      showToast('🔒 Vui lòng đăng nhập với Google để lưu ảnh AI vào Lookbook cá nhân!');
+      return;
+    }
+
     if (!activeOutfit.topPiece || !activeOutfit.bottomPiece || !activeOutfit.footwearPiece) return;
 
     const tryOnOutfit: SavedOutfit = {
@@ -352,18 +348,13 @@ export function App() {
       isFavorite: false,
     };
 
-    if (user) {
-      try {
-        const persisted = await saveOutfitToDb(user.id, tryOnOutfit);
-        setSavedOutfits((prev) => [persisted, ...prev]);
-        showToast('✨ Ảnh AI Try on đã được lưu vào Database!');
-      } catch {
-        setSavedOutfits((prev) => [tryOnOutfit, ...prev]);
-        showToast('✨ Ảnh AI Try on đã được lưu vào Lookbook cá nhân!');
-      }
-    } else {
-      setSessionOutfits((prev) => [tryOnOutfit, ...prev]);
-      showToast('✨ Ảnh AI Try on đã được lưu vào phiên khách!');
+    try {
+      const persisted = await saveOutfitToDb(user!.id, tryOnOutfit);
+      setSavedOutfits((prev) => [persisted, ...prev]);
+      showToast('✨ Ảnh AI Try on đã được lưu vào Database!');
+    } catch {
+      setSavedOutfits((prev) => [tryOnOutfit, ...prev]);
+      showToast('✨ Ảnh AI Try on đã được lưu vào Lookbook cá nhân!');
     }
   };
 
@@ -423,7 +414,7 @@ export function App() {
   };
 
 
-  const currentDisplayOutfits = isLoggedIn ? savedOutfits : sessionOutfits;
+  const currentDisplayOutfits = isLoggedIn ? savedOutfits : sampleOutfits;
 
   return (
     <div className="min-h-screen flex flex-col bg-lacquer text-silk-ivory">
@@ -436,7 +427,7 @@ export function App() {
           <Navbar
             currentScreen={currentScreen}
             onNavigate={setCurrentScreen}
-            sessionCount={isLoggedIn ? savedOutfits.length : sessionOutfits.length}
+            sessionCount={isLoggedIn ? savedOutfits.length : 0}
             onOpenAuth={() => setShowAuthModal(true)}
           />
 
@@ -467,35 +458,36 @@ export function App() {
                   if (user) {
                     deleteOutfitFromDb(id);
                     setSavedOutfits((prev) => prev.filter((o) => o.id !== id));
+                    showToast('Đã xóa outfit khỏi bộ sưu tập');
                   } else {
-                    setSessionOutfits((prev) => prev.filter((o) => o.id !== id));
+                    setShowAuthModal(true);
                   }
-                  showToast('Đã xóa outfit khỏi bộ sưu tập');
                 }}
                 onRenameOutfit={(id, newName) => {
-                  setSavedOutfits((prev) =>
-                    prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
-                  );
                   if (user) {
+                    setSavedOutfits((prev) =>
+                      prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
+                    );
                     updateOutfitInDb(id, { name: newName });
+                  } else {
+                    setShowAuthModal(true);
                   }
                 }}
                 onToggleFavorite={(id) => {
-                  setSavedOutfits((prev) =>
-                    prev.map((o) => {
-                      if (o.id === id) {
-                        const newFav = !o.isFavorite;
-                        if (user) {
+                  if (user) {
+                    setSavedOutfits((prev) =>
+                      prev.map((o) => {
+                        if (o.id === id) {
+                          const newFav = !o.isFavorite;
                           updateOutfitInDb(id, { isFavorite: newFav });
+                          return { ...o, isFavorite: newFav };
                         }
-                        return { ...o, isFavorite: newFav };
-                      }
-                      return o;
-                    })
-                  );
-                  setSessionOutfits((prev) =>
-                    prev.map((o) => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
-                  );
+                        return o;
+                      })
+                    );
+                  } else {
+                    setShowAuthModal(true);
+                  }
                 }}
                 onOpenStudio={() => setCurrentScreen('studio')}
               />

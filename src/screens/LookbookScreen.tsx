@@ -172,7 +172,9 @@ const ScrapbookPostcardCard: React.FC<{
   outfit: SavedOutfit;
   onSelect: () => void;
   onToggleFavorite?: (id: string) => void;
-}> = ({ outfit, onSelect, onToggleFavorite }) => {
+  isLoggedIn?: boolean;
+  onLoginPrompt?: () => void;
+}> = ({ outfit, onSelect, onToggleFavorite, isLoggedIn, onLoginPrompt }) => {
   const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
   const tilt = outfit.tiltAngle || 0;
   const isFeatured = Boolean(outfit.isFeatured);
@@ -268,9 +270,13 @@ const ScrapbookPostcardCard: React.FC<{
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (!isLoggedIn) {
+                      onLoginPrompt?.();
+                      return;
+                    }
                     onToggleFavorite?.(outfit.id);
                   }}
-                  className="p-1 hover:scale-125 active:scale-95 transition-transform text-[#6d543e] hover:text-[#8B1E1E]"
+                  className="p-1 hover:scale-125 active:scale-95 transition-transform text-[#6d543e] hover:text-[#8B1E1E] cursor-pointer"
                   title={outfit.isFavorite ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
                 >
                   <Heart
@@ -422,20 +428,20 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         <div className="absolute top-24 left-1/4 w-80 h-80 rounded-full bg-imperial-red/10 filter blur-[90px]" />
       </div>
 
-      {/* 1. GUEST SESSION BANNER (Non-intrusive, allows full browsing) */}
+      {/* 1. GUEST SESSION BANNER (Non-intrusive, invites Google Sign-In) */}
       {!isLoggedIn && (
         <div className="relative z-10 w-full bg-lacquer-surface/90 backdrop-blur-md border-b border-imperial-gold/30 px-4 sm:px-6 lg:px-10 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-imperial-gold animate-ping" />
             <span className="text-silk-muted">
-              Bạn đang ở chế độ xem tạm thời ({outfits.length} outfit đã lưu trong phiên).
+              Đăng nhập bằng tài khoản Google để bắt đầu lưu trữ và quản lý các bộ sưu tập Việt phục của riêng bạn.
             </span>
           </div>
           <button
             onClick={onLoginPrompt}
-            className="px-4 py-1.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider shadow transition-all whitespace-nowrap"
+            className="px-4 py-1.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider shadow transition-all whitespace-nowrap cursor-pointer"
           >
-            Đăng nhập để lưu vĩnh viễn
+            Đăng nhập với Google
           </button>
         </div>
       )}
@@ -474,7 +480,13 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
             {/* Stylized Golden Parchment Button (rounded-none, sharp corners) */}
             <button
-              onClick={() => {}}
+              onClick={() => {
+                if (!isLoggedIn) {
+                  onLoginPrompt();
+                } else {
+                  // Ready for lookbook creator
+                }
+              }}
               className="py-2.5 px-6 rounded-none bg-gradient-to-r from-[#d8af65] via-[#f2d89b] to-[#d8af65] text-[#241708] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_6px_22px_rgba(216,175,101,0.4)] hover:brightness-110 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border-2 border-[#fae7be]/70 cursor-pointer flex-shrink-0"
               title="Tạo Lookbook mới"
             >
@@ -543,6 +555,8 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   outfit={outfit}
                   onSelect={() => handleOpenDetail(outfit)}
                   onToggleFavorite={onToggleFavorite}
+                  isLoggedIn={isLoggedIn}
+                  onLoginPrompt={onLoginPrompt}
                 />
               ))}
             </div>
@@ -665,16 +679,18 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       <h2 className="font-serif font-extrabold text-2xl text-silk-ivory tracking-tight">
                         {selectedOutfit.name}
                       </h2>
-                      <button
-                        onClick={() => {
-                          setIsEditingName(true);
-                          setEditNameText(selectedOutfit.name);
-                        }}
-                        className="text-silk-muted hover:text-imperial-gold opacity-0 group-hover/edit:opacity-100 transition-opacity p-1"
-                        title="Đổi tên bộ trang phục"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      {isLoggedIn && (
+                        <button
+                          onClick={() => {
+                            setIsEditingName(true);
+                            setEditNameText(selectedOutfit.name);
+                          }}
+                          className="text-silk-muted hover:text-imperial-gold opacity-0 group-hover/edit:opacity-100 transition-opacity p-1"
+                          title="Đổi tên bộ trang phục"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   )}
 
@@ -817,18 +833,20 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   <span>Mở Trong Studio (Remix)</span>
                 </button>
 
-                <button
-                  onClick={() => {
-                    const idToDelete = selectedOutfit.id;
-                    setSelectedOutfit(null);
-                    onDeleteOutfit(idToDelete);
-                  }}
-                  className="py-3 px-4 rounded-xl bg-lacquer hover:bg-rose-950/60 border border-lacquer-border hover:border-rose-500/50 text-silk-muted hover:text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
-                  title="Xóa bộ trang phục này"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Xóa</span>
-                </button>
+                {isLoggedIn && (
+                  <button
+                    onClick={() => {
+                      const idToDelete = selectedOutfit.id;
+                      setSelectedOutfit(null);
+                      onDeleteOutfit(idToDelete);
+                    }}
+                    className="py-3 px-4 rounded-xl bg-lacquer hover:bg-rose-950/60 border border-lacquer-border hover:border-rose-500/50 text-silk-muted hover:text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                    title="Xóa bộ trang phục này"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Xóa</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

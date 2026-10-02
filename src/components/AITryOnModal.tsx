@@ -7,6 +7,8 @@ interface AITryOnModalProps {
   onClose: () => void;
   outfit: ActiveOutfitState;
   onSaveToLookbook: (tryOnResultUrl: string) => void;
+  isLoggedIn?: boolean;
+  onLoginPrompt?: () => void;
 }
 
 export const AITryOnModal: React.FC<AITryOnModalProps> = ({
@@ -14,6 +16,8 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   onClose,
   outfit,
   onSaveToLookbook,
+  isLoggedIn = false,
+  onLoginPrompt,
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isMinorConsent, setIsMinorConsent] = useState(false);
@@ -176,12 +180,16 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               </button>
               <button
                 onClick={() => {
+                  if (!isLoggedIn) {
+                    onLoginPrompt?.();
+                    return;
+                  }
                   onSaveToLookbook(generatedResult);
                   onClose();
                 }}
-                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider"
+                className="py-3 px-4 rounded-none bg-imperial-gold text-lacquer font-bold text-sm hover:bg-imperial-gold-light shadow-md uppercase tracking-wider cursor-pointer"
               >
-                Lưu vào Lookbook
+                {isLoggedIn ? 'Lưu vào Lookbook' : 'Đăng nhập để lưu ảnh'}
               </button>
             </div>
           </div>

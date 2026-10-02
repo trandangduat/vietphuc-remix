@@ -17,6 +17,7 @@ interface StudioCanvas2DProps {
   onSaveOutfit: () => void;
   isLoggedIn: boolean;
   canTryOn: boolean;
+  onLoginPrompt?: () => void;
 }
 
 export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
@@ -29,6 +30,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
   onSaveOutfit,
   isLoggedIn,
   canTryOn,
+  onLoginPrompt,
 }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -55,6 +57,10 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
 
   // Export current layers to a single downloadable PNG via HTML5 Canvas
   const handleDownloadMockup = async () => {
+    if (!isLoggedIn) {
+      onLoginPrompt?.();
+      return;
+    }
     setIsExporting(true);
     try {
       const canvas = document.createElement('canvas');
@@ -356,7 +362,13 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         {/* Action 2: Save Outfit */}
         <div className="relative group flex items-center justify-center">
           <button
-            onClick={onSaveOutfit}
+            onClick={() => {
+              if (!isLoggedIn) {
+                onLoginPrompt?.();
+              } else {
+                onSaveOutfit();
+              }
+            }}
             disabled={!canTryOn}
             aria-label="Lưu outfit"
             className={`w-12 h-12 flex items-center justify-center transition-all duration-200 ${
@@ -371,7 +383,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           {/* Left-floating Tooltip */}
           <div className="absolute right-full mr-3.5 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
             <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-bold px-3 py-1.5 rounded-none border border-imperial-gold/60 shadow-2xl backdrop-blur-md whitespace-nowrap">
-              {canTryOn ? (isLoggedIn ? 'Lưu vào Lookbook cá nhân' : 'Lưu tạm vào phiên hiện tại') : 'Chọn đủ Áo, Quần, Giày để lưu'}
+              {canTryOn ? (isLoggedIn ? 'Lưu vào Lookbook cá nhân' : 'Đăng nhập để lưu outfit') : 'Chọn đủ Áo, Quần, Giày để lưu'}
             </div>
             <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-imperial-gold/60" />
           </div>
@@ -395,7 +407,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
           {/* Left-floating Tooltip */}
           <div className="absolute right-full mr-3.5 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
             <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-bold px-3 py-1.5 rounded-none border border-imperial-gold/60 shadow-2xl backdrop-blur-md whitespace-nowrap">
-              {downloadSuccess ? 'Đã tải ảnh mockup thành công!' : 'Tải ảnh phối đồ 2D (PNG)'}
+              {downloadSuccess ? 'Đã tải ảnh mockup thành công!' : (isLoggedIn ? 'Tải ảnh phối đồ 2D (PNG)' : 'Đăng nhập để tải/lưu ảnh')}
             </div>
             <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-imperial-gold/60" />
           </div>
