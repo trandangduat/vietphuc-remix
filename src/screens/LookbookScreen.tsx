@@ -318,7 +318,7 @@ const ScrapbookPostcardCard: React.FC<{
 };
 
 /**
- * Lookbook Album Card (Bộ sưu tập chuyên đề)
+ * Lookbook Album Card (Trang Lookbook tạp chí thời trang)
  */
 const LookbookAlbumCard: React.FC<{
   lookbook: Lookbook;
@@ -326,17 +326,14 @@ const LookbookAlbumCard: React.FC<{
   onOpen: () => void;
   onDelete?: () => void;
 }> = ({ lookbook, allOutfits, onOpen, onDelete }) => {
-  const outfitsInLookbook = allOutfits.filter((o) =>
-    lookbook.outfitIds.includes(o.id)
-  );
-  const coverOutfit =
-    outfitsInLookbook.find((o) => o.id === lookbook.coverOutfitId) ||
-    outfitsInLookbook[0];
+  const outfit =
+    allOutfits.find((o) => o.id === lookbook.outfitId) ||
+    allOutfits.find((o) => lookbook.outfitIds?.includes(o.id));
   const coverImage =
     lookbook.coverImageUrl ||
-    coverOutfit?.tryOnImage ||
-    coverOutfit?.top?.piece?.thumbnailUrl ||
-    coverOutfit?.top?.piece?.assetUrl ||
+    outfit?.tryOnImage ||
+    outfit?.top?.piece?.thumbnailUrl ||
+    outfit?.top?.piece?.assetUrl ||
     '';
 
   return (
@@ -366,10 +363,10 @@ const LookbookAlbumCard: React.FC<{
           <DecorWatermark type={lookbook.decorStamp || 'seal'} />
         </div>
 
-        {/* Outfit count badge */}
+        {/* Look Number badge */}
         <div className="absolute top-2.5 left-2.5 z-10">
           <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-black/75 backdrop-blur-md text-imperial-gold border border-imperial-gold/40">
-            {outfitsInLookbook.length} bộ trang phục
+            {lookbook.lookNumber || 'LOOK 01'}
           </span>
         </div>
 
@@ -378,6 +375,11 @@ const LookbookAlbumCard: React.FC<{
           <h3 className="font-serif font-extrabold text-base sm:text-lg text-silk-ivory leading-snug drop-shadow-md group-hover:text-imperial-gold transition-colors line-clamp-2">
             {lookbook.title}
           </h3>
+          {lookbook.subtitle && (
+            <p className="text-[11px] text-imperial-gold/90 font-serif italic drop-shadow mt-0.5">
+              {lookbook.subtitle}
+            </p>
+          )}
         </div>
       </div>
 
@@ -400,12 +402,12 @@ const LookbookAlbumCard: React.FC<{
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm(`Bạn có chắc muốn xóa bộ sưu tập "${lookbook.title}" không? (Các outfit đơn lẻ vẫn được giữ lại)`)) {
+                if (window.confirm(`Bạn có chắc muốn xóa Lookbook "${lookbook.title}" không? (Outfit gốc vẫn được giữ lại)`)) {
                   onDelete();
                 }
               }}
               className="p-1.5 text-silk-muted hover:text-rose-400 hover:bg-rose-950/40 transition-colors"
-              title="Xóa bộ sưu tập"
+              title="Xóa Lookbook"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -431,10 +433,11 @@ interface LookbookScreenProps {
   onOpenStudio: () => void;
   onCreateLookbook?: (data: {
     title: string;
+    subtitle: string;
     description: string;
+    outfitId: string;
     coverImageUrl: string;
-    coverOutfitId: string;
-    outfitIds: string[];
+    verticalPoem: string;
     decorStamp: 'blossom' | 'cloud' | 'moon' | 'seal';
   }) => Promise<void>;
   onDeleteLookbook?: (id: string) => Promise<void>;
@@ -617,17 +620,17 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 }
               }}
               className="py-2.5 px-6 rounded-none bg-gradient-to-r from-[#d8af65] via-[#f2d89b] to-[#d8af65] text-[#241708] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_6px_22px_rgba(216,175,101,0.4)] hover:brightness-110 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border-2 border-[#fae7be]/70 cursor-pointer flex-shrink-0"
-              title="Tạo bộ sưu tập mới"
+              title="Tạo Lookbook mới"
             >
               <BookOpen className="w-4 h-4 stroke-[2.5]" />
-              <span className="font-extrabold">TẠO BỘ SƯU TẬP</span>
+              <span className="font-extrabold">TẠO LOOKBOOK</span>
               <Plus className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* 3. TABS SELECTOR (Trực quan & dễ hiểu): "Bộ Sưu Tập" & "Tất Cả Outfit" */}
+      {/* 3. TABS SELECTOR (Trực quan & dễ hiểu): "Lookbook" & "Tất Cả Outfit" */}
       <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 mt-4 mb-2 flex items-center gap-3">
         <button
           onClick={() => setActiveTab('lookbooks')}
@@ -638,7 +641,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Bộ Sưu Tập</span>
+          <span>Lookbook</span>
           <span
             className={`px-1.5 py-0.2 text-[10px] font-bold ${
               activeTab === 'lookbooks'
@@ -672,18 +675,18 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </button>
       </div>
 
-      {/* 4. MAIN CONTENT AREA: TAB "BỘ SƯU TẬP" HOẶC TAB "TẤT CẢ OUTFIT" */}
+      {/* 4. MAIN CONTENT AREA: TAB "LOOKBOOK" HOẶC TAB "TẤT CẢ OUTFIT" */}
       {activeTab === 'lookbooks' ? (
-        /* TAB 1: BỘ SƯU TẬP (LOOKBOOKS ALBUMS GRID) */
+        /* TAB 1: LOOKBOOK (MAGAZINE SPREADS GRID) */
         <div className="relative z-10 w-full pt-4 pb-8">
           {lookbooks.length === 0 ? (
             <div className="mx-6 sm:mx-12 text-center py-20 p-8 rounded-none bg-lacquer-surface/60 border border-lacquer-border backdrop-blur-md">
               <BookOpen className="w-16 h-16 text-imperial-gold/40 mx-auto mb-4" />
               <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
-                Chưa có bộ sưu tập nào
+                Chưa có Lookbook nào
               </h3>
               <p className="text-sm text-silk-muted max-w-md mx-auto mb-6 leading-relaxed">
-                Bạn đã có {outfits.length} bộ outfit. Hãy tạo bộ sưu tập đầu tiên để gom những bộ xiêm y theo chủ đề (Du xuân, dạo phố, công sở, dạ hội)!
+                Bạn đã có {outfits.length} bộ outfit đã lưu. Hãy chọn 1 bộ outfit và bấm 'TẠO LOOKBOOK' để biến thành trang bìa tạp chí thời trang cổ phong tinh xảo!
               </p>
               <button
                 onClick={() => {
@@ -692,7 +695,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 }}
                 className="py-3 px-6 rounded-none bg-gradient-to-r from-imperial-gold to-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
               >
-                Tạo Bộ Sưu Tập Đầu Tiên
+                Tạo Lookbook Đầu Tiên
               </button>
             </div>
           ) : (

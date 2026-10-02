@@ -430,10 +430,11 @@ export function App() {
   // Create Lookbook
   const handleCreateLookbook = async (data: {
     title: string;
+    subtitle: string;
     description: string;
+    outfitId: string;
     coverImageUrl: string;
-    coverOutfitId: string;
-    outfitIds: string[];
+    verticalPoem: string;
     decorStamp: 'blossom' | 'cloud' | 'moon' | 'seal';
   }) => {
     if (!user) {
@@ -442,7 +443,7 @@ export function App() {
     }
     const created = await createLookbookInDb(user.id, data);
     setLookbooks((prev) => [created, ...prev]);
-    showToast(`✨ Đã tạo bộ sưu tập "${created.title}" thành công!`);
+    showToast(`✨ Đã tạo Lookbook "${created.title}" thành công!`);
   };
 
   // Delete Lookbook
@@ -450,7 +451,7 @@ export function App() {
     if (!user) return;
     await deleteLookbookFromDb(id);
     setLookbooks((prev) => prev.filter((l) => l.id !== id));
-    showToast('Đã xóa bộ sưu tập');
+    showToast('Đã xóa Lookbook');
   };
 
   return (

@@ -8,13 +8,19 @@ const isUuid = (id: string) =>
  * Chuyển đổi từ Supabase DB Row sang TypeScript Lookbook
  */
 export const dbToLookbook = (row: any): Lookbook => {
+  const outfitIds = Array.isArray(row.outfit_ids) ? row.outfit_ids : [];
   return {
     id: row.id,
     userId: row.user_id,
     title: row.title,
+    subtitle: row.subtitle || 'Sắc son triều Nguyễn',
+    lookNumber: row.look_number || 'LOOK 01',
     description: row.description || '',
+    outfitId: row.outfit_id || outfitIds[0] || '',
+    outfitIds,
     coverImageUrl: row.cover_image_url || '',
-    outfitIds: Array.isArray(row.outfit_ids) ? row.outfit_ids : [],
+    verticalPoem: row.vertical_poem || 'Tết đến xuân về vạn sự như ý',
+    decorStamp: row.decor_stamp || 'seal',
     isPublic: Boolean(row.is_public),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -62,29 +68,37 @@ export const fetchUserLookbooks = async (userId: string): Promise<Lookbook[]> =>
 };
 
 /**
- * 2. Tạo lookbook mới trong Supabase
+ * 2. Tạo lookbook mới trong Supabase (chọn 1 outfit duy nhất)
  */
 export const createLookbookInDb = async (
   userId: string,
   lookbook: {
     title: string;
-    description?: string;
+    subtitle?: string;
+    lookNumber?: string;
+    description: string;
+    outfitId: string;
     coverImageUrl?: string;
-    outfitIds: string[];
+    verticalPoem?: string;
+    decorStamp?: 'blossom' | 'cloud' | 'moon' | 'seal';
     isPublic?: boolean;
-    decorStamp?: string;
   }
 ): Promise<Lookbook> => {
-  const validOutfitIds = (lookbook.outfitIds || []).filter(isUuid);
+  const outfitIds = isUuid(lookbook.outfitId) ? [lookbook.outfitId] : [];
 
   if (!isSupabaseConfigured) {
     const newLookbook: Lookbook = {
       id: `lookbook-${Date.now()}`,
       userId,
       title: lookbook.title,
+      subtitle: lookbook.subtitle || 'Sắc son triều Nguyễn',
+      lookNumber: lookbook.lookNumber || 'LOOK 01',
       description: lookbook.description || '',
+      outfitId: lookbook.outfitId,
+      outfitIds: [lookbook.outfitId],
       coverImageUrl: lookbook.coverImageUrl || '',
-      outfitIds: lookbook.outfitIds || [],
+      verticalPoem: lookbook.verticalPoem || 'Tết đến xuân về vạn sự như ý',
+      decorStamp: lookbook.decorStamp || 'seal',
       isPublic: Boolean(lookbook.isPublic),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -106,7 +120,7 @@ export const createLookbookInDb = async (
       title: lookbook.title,
       description: lookbook.description || null,
       cover_image_url: lookbook.coverImageUrl || null,
-      outfit_ids: validOutfitIds,
+      outfit_ids: outfitIds,
       is_public: Boolean(lookbook.isPublic),
     };
 
@@ -122,10 +136,11 @@ export const createLookbookInDb = async (
     }
 
     const created = dbToLookbook(data);
-    // If some outfitIds weren't UUIDs (e.g. client-side temp ids), preserve them in returned object
-    if (lookbook.outfitIds && lookbook.outfitIds.length > created.outfitIds.length) {
-      created.outfitIds = lookbook.outfitIds;
-    }
+    created.outfitId = lookbook.outfitId;
+    created.subtitle = lookbook.subtitle || 'Sắc son triều Nguyễn';
+    created.lookNumber = lookbook.lookNumber || 'LOOK 01';
+    created.verticalPoem = lookbook.verticalPoem || 'Tết đến xuân về vạn sự như ý';
+    created.decorStamp = lookbook.decorStamp || 'seal';
     return created;
   } catch (err: any) {
     console.error('Exception khi tạo lookbook:', err);
@@ -140,16 +155,14 @@ export const updateLookbookInDb = async (
   lookbookId: string,
   updates: Partial<Lookbook>
 ): Promise<void> => {
-  if (!isSupabaseConfigured) {
-    return;
-  }
+  if (!isSupabaseConfigured) return;
 
   const dbUpdates: any = {};
   if (updates.title !== undefined) dbUpdates.title = updates.title;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
   if (updates.coverImageUrl !== undefined) dbUpdates.cover_image_url = updates.coverImageUrl;
-  if (updates.outfitIds !== undefined) {
-    dbUpdates.outfit_ids = updates.outfitIds.filter(isUuid);
+  if (updates.outfitId !== undefined) {
+    dbUpdates.outfit_ids = isUuid(updates.outfitId) ? [updates.outfitId] : [];
   }
   if (updates.isPublic !== undefined) dbUpdates.is_public = updates.isPublic;
 

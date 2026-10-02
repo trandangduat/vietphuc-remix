@@ -130,10 +130,13 @@ export interface Lookbook {
   id: string;
   userId: string;
   title: string;
-  description?: string;
+  subtitle?: string;
+  lookNumber?: string;
+  description: string;
+  outfitId: string;
+  outfitIds?: string[];
   coverImageUrl?: string;
-  coverOutfitId?: string;
-  outfitIds: string[];
+  verticalPoem?: string;
   decorStamp?: 'cloud' | 'blossom' | 'moon' | 'seal';
   isPublic?: boolean;
   createdAt: string;
