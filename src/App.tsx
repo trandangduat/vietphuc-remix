@@ -3,7 +3,6 @@ import { Navbar } from './components/Navbar';
 import { LandingScreen } from './screens/LandingScreen';
 import { StudioScreen } from './screens/StudioScreen';
 import { LookbookScreen } from './screens/LookbookScreen';
-import { DevCalibratorScreen } from './screens/DevCalibratorScreen';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import {
@@ -22,28 +21,10 @@ import {
 import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
 export function App() {
-  const [currentScreen, setCurrentScreen] = useState<'landing' | 'studio' | 'lookbook' | 'dev-calibrate'>('landing');
+  const [currentScreen, setCurrentScreen] = useState<'landing' | 'studio' | 'lookbook'>('landing');
   const { user, profile } = useAuth();
   const isLoggedIn = Boolean(user);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  // Dev-only hotkeys & URL params
-  useEffect(() => {
-    // Check URL query ?dev=calibrate or hash #calibrate
-    if (window.location.search.includes('dev=calibrate') || window.location.hash === '#calibrate') {
-      setCurrentScreen('dev-calibrate');
-    }
-
-    const handleDevShortcut = (e: KeyboardEvent) => {
-      // Ctrl+Shift+D or Alt+C
-      if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') || (e.altKey && e.key.toLowerCase() === 'c')) {
-        e.preventDefault();
-        setCurrentScreen((prev) => (prev === 'dev-calibrate' ? 'studio' : 'dev-calibrate'));
-      }
-    };
-    window.addEventListener('keydown', handleDevShortcut);
-    return () => window.removeEventListener('keydown', handleDevShortcut);
-  }, []);
 
   // Initial active outfit state
   const initialTop = PIECES.find((p) => p.id === 'piece-ao-tac-do') || PIECES[0];
@@ -435,77 +416,70 @@ export function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-lacquer text-silk-ivory">
-      {/* Dev Calibrator Screen (Full workbench mode) */}
-      {currentScreen === 'dev-calibrate' ? (
-        <DevCalibratorScreen onExit={() => setCurrentScreen('studio')} />
-      ) : (
-        <>
-          {/* Global Navbar */}
-          <Navbar
-            currentScreen={currentScreen}
-            onNavigate={handleNavigate}
-            sessionCount={isLoggedIn ? savedOutfits.length : 0}
-            onOpenAuth={() => setShowAuthModal(true)}
+      {/* Global Navbar */}
+      <Navbar
+        currentScreen={currentScreen}
+        onNavigate={handleNavigate}
+        sessionCount={isLoggedIn ? savedOutfits.length : 0}
+        onOpenAuth={() => setShowAuthModal(true)}
+      />
+
+      {/* Screen Routing */}
+      <main className="flex-1 flex flex-col">
+        {currentScreen === 'landing' && (
+          <LandingScreen onOpenStudio={handleOpenStudio} />
+        )}
+
+        {currentScreen === 'studio' && (
+          <StudioScreen
+            outfit={activeOutfit}
+            setOutfit={setActiveOutfit}
+            isLoggedIn={isLoggedIn}
+            onLoginPrompt={() => setShowAuthModal(true)}
+            onSaveOutfit={handleSaveOutfit}
+            onSaveTryOnToLookbook={handleSaveTryOnToLookbook}
           />
+        )}
 
-          {/* Screen Routing */}
-          <main className="flex-1 flex flex-col">
-            {currentScreen === 'landing' && (
-              <LandingScreen onOpenStudio={handleOpenStudio} />
-            )}
-
-            {currentScreen === 'studio' && (
-              <StudioScreen
-                outfit={activeOutfit}
-                setOutfit={setActiveOutfit}
-                isLoggedIn={isLoggedIn}
-                onLoginPrompt={() => setShowAuthModal(true)}
-                onSaveOutfit={handleSaveOutfit}
-                onSaveTryOnToLookbook={handleSaveTryOnToLookbook}
-              />
-            )}
-
-            {currentScreen === 'lookbook' && isLoggedIn && (
-              <LookbookScreen
-                outfits={savedOutfits}
-                isLoggedIn={isLoggedIn}
-                onLoginPrompt={() => setShowAuthModal(true)}
-                onLoadOutfitIntoStudio={handleLoadOutfitIntoStudio}
-                onDeleteOutfit={(id) => {
-                  if (user) {
-                    deleteOutfitFromDb(id);
-                    setSavedOutfits((prev) => prev.filter((o) => o.id !== id));
-                    showToast('Đã xóa outfit khỏi bộ sưu tập');
-                  }
-                }}
-                onRenameOutfit={(id, newName) => {
-                  if (user) {
-                    setSavedOutfits((prev) =>
-                      prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
-                    );
-                    updateOutfitInDb(id, { name: newName });
-                  }
-                }}
-                onToggleFavorite={(id) => {
-                  if (user) {
-                    setSavedOutfits((prev) =>
-                      prev.map((o) => {
-                        if (o.id === id) {
-                          const newFav = !o.isFavorite;
-                          updateOutfitInDb(id, { isFavorite: newFav });
-                          return { ...o, isFavorite: newFav };
-                        }
-                        return o;
-                      })
-                    );
-                  }
-                }}
-                onOpenStudio={() => setCurrentScreen('studio')}
-              />
-            )}
-          </main>
-        </>
-      )}
+        {currentScreen === 'lookbook' && isLoggedIn && (
+          <LookbookScreen
+            outfits={savedOutfits}
+            isLoggedIn={isLoggedIn}
+            onLoginPrompt={() => setShowAuthModal(true)}
+            onLoadOutfitIntoStudio={handleLoadOutfitIntoStudio}
+            onDeleteOutfit={(id) => {
+              if (user) {
+                deleteOutfitFromDb(id);
+                setSavedOutfits((prev) => prev.filter((o) => o.id !== id));
+                showToast('Đã xóa outfit khỏi bộ sưu tập');
+              }
+            }}
+            onRenameOutfit={(id, newName) => {
+              if (user) {
+                setSavedOutfits((prev) =>
+                  prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
+                );
+                updateOutfitInDb(id, { name: newName });
+              }
+            }}
+            onToggleFavorite={(id) => {
+              if (user) {
+                setSavedOutfits((prev) =>
+                  prev.map((o) => {
+                    if (o.id === id) {
+                      const newFav = !o.isFavorite;
+                      updateOutfitInDb(id, { isFavorite: newFav });
+                      return { ...o, isFavorite: newFav };
+                    }
+                    return o;
+                  })
+                );
+              }
+            }}
+            onOpenStudio={() => setCurrentScreen('studio')}
+          />
+        )}
+      </main>
 
       {/* Real Supabase Authentication Modal */}
       <AuthModal
@@ -515,19 +489,6 @@ export function App() {
           showToast(`✨ Chào mừng bạn, ${profile?.display_name || 'Đăng nhập thành công!'}!`);
         }}
       />
-
-      {/* Floating Developer Calibrator Launcher (Only visible in DEV mode, never in production) */}
-      {import.meta.env.DEV && currentScreen !== 'dev-calibrate' && (
-        <button
-          onClick={() => setCurrentScreen('dev-calibrate')}
-          className="fixed bottom-3 left-3 z-50 px-3 py-1.5 bg-lacquer/95 hover:bg-lacquer-surface text-imperial-gold text-xs font-mono font-bold border-2 border-imperial-gold/60 shadow-2xl flex items-center gap-2 transition-all hover:scale-105 rounded-none"
-          title="Mở Bộ Căn Chỉnh Piece (Dev Only - Phím tắt Ctrl+Shift+D)"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-          <span>🛠️ Dev Calibrator</span>
-          <span className="text-[10px] text-silk-muted px-1 py-0.5 bg-lacquer border border-lacquer-border">Ctrl+Shift+D</span>
-        </button>
-      )}
 
       {/* Toast Notification */}
       {toastMessage && (

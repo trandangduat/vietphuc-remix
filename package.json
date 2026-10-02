@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:calibrator": "vite --open /calibrator.html --port 3001",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

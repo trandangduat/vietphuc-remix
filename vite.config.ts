@@ -87,5 +87,13 @@ export default defineConfig({
     port: 3000,
     open: false,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        calibrator: path.resolve(__dirname, 'calibrator.html'),
+      },
+    },
+  },
 });
 

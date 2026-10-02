@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 interface DevCalibratorScreenProps {
-  onExit: () => void;
+  onExit?: () => void;
 }
 
 export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit }) => {
@@ -230,11 +230,11 @@ export const DevCalibratorScreen: React.FC<DevCalibratorScreenProps> = ({ onExit
       <header className="border-b-2 border-imperial-gold/40 bg-lacquer-surface px-4 py-3 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <button
-            onClick={onExit}
+            onClick={onExit || (() => { window.location.href = '/'; })}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-lacquer border border-lacquer-border hover:border-imperial-gold text-sm font-semibold transition-all hover:bg-lacquer-hover"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Thoát về Studio</span>
+            <span>Về Web Chính</span>
           </button>
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase font-extrabold px-2 py-0.5 bg-imperial-red text-white tracking-widest border border-imperial-red-bright shadow-sm">
