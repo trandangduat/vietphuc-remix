@@ -21,6 +21,12 @@ import {
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
 import { CreateLookbookModal } from '../components/CreateLookbookModal';
 import { LookbookDetailModal } from '../components/LookbookDetailModal';
+import {
+  CornerTopLeftTassel,
+  CornerTopRightBlossom,
+  CornerBottomRightBrass,
+  CornerBottomLeft,
+} from '../components/heritage/HeritageDecorations';
 
 
 /**
@@ -790,16 +796,22 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         >
           {/* Modal Container */}
           <div
-            className="w-full max-w-5xl max-h-[92vh] bg-lacquer-surface border-2 border-imperial-gold shadow-[0_24px_64px_rgba(0,0,0,0.95)] rounded-2xl flex flex-col lg:flex-row overflow-hidden animate-in zoom-in-95 duration-200 relative"
+            className="w-full max-w-5xl max-h-[92vh] bg-gradient-to-b from-[#14110E] via-[#0E0C0A] to-[#0A0908] border border-[#C5A059]/75 shadow-[0_24px_72px_rgba(0,0,0,0.96),0_0_24px_rgba(197,160,89,0.2)] rounded-none flex flex-col lg:flex-row overflow-hidden animate-in zoom-in-95 duration-200 relative"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* 4 Heritage Corners */}
+            <CornerTopLeftTassel />
+            <CornerTopRightBlossom />
+            <CornerBottomRightBrass />
+            <CornerBottomLeft />
+
             {/* Close Button */}
             <button
               onClick={() => setSelectedOutfit(null)}
-              className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-imperial-gold text-silk-muted hover:text-lacquer flex items-center justify-center border border-white/20 transition-all shadow-lg"
+              className="absolute top-3 right-3 z-40 w-7 h-7 rounded-full bg-black/75 hover:bg-black/95 border border-[#C5A059]/60 hover:border-[#D4AF37] text-white/80 hover:text-white flex items-center justify-center transition-all shadow-md cursor-pointer"
               title="Đóng cửa sổ"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
 
             {/* LEFT SIDE: Media Visual Stage (58%) */}
