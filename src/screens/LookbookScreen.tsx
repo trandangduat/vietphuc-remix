@@ -19,22 +19,6 @@ import {
 } from 'lucide-react';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
 
-/**
- * Imperial Vermilion Red Seal Stamp with double gold border
- */
-const ImperialRedSeal: React.FC<{ className?: string }> = ({ className = 'w-10 h-16' }) => (
-  <div className={`relative flex items-center justify-center bg-gradient-to-b from-[#8B1E1E] via-[#751616] to-[#590e0e] border-[2px] border-[#C69B56] shadow-[0_6px_18px_rgba(139,30,30,0.65)] p-0.5 rounded-none flex-shrink-0 select-none ${className}`}>
-    <div className="w-full h-full border border-[#C69B56]/70 flex flex-col items-center justify-center py-0.5 px-1 bg-black/10">
-      <span className="text-[#F7F4EE] font-serif font-black text-[10px] sm:text-xs leading-tight tracking-widest uppercase">
-        Việt
-      </span>
-      <span className="w-3.5 h-[1px] bg-[#C69B56]/80 my-0.5" />
-      <span className="text-[#F7F4EE] font-serif font-black text-[10px] sm:text-xs leading-tight tracking-widest uppercase">
-        Phục
-      </span>
-    </div>
-  </div>
-);
 
 /**
  * Traditional corner watermark for cards (cherry blossom, cloud, harvest moon, seal)
@@ -246,19 +230,19 @@ const ScrapbookPostcardCard: React.FC<{
           )}
         </div>
 
-        {/* The Authentic Handmade Giấy Dó Paper Canvas using generated torn paper asset */}
-        <div className="relative w-full p-3 sm:p-3.5 pb-4 flex flex-col gap-2 select-none">
-          {/* Real Torn Paper Texture Asset */}
+        {/* The Authentic Handmade Giấy Dó Paper Canvas using delicate deckled paper asset */}
+        <div className="relative w-full px-5 sm:px-6 pt-5 sm:pt-5.5 pb-5 sm:pb-6 flex flex-col gap-2.5 select-none">
+          {/* Real Deckled Paper Texture Asset */}
           <img
-            src="/assets/decorations/torn-paper.png"
-            alt="Giấy Dó xé thủ công"
-            className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
+            src="/assets/decorations/deckled-paper.png"
+            alt="Giấy Dó viền thô tự nhiên"
+            className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
           />
 
-          {/* Inner Content Layer (above paper) */}
-          <div className="relative z-10 flex flex-col gap-2">
-            {/* Inner Photo Frame (Standard 9:16 aspect ratio) */}
-            <div className="relative w-full aspect-[9/16] overflow-hidden bg-black/95 border border-[#2d2216]/60 rounded-xs shadow-inner mt-1">
+          {/* Inner Content Layer (comfortably centered inside deckled paper borders) */}
+          <div className="relative z-10 flex flex-col gap-2.5">
+            {/* Inner Photo Frame (Standard 9:16 aspect ratio with clean border) */}
+            <div className="relative w-full aspect-[9/16] overflow-hidden bg-black/95 border border-[#2d2216]/50 rounded-[2px] shadow-sm">
               {hasAIImage ? (
                 <div className="relative w-full h-full overflow-hidden">
                   <img
@@ -273,11 +257,11 @@ const ScrapbookPostcardCard: React.FC<{
               )}
             </div>
 
-            {/* Bottom Card Footer Area (Inside the Paper) */}
-            <div className="flex flex-col gap-1.5 px-1 pt-0.5">
+            {/* Bottom Card Footer Area (Spaced generously away from paper deckled edges) */}
+            <div className="flex flex-col gap-2 px-1 pt-1">
               {/* Row 1: Timestamp & Favorite Heart Toggle */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] sm:text-[11px] text-[#4d3c2b] font-mono tracking-wider font-bold">
+                <span className="text-[11px] sm:text-xs text-[#4a3928] font-mono tracking-wider font-bold">
                   {formatCreationDateTime(outfit.createdAt)}
                 </span>
 
@@ -456,31 +440,26 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </div>
       )}
 
-      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Outfit placed cleanly below Bộ Sưu Tập) */}
+      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Title without badge, Chim Lac Hong motif next to Outfit) */}
       <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 pt-7 pb-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          {/* Left: Imperial Seal + Title "Bộ Sưu Tập" over "Outfit" + Cloud image asset */}
-          <div className="flex items-center gap-4 sm:gap-5">
-            {/* Vermilion Imperial Red Seal */}
-            <ImperialRedSeal className="w-10 h-16 sm:w-11 sm:h-18" />
+          {/* Left: Title "Bộ Sưu Tập" over "Outfit" + Chim Lạc Hồng Motif */}
+          <div className="flex flex-col">
+            {/* Line 1: Bộ Sưu Tập */}
+            <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md leading-none">
+              Bộ Sưu Tập
+            </h1>
 
-            <div className="flex flex-col">
-              {/* Line 1: Bộ Sưu Tập */}
-              <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md leading-none">
-                Bộ Sưu Tập
-              </h1>
-
-              {/* Line 2: Outfit + Golden Cloud Asset */}
-              <div className="flex items-center gap-3.5 mt-2">
-                <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-2 font-bold drop-shadow-[0_4px_14px_rgba(232,200,123,0.35)] leading-none select-none">
-                  Outfit
-                </span>
-                <img
-                  src="/assets/decorations/golden-cloud.png"
-                  alt="Vân mây cổ phong"
-                  className="h-8 sm:h-10 w-auto object-contain filter drop-shadow-[0_2px_10px_rgba(198,155,86,0.6)] select-none pointer-events-none inline-block"
-                />
-              </div>
+            {/* Line 2: Outfit + Chim Lạc Hồng Motif Asset */}
+            <div className="flex items-center gap-3.5 sm:gap-4 mt-2">
+              <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-2 font-bold drop-shadow-[0_4px_14px_rgba(232,200,123,0.35)] leading-none select-none">
+                Outfit
+              </span>
+              <img
+                src="/assets/decorations/chim-lac.png"
+                alt="Họa tiết chim Lạc Hồng"
+                className="h-8 sm:h-10 lg:h-11 w-auto object-contain filter drop-shadow-[0_2px_10px_rgba(175,39,41,0.6)] select-none pointer-events-none inline-block hover:scale-105 transition-transform"
+              />
             </div>
           </div>
 
