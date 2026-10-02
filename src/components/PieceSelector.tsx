@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
 import { Sparkles, X, Check, BookOpen, Layers, Ban } from 'lucide-react';
+import { HeritageCulturalCard } from './heritage/HeritageCulturalCard';
 
 interface PieceSelectorProps {
   pieces: Piece[];
@@ -91,8 +92,8 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   const handleMouseMove = (e: React.MouseEvent) => {
     // Keep tooltip visible within viewport boundaries
     const offset = 18;
-    const tooltipWidth = 320;
-    const tooltipHeight = 220;
+    const tooltipWidth = 360;
+    const tooltipHeight = 360;
     let x = e.clientX + offset;
     let y = e.clientY + offset;
 
@@ -343,41 +344,13 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
 
 
 
-      {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng */}
+      {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng (Exact Match to Heritage Design) */}
       {hoveredPiece && (
         <div
           style={{ top: tooltipPos.y, left: tooltipPos.x }}
-          className="fixed z-50 pointer-events-none max-w-sm w-80 bg-lacquer-card/95 backdrop-blur-md border-2 border-imperial-gold shadow-2xl p-4 text-xs font-sans text-silk-ivory space-y-2.5 rounded-none animate-fadeIn"
+          className="fixed z-50 pointer-events-none max-w-sm w-[350px] animate-in fade-in zoom-in-95 duration-150"
         >
-          <div className="flex items-center justify-between pb-1.5 border-b border-lacquer-border">
-            <h5 className="font-bold text-sm text-silk-ivory flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-imperial-gold" />
-              <span>{hoveredPiece.name}</span>
-            </h5>
-            <span className="text-xs uppercase font-bold px-2 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
-              {hoveredPiece.style === 'traditional' ? 'Cổ phong' : 'Hiện đại'}
-            </span>
-          </div>
-
-          <div>
-            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Thời kỳ lịch sử:</span>
-            <p className="text-silk-ivory font-medium mt-0.5">{hoveredPiece.culturalInfo.period}</p>
-          </div>
-
-          <div>
-            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Ý nghĩa văn hóa:</span>
-            <p className="text-silk-ivory/90 leading-relaxed mt-0.5 font-normal">{hoveredPiece.culturalInfo.meaning}</p>
-          </div>
-
-          <div>
-            <span className="font-bold text-silk-muted block text-xs uppercase tracking-wider">Bối cảnh chuẩn mực:</span>
-            <p className="text-silk-ivory/90 leading-relaxed mt-0.5 font-normal">{hoveredPiece.culturalInfo.context}</p>
-          </div>
-
-          <div className="pt-2 border-t border-lacquer-border text-xs text-imperial-gold font-medium">
-            <span>Nguồn: </span>
-            <span className="italic text-silk-ivory">{hoveredPiece.culturalInfo.source}</span>
-          </div>
+          <HeritageCulturalCard piece={hoveredPiece} />
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Layers,
 } from 'lucide-react';
+import { HeritageModal } from './heritage/HeritageFrame';
 
 interface CreateLookbookModalProps {
   isOpen: boolean;
@@ -127,48 +128,27 @@ export const CreateLookbookModal: React.FC<CreateLookbookModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 select-none font-sans"
-      onClick={onClose}
+    <HeritageModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Tạo Lookbook Mới"
+      badge="XUẤT BẢN"
+      maxWidth="max-w-2xl"
     >
-      <div
-        className="w-full max-w-2xl bg-lacquer-surface border-2 border-imperial-gold shadow-[0_24px_64px_rgba(0,0,0,0.95)] rounded-none flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-imperial-gold/30 bg-lacquer/90 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-none bg-imperial-gold/20 border border-imperial-gold flex items-center justify-center text-imperial-gold">
-              <BookOpen className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-serif font-bold text-lg text-silk-ivory leading-none">
-                Tạo Lookbook Mới
-              </h3>
-              <p className="text-[11px] text-silk-muted mt-1">
-                Xuất bản trang Lookbook tạp chí thời trang cổ phong từ 1 bộ outfit của bạn
-              </p>
-            </div>
-          </div>
+      <p className="text-[11px] text-[#C5A059] font-serif italic -mt-1 mb-3">
+        Xuất bản trang Lookbook tạp chí thời trang cổ phong từ 1 bộ outfit của bạn
+      </p>
 
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-none bg-lacquer border border-white/20 hover:border-imperial-gold text-silk-muted hover:text-silk-ivory flex items-center justify-center transition-all cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+      {/* Error notification */}
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-rose-950/80 border border-rose-500/60 text-rose-200 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+          <span>{errorMsg}</span>
         </div>
+      )}
 
-        {/* Error notification */}
-        {errorMsg && (
-          <div className="mx-6 mt-4 p-3 bg-rose-950/80 border border-rose-500/60 text-rose-200 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[70vh] space-y-5">
+      {/* Form Body */}
+      <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[70vh] space-y-5 pr-1">
           {/* 1. Chọn 1 outfit duy nhất */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -380,7 +360,6 @@ export const CreateLookbookModal: React.FC<CreateLookbookModalProps> = ({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </HeritageModal>
   );
 };
