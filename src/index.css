@@ -33,3 +33,12 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #C69B56;
 }
+
+/* Hide scrollbar for clean carousel reels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

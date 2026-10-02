@@ -67,19 +67,23 @@ export function App() {
     styleFilter: 'all',
   });
 
-  // Sample Outfits for Gallery with Staggered Masonry Heights
+  // 6 Sample Outfits for Vintage Scrapbook Gallery (Matching Target Artwork)
   const sampleOutfits: SavedOutfit[] = [
     {
       id: 'outfit-default-1',
-      name: 'Lễ Hội Cung Đình Huế',
-      createdAt: '2026-10-01T14:30:00',
+      name: 'Tết Nguyên Đán',
+      conceptTag: 'Tết Nguyên Đán',
+      createdAt: '2026-10-01T09:00:00',
       gender: 'women',
       top: { piece: initialTop!, variant: initialTopVariant! },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
-      aspectRatio: 'tall',
+      colorPalette: ['#8B1E1E', '#F7F4EE', '#9A7332'],
+      tiltAngle: -1.5,
+      decorStamp: 'blossom',
+      isFavorite: false,
       aiAnalysis: {
         totalScore: 9.8,
         criteria: {
@@ -97,14 +101,18 @@ export function App() {
     },
     {
       id: 'outfit-default-2',
-      name: 'Thanh Tao Nho Gia',
-      createdAt: '2026-09-30T10:15:00',
+      name: 'Hội An Cổ Phục',
+      conceptTag: 'Hội An Cổ Phục',
+      createdAt: '2026-09-30T09:00:00',
       gender: 'men',
       top: { piece: topXanh, variant: topXanh },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       event: EVENTS[0],
-      aspectRatio: 'medium',
+      colorPalette: ['#1A4B54', '#266D7A', '#F7F4EE'],
+      tiltAngle: 1.2,
+      decorStamp: 'cloud',
+      isFavorite: true,
       aiAnalysis: {
         totalScore: 9.6,
         criteria: {
@@ -122,53 +130,121 @@ export function App() {
     },
     {
       id: 'outfit-default-3',
-      name: 'Dạ Yến Remix Đương Đại',
-      createdAt: '2026-09-28T18:45:00',
+      name: 'Hoàng Triều Khai Xuân',
+      conceptTag: '👑 Được yêu thích nhất',
+      isFeatured: true,
+      createdAt: '2026-10-01T09:00:00',
+      gender: 'women',
+      top: { piece: initialTop!, variant: initialTopVariant! },
+      bottom: { piece: initialBottom!, variant: initialBottomVariant! },
+      footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
+      accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
+      event: EVENTS[0],
+      colorPalette: ['#8B1E1E', '#C69B56', '#F7F4EE'],
+      tiltAngle: 0,
+      decorStamp: 'cloud',
+      isFavorite: true,
+      aiAnalysis: {
+        totalScore: 9.9,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.9, maxScore: 10, comment: 'Sắc đỏ hoàng hôn kết hợp nón lá chóp bạc và lụa ngà cung đình.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 10.0, maxScore: 10, comment: 'Tuyệt mỹ và trang nghiêm bậc nhất cho đại lễ cổ truyền.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.9, maxScore: 10, comment: 'Phụng chuẩn lễ nghi cung đình triều Nguyễn.' },
+        },
+        colorHarmony: 'Sắc đỏ gấm hoàng triều phối lụa ngà quý phái.',
+        eventFit: 'Đại lễ cung đình và sự kiện văn hóa trọng đại.',
+        culturalStatus: 'suitable',
+        explanation: 'Bộ trang phục tiêu biểu và được yêu thích nhất trong bảo tàng phục sắc Việt Nam.',
+        source: 'Cố Đô Huế & Bảo Tàng Cung Đình',
+        mascotQuote: 'Đỉnh cao cổ phong hoàng triều! Bộ phục sức được ngợi ca nhiều nhất!',
+      },
+    },
+    {
+      id: 'outfit-default-4',
+      name: 'Xuân Về',
+      conceptTag: 'Xuân Về',
+      createdAt: '2026-09-30T09:00:00',
+      gender: 'men',
+      top: { piece: topXanh, variant: topXanh },
+      bottom: { piece: initialBottom!, variant: initialBottomVariant! },
+      footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
+      event: EVENTS[0],
+      colorPalette: ['#1A4B54', '#484F58', '#F7F4EE'],
+      tiltAngle: -1.0,
+      decorStamp: 'blossom',
+      isFavorite: false,
+      aiAnalysis: {
+        totalScore: 9.5,
+        criteria: {
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.5, maxScore: 10, comment: 'Tươi tắn, trang nhã sắc lụa non đầu xuân.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.5, maxScore: 10, comment: 'Nhã nhặn khi du xuân trẩy hội phố cổ.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.5, maxScore: 10, comment: 'Trang trọng thuần khiết phong cách xưa.' },
+        },
+        colorHarmony: 'Sắc xanh ngọc và lụa trắng thanh lịch.',
+        eventFit: 'Dạo phố hoa và thưởng lãm trà xuân.',
+        culturalStatus: 'suitable',
+        explanation: 'Một nét phối đồ mang đậm khí tiết mùa xuân yên bình và hoài niệm.',
+        source: 'Hội An Di Sản',
+        mascotQuote: 'Xuân về phố cổ ngập tràn sắc đào, dáng áo xanh khoan thai tự tại!',
+      },
+    },
+    {
+      id: 'outfit-default-5',
+      name: 'Thu Hà Nội',
+      conceptTag: 'Thu Hà Nội',
+      createdAt: '2026-09-28T09:00:00',
       gender: 'men',
       top: { piece: initialTop!, variant: initialTopVariant! },
       bottom: { piece: bottomTay || initialBottom!, variant: bottomTay || initialBottom! },
       footwear: { piece: footwearLoafer || initialFootwear!, variant: footwearLoafer || initialFootwear! },
       event: EVENTS[1] || EVENTS[0],
-      aspectRatio: 'short',
+      colorPalette: ['#8B1E1E', '#374151', '#451A03'],
+      tiltAngle: 1.5,
+      decorStamp: 'seal',
+      isFavorite: false,
       aiAnalysis: {
-        totalScore: 8.8,
+        totalScore: 9.1,
         criteria: {
-          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.0, maxScore: 10, comment: 'Áo tấc gấm đỏ nổi bật trên nền âu phục Tây phương tối màu.' },
-          eventFit: { name: 'Phù hợp sự kiện', score: 9.2, maxScore: 10, comment: 'Ấn tượng cho dạ hội, sự kiện nghệ thuật hoặc tiệc tối.' },
-          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 7.9, maxScore: 10, comment: 'Giao thoa giữa tà áo thụng và âu phục đương đại.' },
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.3, maxScore: 10, comment: 'Áo tấc đỏ gấm nổi bật trên nền âu phục Tây phương tối màu.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.4, maxScore: 10, comment: 'Độc đáo cho sự kiện giao lưu văn nghệ hoặc dạ hội thu.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 8.6, maxScore: 10, comment: 'Giao thoa hài hòa giữa phong vị cổ phong và hơi thở hiện đại.' },
         },
-        colorHarmony: 'Phối màu Menswear hiện đại cá tính.',
-        eventFit: 'Rất ấn tượng cho dạ hội học sinh hoặc sự kiện nghệ thuật.',
-        culturalStatus: 'caution',
-        explanation: 'Cách phối Remix sáng tạo giữa tà áo thụng triều Nguyễn và âu phục Tây phương.',
-        source: 'Chuyên khảo Văn hóa Mặc đương đại',
-        mascotQuote: 'Phối đồ Remix rất phá cách và có gu! Rất hợp cho dạ tiệc nghệ thuật!',
+        colorHarmony: 'Phối màu Menswear hiện đại ấm áp sắc thu.',
+        eventFit: 'Dạ tiệc nghệ thuật và lễ hội giao lưu văn hóa.',
+        culturalStatus: 'suitable',
+        explanation: 'Sự kết hợp tinh tế giữa tà áo tấc cổ truyền và quần âu đương đại đầy phong cách.',
+        source: 'Tạp chí Mỹ thuật & Thời trang',
+        mascotQuote: 'Gió thu heo may cùng nét remix tân cổ giao duyên vô cùng ấn tượng!',
       },
     },
     {
-      id: 'outfit-default-4',
-      name: 'Hương Sắc Cố Đô',
-      createdAt: '2026-09-25T08:20:00',
+      id: 'outfit-default-6',
+      name: 'Trung Thu',
+      conceptTag: 'Trung Thu',
+      createdAt: '2026-09-25T09:00:00',
       gender: 'women',
       top: { piece: topXanh, variant: topXanh },
       bottom: { piece: initialBottom!, variant: initialBottomVariant! },
       footwear: { piece: initialFootwear!, variant: initialFootwearVariant! },
       accessory: { piece: initialAccessory!, variant: initialAccessoryVariant! },
       event: EVENTS[0],
-      aspectRatio: 'tall',
+      colorPalette: ['#1A4B54', '#374151', '#8B1E1E'],
+      tiltAngle: -0.8,
+      decorStamp: 'moon',
+      isFavorite: false,
       aiAnalysis: {
         totalScore: 9.7,
         criteria: {
-          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.7, maxScore: 10, comment: 'Hài hòa nhã nhặn, tôn vinh chiếc nón lá chóp bạc duyên dáng.' },
-          eventFit: { name: 'Phù hợp sự kiện', score: 9.8, maxScore: 10, comment: 'Duyên dáng dịu dàng cho dạo bước phố cổ.' },
-          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.6, maxScore: 10, comment: 'Nét đẹp kín đáo, thuần hậu của phụ nữ Việt.' },
+          colorHarmony: { name: 'Hài hòa màu sắc', score: 9.7, maxScore: 10, comment: 'Nón lá chóp bạc đi cùng tà áo xanh dưới ánh trăng rằm.' },
+          eventFit: { name: 'Phù hợp sự kiện', score: 9.8, maxScore: 10, comment: 'Lãng mạn và dịu dàng cho đêm rằm Trung thu phố cổ.' },
+          culturalNorm: { name: 'Chuẩn mực lễ nghi', score: 9.6, maxScore: 10, comment: 'Duyên dáng đoan trang theo thuần phong mỹ tục.' },
         },
-        colorHarmony: 'Sắc xanh ngọc kết hợp cùng nón lá chóp bạc.',
-        eventFit: 'Hoàn hảo cho du xuân phố cổ và lễ hội hoa.',
+        colorHarmony: 'Sắc xanh đêm thu hòa cùng nón lá chóp bạc.',
+        eventFit: 'Lễ hội hoa đăng và đêm rằm Trung thu cổ truyền.',
         culturalStatus: 'suitable',
-        explanation: 'Tổ hợp áo tấc và nón lá chóp bạc tạo nên hình ảnh người phụ nữ đoan trang, dịu dàng.',
+        explanation: 'Trang phục tôn vinh vẻ đẹp kín đáo, thanh khiết của người phụ nữ dưới trăng rằm.',
         source: 'Bảo tàng Phụ nữ Nam Bộ',
-        mascotQuote: 'Nón lá chóp bạc nghiêng che tà áo xanh, phong nhã đượm hồn cố đô!',
+        mascotQuote: 'Trăng rằm soi bóng nón nghiêng, tà áo thướt tha tựa tiên nữ giáng trần!',
       },
     },
   ];
@@ -367,6 +443,14 @@ export function App() {
                 onRenameOutfit={(id, newName) => {
                   setSavedOutfits((prev) =>
                     prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
+                  );
+                }}
+                onToggleFavorite={(id) => {
+                  setSavedOutfits((prev) =>
+                    prev.map((o) => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
+                  );
+                  setSessionOutfits((prev) =>
+                    prev.map((o) => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
                   );
                 }}
                 onOpenStudio={() => setCurrentScreen('studio')}

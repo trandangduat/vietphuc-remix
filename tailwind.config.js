@@ -32,6 +32,8 @@ export default {
       fontFamily: {
         serif: ['"Fraunces"', 'Georgia', 'serif'],
         sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        calligraphy: ['"Dancing Script"', '"Caveat"', 'cursive'],
+        handwriting: ['"Caveat"', '"Dancing Script"', 'cursive'],
       },
       borderRadius: {
         none: '0px',

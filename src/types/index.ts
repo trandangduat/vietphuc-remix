@@ -94,6 +94,12 @@ export interface SavedOutfit {
   tryOnImage?: string;
   tryOnImages?: string[];
   aspectRatio?: 'tall' | 'medium' | 'short';
+  conceptTag?: string;
+  isFeatured?: boolean;
+  isFavorite?: boolean;
+  colorPalette?: string[];
+  decorStamp?: 'cloud' | 'blossom' | 'moon' | 'seal';
+  tiltAngle?: number;
 }
 
 export interface AICriterionScore {

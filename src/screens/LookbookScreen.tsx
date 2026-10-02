@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { SavedOutfit, Piece } from '../types';
 import {
   Sparkles,
@@ -12,9 +12,92 @@ import {
   Download,
   ArrowRight,
   ShieldCheck,
-  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  BookOpen,
 } from 'lucide-react';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
+
+/**
+ * Handmade Giấy Dó / Deckled Torn Paper Polygon for Vintage Scrapbook Cards
+ */
+const TORN_PAPER_CLIP = `polygon(
+  0% 3px, 3% 1px, 6% 3px, 10% 0px, 15% 3px, 20% 1px, 26% 4px, 32% 1px, 38% 3px, 44% 0px, 50% 3px, 56% 1px, 62% 4px, 68% 1px, 74% 3px, 80% 0px, 86% 3px, 92% 1px, 97% 4px, 100% 2px,
+  99.2% 6%, 100% 14%, 99.3% 22%, 100% 30%, 99.1% 38%, 100% 46%, 99.4% 54%, 100% 62%, 99.2% 70%, 100% 78%, 99.3% 86%, 100% 94%, 99% 100%,
+  97% 99.2%, 92% 100%, 86% 99.1%, 80% 100%, 74% 99.3%, 68% 100%, 62% 99.1%, 56% 100%, 50% 99.3%, 44% 100%, 38% 99.1%, 32% 100%, 26% 99.3%, 20% 100%, 15% 99.1%, 10% 100%, 5% 99.2%, 0% 98%,
+  0.8% 92%, 0% 84%, 0.7% 76%, 0% 68%, 0.9% 60%, 0% 52%, 0.8% 44%, 0% 36%, 0.7% 28%, 0% 20%, 0.9% 12%, 0% 4%
+)`;
+
+/**
+ * Imperial Vermilion Red Seal Stamp with double gold border
+ */
+const ImperialRedSeal: React.FC<{ className?: string }> = ({ className = 'w-9 h-14' }) => (
+  <div className={`relative flex items-center justify-center bg-gradient-to-b from-[#8B1E1E] via-[#751616] to-[#590e0e] border-[2px] border-[#C69B56] shadow-[0_6px_18px_rgba(139,30,30,0.65)] p-0.5 rounded-none flex-shrink-0 select-none ${className}`}>
+    <div className="w-full h-full border border-[#C69B56]/70 flex flex-col items-center justify-center py-0.5 px-1 bg-black/10">
+      <span className="text-[#F7F4EE] font-serif font-black text-[10px] leading-tight tracking-widest uppercase">
+        Việt
+      </span>
+      <span className="w-3.5 h-[1px] bg-[#C69B56]/80 my-0.5" />
+      <span className="text-[#F7F4EE] font-serif font-black text-[10px] leading-tight tracking-widest uppercase">
+        Phục
+      </span>
+    </div>
+  </div>
+);
+
+/**
+ * Traditional Golden Imperial Cloud SVG Pattern
+ */
+const TraditionalCloudSvg: React.FC<{ className?: string }> = ({ className = 'w-11 h-6' }) => (
+  <svg viewBox="0 0 100 45" fill="none" className={`text-imperial-gold ${className}`}>
+    <path
+      d="M12 30 C 5 30 2 24 5 18 C 8 12 16 12 20 15 C 24 8 35 6 42 12 C 48 5 62 5 68 12 C 75 7 86 10 88 18 C 94 22 93 30 85 32 C 80 34 70 34 65 30 C 60 36 45 37 38 30 C 30 36 18 36 12 30 Z"
+      fill="currentColor"
+      fillOpacity="0.25"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M25 25 C 32 18 42 22 45 28 M52 28 C 58 20 68 22 72 27"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+/**
+ * Traditional corner watermark for cards (cherry blossom, cloud, harvest moon, seal)
+ */
+const DecorWatermark: React.FC<{ type?: 'cloud' | 'blossom' | 'moon' | 'seal' }> = ({ type = 'blossom' }) => {
+  if (type === 'moon') {
+    return (
+      <div className="w-6 h-6 rounded-full border border-[#8c745c]/40 flex items-center justify-center opacity-45">
+        <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-[#8c745c]/50 to-transparent" />
+      </div>
+    );
+  }
+  if (type === 'seal') {
+    return (
+      <div className="w-4.5 h-4.5 border border-[#8B1E1E]/50 rounded-none flex items-center justify-center opacity-60">
+        <span className="text-[7.5px] text-[#8B1E1E] font-serif font-black">ẤN</span>
+      </div>
+    );
+  }
+  if (type === 'cloud') {
+    return <TraditionalCloudSvg className="w-5 h-3 opacity-40 text-[#8c745c]" />;
+  }
+  // blossom default
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5 text-[#8c745c] opacity-40">
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M12 4.5 C 9.5 7 9.5 9 12 9 C 14.5 9 14.5 7 12 4.5 Z M19.5 12 C 17 9.5 15 9.5 15 12 C 15 14.5 17 14.5 19.5 12 Z M12 19.5 C 14.5 17 14.5 15 12 15 C 9.5 15 9.5 17 12 19.5 Z M4.5 12 C 7 14.5 9 14.5 9 12 C 9 9.5 7 9.5 4.5 12 Z" />
+    </svg>
+  );
+};
 
 /**
  * Renders the full mannequin composite wearing all pieces for an outfit
@@ -125,6 +208,146 @@ const OutfitMannequinComposite: React.FC<{
   );
 };
 
+/**
+ * Vintage Giấy Dó Postcard Card Component (Artistic Scrapbook Style)
+ */
+const ScrapbookPostcardCard: React.FC<{
+  outfit: SavedOutfit;
+  onSelect: () => void;
+  onToggleFavorite?: (id: string) => void;
+}> = ({ outfit, onSelect, onToggleFavorite }) => {
+  const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
+  const tilt = outfit.tiltAngle || 0;
+  const isFeatured = Boolean(outfit.isFeatured);
+
+  // Format date-time: DD/MM/YYYY • HH:mm
+  const formatCreationDateTime = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      const day = date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const hasTime = dateStr.includes('T') || dateStr.includes(':');
+      const time = hasTime
+        ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+        : '09:00';
+      return `${day} • ${time}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div
+      onClick={onSelect}
+      className={`group relative flex-shrink-0 cursor-pointer transition-all duration-300 ${
+        isFeatured
+          ? 'w-[280px] sm:w-[300px] md:w-[315px] scale-105 z-20'
+          : 'w-[250px] sm:w-[265px] md:w-[275px] z-10 hover:z-30 hover:scale-105'
+      }`}
+      style={{
+        transform: tilt !== 0 ? `rotate(${tilt}deg)` : undefined,
+      }}
+    >
+      {/* Outer shadow filter wrapping the torn paper contour */}
+      <div
+        className={`w-full transition-all duration-300 ${
+          isFeatured
+            ? 'filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.95)] drop-shadow-[0_0_25px_rgba(216,175,101,0.45)]'
+            : 'filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] group-hover:drop-shadow-[0_18px_32px_rgba(0,0,0,0.95)]'
+        }`}
+      >
+        {/* Pinned Washi Tape / Crown Ribbon at Top */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none">
+          {isFeatured ? (
+            <div className="bg-gradient-to-r from-[#d8af65] via-[#f7e3b8] to-[#c69b56] text-[#2c1a04] px-3.5 py-1 text-xs font-calligraphy font-extrabold shadow-md border border-[#9A7332] whitespace-nowrap rounded-xs flex items-center gap-1.5 -rotate-1">
+              <span>{outfit.conceptTag || '👑 Được yêu thích nhất'}</span>
+            </div>
+          ) : (
+            <div className="bg-[#ede0ca]/95 backdrop-blur-xs border-y border-[#cbba9e]/60 shadow-xs px-3 py-0.5 text-xs font-calligraphy text-[#3d2d1d] font-bold whitespace-nowrap -rotate-1.5">
+              <span>{outfit.conceptTag || outfit.name}</span>
+            </div>
+          )}
+        </div>
+
+        {/* The Handmade Giấy Dó Paper Canvas */}
+        <div
+          className={`w-full p-2.5 sm:p-3 pb-3 bg-gradient-to-b from-[#fbf7ee] via-[#f6efdf] to-[#eee4ce] border border-[#e4d6bf] relative select-none flex flex-col gap-2 ${
+            isFeatured ? 'ring-1 ring-[#d8af65]/60' : ''
+          }`}
+          style={{
+            clipPath: TORN_PAPER_CLIP,
+          }}
+        >
+          {/* Inner Photo Frame (Standard 9:16 aspect ratio) */}
+          <div className="relative w-full aspect-[9/16] overflow-hidden bg-black/95 border border-[#2d2216]/60 rounded-xs shadow-inner mt-1">
+            {hasAIImage ? (
+              <div className="relative w-full h-full overflow-hidden">
+                <img
+                  src={outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages[0])}
+                  alt={outfit.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+              </div>
+            ) : (
+              <OutfitMannequinComposite outfit={outfit} />
+            )}
+          </div>
+
+          {/* Bottom Card Footer Area (Inside the Paper) */}
+          <div className="flex flex-col gap-1.5 px-0.5 pt-0.5">
+            {/* Row 1: Timestamp & Favorite Heart Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] sm:text-[11px] text-[#4d3c2b] font-mono tracking-wider font-bold">
+                {formatCreationDateTime(outfit.createdAt)}
+              </span>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite?.(outfit.id);
+                }}
+                className="p-1 hover:scale-125 active:scale-95 transition-transform text-[#6d543e] hover:text-[#8B1E1E]"
+                title={outfit.isFavorite ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
+              >
+                <Heart
+                  className={`w-3.5 h-3.5 transition-colors ${
+                    outfit.isFavorite ? 'fill-[#8B1E1E] text-[#8B1E1E]' : ''
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Row 2: Color Palette Swatches & Traditional Corner Watermark */}
+            <div className="flex items-center justify-between pt-0.5">
+              {/* Palette dots */}
+              <div className="flex items-center gap-1.5">
+                {(outfit.colorPalette || ['#8B1E1E', '#F7F4EE', '#9A7332']).map((color, idx) => (
+                  <span
+                    key={idx}
+                    className="w-2.5 h-2.5 rounded-full border border-black/20 shadow-2xs inline-block"
+                    style={{ backgroundColor: color }}
+                    title={`Màu sắc trang phục #${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Traditional Watermark Stamp */}
+              <div className="pr-1">
+                <DecorWatermark type={outfit.decorStamp} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface LookbookScreenProps {
   outfits: SavedOutfit[];
   isLoggedIn: boolean;
@@ -132,6 +355,7 @@ interface LookbookScreenProps {
   onLoadOutfitIntoStudio: (outfit: SavedOutfit) => void;
   onDeleteOutfit: (id: string) => void;
   onRenameOutfit: (id: string, newName: string) => void;
+  onToggleFavorite?: (id: string) => void;
   onOpenStudio: () => void;
 }
 
@@ -142,6 +366,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   onLoadOutfitIntoStudio,
   onDeleteOutfit,
   onRenameOutfit,
+  onToggleFavorite,
   onOpenStudio,
 }) => {
   // Modal detail view for clicked outfit
@@ -154,10 +379,23 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameText, setEditNameText] = useState('');
 
+  // Carousel slider ref
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Smooth scroll handler for carousel arrows
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (sliderRef.current) {
+      const scrollAmount = 320;
+      sliderRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   // Open detail modal for outfit
   const handleOpenDetail = (outfit: SavedOutfit) => {
     setSelectedOutfit(outfit);
-    // If outfit has AI try on image, default to AI image view (index 1), else 2D (index 0)
     const hasAI = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
     setActiveMediaIndex(hasAI ? 1 : 0);
     setIsEditingName(false);
@@ -207,31 +445,26 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
     return list;
   };
 
-  // Format creation date and time: DD/MM/YYYY • HH:mm
-  const formatCreationDateTime = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
-      const day = date.toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const hasTime = dateStr.includes('T') || dateStr.includes(':');
-      const time = hasTime
-        ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
-        : '09:00';
-      return `${day} • ${time}`;
-    } catch {
-      return dateStr;
-    }
-  };
-
   return (
-    <div className="w-full min-h-[calc(100vh-56px)] bg-lacquer text-silk-ivory font-sans pb-20">
+    <div className="w-full min-h-[calc(100vh-56px)] bg-lacquer text-silk-ivory font-sans pb-16 relative overflow-hidden">
+      {/* ATMOSPHERIC BACKGROUND ENVIRONMENT: Ancient Street Scene under night lantern glow */}
+      <div className="absolute inset-0 pointer-events-none select-none z-0">
+        <img
+          src="/assets/events/bg-tet-pho-co.jpg"
+          alt="Không gian cổ phong"
+          className="w-full h-full object-cover object-top opacity-20 filter blur-[1.5px]"
+        />
+        {/* Ambient Dark Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-lacquer via-lacquer/85 to-lacquer" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_transparent_20%,_#0A0D12_85%)]" />
+        {/* Soft lantern glow warm highlights */}
+        <div className="absolute top-10 right-1/4 w-96 h-96 rounded-full bg-imperial-red/10 filter blur-[90px]" />
+        <div className="absolute top-20 left-1/4 w-80 h-80 rounded-full bg-imperial-gold/10 filter blur-[80px]" />
+      </div>
+
       {/* 1. GUEST SESSION BANNER (Non-intrusive, allows full browsing) */}
       {!isLoggedIn && (
-        <div className="w-full bg-lacquer-surface border-b border-imperial-gold/30 px-4 sm:px-6 lg:px-10 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="relative z-10 w-full bg-lacquer-surface/90 backdrop-blur-md border-b border-imperial-gold/30 px-4 sm:px-6 lg:px-10 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-imperial-gold animate-ping" />
             <span className="text-silk-muted">
@@ -247,33 +480,63 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
         </div>
       )}
 
-      {/* 2. GALLERY HERO HEADER (No separator) */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-6 sm:pt-8 pb-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif font-extrabold text-2xl sm:text-3xl text-silk-ivory tracking-tight">
-              Bộ Sưu Tập Outfit
-            </h1>
+      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Matching Target Image 2) */}
+      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 pt-7 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          {/* Left: Imperial Seal + Title "Bộ Sưu Tập Outfit" + Cloud pattern */}
+          <div className="flex items-start gap-4">
+            {/* Vermilion Imperial Red Seal */}
+            <ImperialRedSeal />
+
+            <div>
+              <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
+                <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md">
+                  Bộ Sưu Tập
+                </h1>
+                <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-3 inline-block font-bold drop-shadow-[0_4px_12px_rgba(232,200,123,0.35)]">
+                  Outfit
+                </span>
+                {/* Traditional Cloud Accent */}
+                <div className="inline-flex items-center pl-1">
+                  <TraditionalCloudSvg className="w-10 sm:w-12 h-5 sm:h-6" />
+                </div>
+              </div>
+
+              {/* Subtitle */}
+              <p className="text-xs sm:text-sm text-silk-muted/90 font-sans mt-1 tracking-wide">
+                Khám phá những concept phối đồ Việt phục được yêu thích nhất!
+              </p>
+            </div>
           </div>
 
-          {/* Right Action: Create Lookbook */}
-          <div className="flex items-center gap-3">
+          {/* Right: Poetic Calligraphic Quote & Parchment "Tạo Lookbook" Button */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 self-start md:self-center">
+            {/* Calligraphic poetic quote */}
+            <div className="text-left sm:text-right hidden sm:block">
+              <p className="font-calligraphy text-lg sm:text-xl text-[#f3eedd]/90 italic -rotate-1 leading-snug drop-shadow-sm">
+                Mỗi bộ đồ là một câu chuyện về văn hóa Việt
+              </p>
+            </div>
+
+            {/* Stylized Golden Parchment Button */}
             <button
               onClick={() => {}}
-              className="py-2.5 px-5 bg-gradient-to-r from-imperial-gold to-imperial-gold-light hover:brightness-105 text-lacquer font-bold text-xs sm:text-sm shadow-[0_4px_16px_rgba(212,175,55,0.25)] flex items-center gap-2 transition-all uppercase tracking-wider rounded-xl cursor-pointer"
+              className="py-2.5 px-6 rounded-full bg-gradient-to-r from-[#d8af65] via-[#f2d89b] to-[#d8af65] text-[#241708] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_6px_22px_rgba(216,175,101,0.4)] hover:brightness-110 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border border-[#fae7be]/70 cursor-pointer flex-shrink-0"
+              title="Tạo Lookbook mới"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Tạo Lookbook</span>
+              <BookOpen className="w-4 h-4 stroke-[2.5]" />
+              <span className="font-extrabold">TẠO LOOKBOOK</span>
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* 3. GALLERY OUTFITS GRID (Full Width, Uniform 9:16 Ratio, Compact Sizing) */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-3">
+      {/* 3. HORIZONTAL SCRAPBOOK GALLERY SHOWCASE CAROUSEL */}
+      <div className="relative z-10 w-full pt-4 pb-8">
         {outfits.length === 0 ? (
           /* Empty State */
-          <div className="text-center py-24 p-8 rounded-2xl bg-lacquer-surface/40 border border-lacquer-border">
+          <div className="mx-6 sm:mx-12 text-center py-24 p-8 rounded-2xl bg-lacquer-surface/50 border border-lacquer-border backdrop-blur-md">
             <Layers className="w-16 h-16 text-silk-muted mx-auto mb-4 opacity-30" />
             <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
               Chưa có outfit nào trong bộ sưu tập
@@ -289,49 +552,45 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             </button>
           </div>
         ) : (
-          /* Responsive Grid with Compact Uniform 9:16 Cards (5-7 cards per row on larger screens) */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3.5 sm:gap-4.5">
-            {outfits.map((outfit) => {
-              const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
+          /* Carousel Stage Container with Floating Nav Buttons */
+          <div className="relative w-full">
+            {/* Floating Left Arrow Button */}
+            <button
+              onClick={() => handleScroll('left')}
+              className="absolute left-2 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/65 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
+              title="Cuộn sang trái"
+            >
+              <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
+            </button>
 
-              return (
-                <div
+            {/* Floating Right Arrow Button */}
+            <button
+              onClick={() => handleScroll('right')}
+              className="absolute right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/65 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
+              title="Cuộn sang phải"
+            >
+              <ChevronRight className="w-6 h-6 stroke-[2.5]" />
+            </button>
+
+            {/* Horizontal Scroll Reel */}
+            <div
+              ref={sliderRef}
+              className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-6 sm:gap-7 lg:gap-8 px-12 sm:px-20 lg:px-24 py-10"
+            >
+              {outfits.map((outfit) => (
+                <ScrapbookPostcardCard
                   key={outfit.id}
-                  onClick={() => handleOpenDetail(outfit)}
-                  className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-lacquer-border/80 hover:border-imperial-gold/70 bg-lacquer-surface shadow-md hover:shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-all duration-300 cursor-pointer"
-                >
-                  {/* Photo Canvas Container with uniform 9:16 aspect ratio */}
-                  <div className="relative w-full aspect-[9/16] overflow-hidden bg-lacquer-card">
-                    {hasAIImage ? (
-                      /* AI Try-on Photo */
-                      <div className="relative w-full h-full overflow-hidden">
-                        <img
-                          src={outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages[0])}
-                          alt={outfit.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                      </div>
-                    ) : (
-                      /* Full Mannequin Composite Stage */
-                      <OutfitMannequinComposite outfit={outfit} />
-                    )}
-
-                    {/* MINIMAL BOTTOM OVERLAY: Only Date and Time of Creation */}
-                    <div className="absolute bottom-0 inset-x-0 z-20 py-2 sm:py-2.5 px-2 bg-gradient-to-t from-black/80 via-black/35 to-transparent flex items-center justify-center text-center pointer-events-none">
-                      <span className="text-[10px] sm:text-[11px] text-silk-ivory/85 font-mono tracking-wider">
-                        {formatCreationDateTime(outfit.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  outfit={outfit}
+                  onSelect={() => handleOpenDetail(outfit)}
+                  onToggleFavorite={onToggleFavorite}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* 5. THE OUTFIT DETAIL MODAL (Opens when clicking any card) */}
+      {/* 4. THE OUTFIT DETAIL MODAL (Opens when clicking any card) */}
       {selectedOutfit && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 lg:p-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
@@ -351,7 +610,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
               <X className="w-4 h-4" />
             </button>
 
-            {/* LEFT SIDE: Media Visual Stage (60%) */}
+            {/* LEFT SIDE: Media Visual Stage (58%) */}
             <div className="w-full lg:w-[58%] bg-lacquer-card flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-lacquer-border/80 relative overflow-hidden">
               {/* Media Display Canvas */}
               <div className="relative flex-1 min-h-[340px] sm:min-h-[440px] flex items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-lacquer to-lacquer-surface overflow-hidden">
