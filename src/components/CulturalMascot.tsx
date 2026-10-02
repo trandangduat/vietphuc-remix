@@ -253,6 +253,11 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
   const isRightHalf = position.x > (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
   const isBottomHalf = position.y > (typeof window !== 'undefined' ? window.innerHeight - 200 : 500);
 
+  // Forbid displaying mascot assistant if user is not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
+
   return (
     <>
       {/* FLOATING DRAGGABLE MASCOT CONTAINER */}

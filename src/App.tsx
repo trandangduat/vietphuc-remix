@@ -414,7 +414,24 @@ export function App() {
   };
 
 
-  const currentDisplayOutfits = isLoggedIn ? savedOutfits : sampleOutfits;
+  // Navigation handler with auth gate for Lookbook
+  const handleNavigate = (screen: 'landing' | 'studio' | 'lookbook') => {
+    if (screen === 'lookbook' && !isLoggedIn) {
+      setShowAuthModal(true);
+      showToast('🔒 Vui lòng đăng nhập với Google để truy cập Bộ sưu tập!');
+      return;
+    }
+    setCurrentScreen(screen);
+  };
+
+  // Enforce auth gate for Lookbook: kick unauthenticated visitors out to studio
+  useEffect(() => {
+    if (currentScreen === 'lookbook' && !isLoggedIn) {
+      setCurrentScreen('studio');
+      setShowAuthModal(true);
+      showToast('🔒 Bạn cần đăng nhập với Google để truy cập trang Bộ sưu tập.');
+    }
+  }, [currentScreen, isLoggedIn]);
 
   return (
     <div className="min-h-screen flex flex-col bg-lacquer text-silk-ivory">
@@ -426,7 +443,7 @@ export function App() {
           {/* Global Navbar */}
           <Navbar
             currentScreen={currentScreen}
-            onNavigate={setCurrentScreen}
+            onNavigate={handleNavigate}
             sessionCount={isLoggedIn ? savedOutfits.length : 0}
             onOpenAuth={() => setShowAuthModal(true)}
           />
@@ -448,9 +465,9 @@ export function App() {
               />
             )}
 
-            {currentScreen === 'lookbook' && (
+            {currentScreen === 'lookbook' && isLoggedIn && (
               <LookbookScreen
-                outfits={currentDisplayOutfits}
+                outfits={savedOutfits}
                 isLoggedIn={isLoggedIn}
                 onLoginPrompt={() => setShowAuthModal(true)}
                 onLoadOutfitIntoStudio={handleLoadOutfitIntoStudio}
@@ -459,8 +476,6 @@ export function App() {
                     deleteOutfitFromDb(id);
                     setSavedOutfits((prev) => prev.filter((o) => o.id !== id));
                     showToast('Đã xóa outfit khỏi bộ sưu tập');
-                  } else {
-                    setShowAuthModal(true);
                   }
                 }}
                 onRenameOutfit={(id, newName) => {
@@ -469,8 +484,6 @@ export function App() {
                       prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
                     );
                     updateOutfitInDb(id, { name: newName });
-                  } else {
-                    setShowAuthModal(true);
                   }
                 }}
                 onToggleFavorite={(id) => {
@@ -485,8 +498,6 @@ export function App() {
                         return o;
                       })
                     );
-                  } else {
-                    setShowAuthModal(true);
                   }
                 }}
                 onOpenStudio={() => setCurrentScreen('studio')}

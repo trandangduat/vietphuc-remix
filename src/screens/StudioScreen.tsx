@@ -176,12 +176,14 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
         />
       </div>
 
-      {/* Floating Free-Draggable Cultural Mascot (Bé Nghê Cung Đình) */}
-      <CulturalMascot
-        outfit={outfit}
-        isLoggedIn={isLoggedIn}
-        onLoginPrompt={onLoginPrompt}
-      />
+      {/* Floating Free-Draggable Cultural Mascot (Bé Nghê Cung Đình - chỉ hiển thị cho thành viên đã đăng nhập) */}
+      {isLoggedIn && (
+        <CulturalMascot
+          outfit={outfit}
+          isLoggedIn={isLoggedIn}
+          onLoginPrompt={onLoginPrompt}
+        />
+      )}
 
       {/* Modals */}
       <AITryOnModal

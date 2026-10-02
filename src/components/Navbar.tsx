@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BookMarked, User, LogOut, LogIn, ChevronDown, Sparkles } from 'lucide-react';
+import { BookMarked, User, LogOut, LogIn, ChevronDown, Sparkles, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -44,9 +44,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     .join('') || 'VP';
 
   const navItems = [
-    { id: 'landing' as const, label: 'Trang chủ' },
-    { id: 'studio' as const, label: 'Studio phối đồ' },
-    { id: 'lookbook' as const, label: 'Bộ sưu tập', count: sessionCount },
+    { id: 'landing' as const, label: 'Trang chủ', requiresAuth: false },
+    { id: 'studio' as const, label: 'Studio phối đồ', requiresAuth: false },
+    { id: 'lookbook' as const, label: 'Bộ sưu tập', count: sessionCount, requiresAuth: true },
   ];
 
   return (
@@ -77,10 +77,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         <nav className="h-full flex items-center gap-1 sm:gap-2 lg:gap-4">
           {navItems.map((item) => {
             const isActive = currentScreen === item.id;
+            const isGated = Boolean(item.requiresAuth && !user);
+
             return (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => {
+                  if (isGated) {
+                    onOpenAuth();
+                    return;
+                  }
+                  onNavigate(item.id);
+                }}
+                title={isGated ? 'Đăng nhập với Google để truy cập Bộ sưu tập' : undefined}
                 /* Constant font-medium & fixed paddings to ensure zero horizontal shift */
                 className={`relative h-full px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium tracking-wide transition-colors cursor-pointer ${
                   isActive
@@ -90,8 +99,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <span>{item.label}</span>
 
+                {/* Lock indicator for member-only screens */}
+                {isGated && (
+                  <Lock className="w-3 h-3 text-imperial-gold/70 stroke-[2.2]" />
+                )}
+
                 {/* Lookbook Count Badge */}
-                {item.count !== undefined && item.count > 0 && (
+                {!isGated && item.count !== undefined && item.count > 0 && (
                   <span
                     className={`px-1.5 py-0.2 text-[10px] font-bold rounded-none transition-colors ${
                       isActive
