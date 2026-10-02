@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { EventBackground } from '../types';
+import { HeritageModal } from './heritage/HeritageFrame';
 
 interface CustomEventModalProps {
   isOpen: boolean;
@@ -15,8 +16,6 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
 }) => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-
-  if (!isOpen) return null;
 
   const SUGGESTIONS = [
     'Quán cà phê phố cổ Hội An lúc hoàng hôn rực rỡ',
@@ -44,81 +43,70 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
-      <div className="max-w-md w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-6 sm:p-7 shadow-2xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-none text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all border border-lacquer-border"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2.5 rounded-none bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="font-serif font-bold text-2xl text-silk-ivory">
-              Tạo Bối cảnh Event bằng AI
-            </h3>
-            <p className="text-sm text-silk-muted mt-0.5">
-              Nhập mô tả không gian để AI sinh một nền độc nhất cho Studio
-            </p>
-          </div>
+    <HeritageModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Tạo Bối Cảnh Sự Kiện (AI)"
+      subtitle="Nhập mô tả không gian để AI sinh một nền độc nhất cho Studio"
+      icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
+      badge="AI GENERATION"
+      maxWidth="max-w-md"
+    >
+      <div className="space-y-4 font-sans text-xs">
+        <div>
+          <label className="block text-[11px] font-bold text-[#C5A059] mb-2 uppercase tracking-wider">
+            Mô tả không gian hoặc bối cảnh:
+          </label>
+          <textarea
+            rows={3}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Ví dụ: Hoàng hôn bên dòng sông Hương, phố đèn lồng Hội An lung linh..."
+            className="w-full p-3 rounded-[6px] bg-[#0D111A] border border-[#C5A059]/40 focus:border-[#D4AF37] text-xs sm:text-sm text-[#EDE5D8] placeholder-[#EDE5D8]/40 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-colors resize-none font-sans"
+          />
         </div>
 
-        <div className="space-y-4 my-5">
-          <div>
-            <label className="block text-xs font-bold text-silk-ivory mb-2 uppercase tracking-wider">
-              Mô tả không gian hoặc bối cảnh:
-            </label>
-            <textarea
-              rows={3}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Ví dụ: Hoàng hôn bên dòng sông Hương, phố đèn lồng Hội An lung linh..."
-              className="w-full p-3.5 rounded-none bg-lacquer-surface border-2 border-lacquer-border text-sm text-silk-ivory placeholder:text-silk-muted/60 focus:outline-none focus:border-imperial-gold transition-colors resize-none font-sans"
-            />
-          </div>
-
-          <div>
-            <span className="text-xs font-bold text-silk-muted block mb-2 uppercase tracking-wider">Gợi ý nhanh:</span>
-            <div className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setPrompt(item)}
-                  className="px-3 py-1.5 rounded-none text-xs bg-lacquer-surface border border-lacquer-border text-silk-muted hover:text-imperial-gold hover:border-imperial-gold transition-all text-left font-medium"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
+        <div>
+          <span className="text-[11px] font-bold text-[#C5A059] block mb-2 uppercase tracking-wider">
+            Gợi ý nhanh:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {SUGGESTIONS.map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setPrompt(item)}
+                className="px-2.5 py-1 rounded-[6px] text-xs bg-[#121622] border border-[#C5A059]/30 text-[#EDE5D8]/80 hover:text-[#D4AF37] hover:border-[#D4AF37]/60 transition-all text-left font-sans cursor-pointer"
+              >
+                {item}
+              </button>
+            ))}
           </div>
         </div>
 
         <button
+          type="button"
           onClick={handleGenerate}
           disabled={!prompt.trim() || isGenerating}
-          className={`w-full py-3.5 rounded-none font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md ${
+          className={`w-full py-3 rounded-[6px] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
             prompt.trim() && !isGenerating
-              ? 'bg-imperial-gold text-lacquer hover:bg-imperial-gold-light'
-              : 'bg-lacquer-surface text-silk-muted border border-lacquer-border cursor-not-allowed opacity-60'
+              ? 'bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] hover:brightness-110 shadow-[0_4px_16px_rgba(212,175,55,0.25)]'
+              : 'bg-[#161B26] text-[#EDE5D8]/40 border border-[#C5A059]/25 cursor-not-allowed'
           }`}
         >
           {isGenerating ? (
             <>
-              <div className="w-4 h-4 border-2 border-lacquer/30 border-t-lacquer rounded-none animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#0A0D12]/30 border-t-[#0A0D12] rounded-full animate-spin" />
               <span>AI đang vẽ bối cảnh...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-[#0A0D12]" />
               <span>Sinh Nền Event Mới & Áp dụng</span>
             </>
           )}
         </button>
       </div>
-    </div>
+    </HeritageModal>
   );
 };

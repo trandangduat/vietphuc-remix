@@ -23,7 +23,6 @@ import { CreateLookbookModal } from '../components/CreateLookbookModal';
 import { LookbookDetailModal } from '../components/LookbookDetailModal';
 import {
   CornerTopLeftTassel,
-  CornerTopRightBlossom,
   CornerBottomRightBrass,
   CornerBottomLeft,
 } from '../components/heritage/HeritageDecorations';
@@ -794,21 +793,21 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 lg:p-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setSelectedOutfit(null)}
         >
-          {/* Modal Container */}
+          {/* Modal Container matching cultural popup frame */}
           <div
-            className="w-full max-w-5xl max-h-[92vh] bg-gradient-to-b from-[#14110E] via-[#0E0C0A] to-[#0A0908] border border-[#C5A059]/75 shadow-[0_24px_72px_rgba(0,0,0,0.96),0_0_24px_rgba(197,160,89,0.2)] rounded-none flex flex-col lg:flex-row overflow-hidden animate-in zoom-in-95 duration-200 relative"
+            style={{ borderRadius: '10px' }}
+            className="w-full max-w-5xl max-h-[92vh] bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_24px_rgba(197,160,89,0.12),inset_0_0_0_1px_rgba(197,160,89,0.2)] flex flex-col lg:flex-row overflow-hidden animate-in zoom-in-95 duration-200 relative text-[#EDE5D8]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 4 Heritage Corners */}
+            {/* Heritage Corners (Peach blossom removed) */}
             <CornerTopLeftTassel />
-            <CornerTopRightBlossom />
             <CornerBottomRightBrass />
             <CornerBottomLeft />
 
             {/* Close Button */}
             <button
               onClick={() => setSelectedOutfit(null)}
-              className="absolute top-3 right-3 z-40 w-7 h-7 rounded-full bg-black/75 hover:bg-black/95 border border-[#C5A059]/60 hover:border-[#D4AF37] text-white/80 hover:text-white flex items-center justify-center transition-all shadow-md cursor-pointer"
+              className="absolute top-2.5 right-2.5 z-40 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 border border-[#C5A059]/50 hover:border-[#D4AF37] text-[#EDE5D8]/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer shadow-md"
               title="Đóng cửa sổ"
             >
               <X className="w-3.5 h-3.5" />
@@ -878,10 +877,10 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 {/* 1. Header: Editable Outfit Title & Date */}
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-imperial-gold">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-[#C5A059] font-sans">
                       Hồ Sơ Trang Phục
                     </span>
-                    <span className="text-xs text-silk-muted flex items-center gap-1">
+                    <span className="text-xs text-[#EDE5D8]/70 flex items-center gap-1 font-sans">
                       <Calendar className="w-3 h-3" />
                       <span>{selectedOutfit.createdAt}</span>
                     </span>
@@ -893,12 +892,12 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                         type="text"
                         value={editNameText}
                         onChange={(e) => setEditNameText(e.target.value)}
-                        className="flex-1 bg-lacquer border border-imperial-gold px-3 py-1.5 text-base font-serif text-silk-ivory focus:outline-none rounded-md"
+                        className="flex-1 bg-[#0D111A] border border-[#C5A059]/50 px-3 py-1.5 text-sm font-sans text-[#EDE5D8] focus:outline-none rounded-[6px]"
                         autoFocus
                       />
                       <button
                         onClick={handleSaveRename}
-                        className="p-2 bg-imperial-gold text-lacquer hover:bg-imperial-gold-light rounded-md"
+                        className="p-2 bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] hover:brightness-110 rounded-[6px] cursor-pointer"
                         title="Lưu tên mới"
                       >
                         <Check className="w-4 h-4 stroke-[3]" />
@@ -906,7 +905,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 group/edit">
-                      <h2 className="font-serif font-extrabold text-2xl text-silk-ivory tracking-tight">
+                      <h2 className="font-serif font-extrabold text-2xl text-[#F7F4EE] tracking-tight">
                         {selectedOutfit.name}
                       </h2>
                       {isLoggedIn && (
@@ -915,7 +914,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                             setIsEditingName(true);
                             setEditNameText(selectedOutfit.name);
                           }}
-                          className="text-silk-muted hover:text-imperial-gold opacity-0 group-hover/edit:opacity-100 transition-opacity p-1"
+                          className="text-[#EDE5D8]/50 hover:text-[#D4AF37] opacity-0 group-hover/edit:opacity-100 transition-opacity p-1 cursor-pointer"
                           title="Đổi tên bộ trang phục"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -924,23 +923,23 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     </div>
                   )}
 
-                  <p className="text-xs text-silk-muted mt-1">
-                    Bối cảnh phục sức: <strong className="text-silk-ivory">{selectedOutfit.event.name}</strong> • Giới tính:{' '}
-                    <strong className="text-silk-ivory">{selectedOutfit.gender === 'women' ? 'Nữ' : 'Nam'}</strong>
+                  <p className="text-xs text-[#EDE5D8]/70 mt-1 font-sans">
+                    Bối cảnh phục sức: <strong className="text-[#F7F4EE]">{selectedOutfit.event.name}</strong> • Giới tính:{' '}
+                    <strong className="text-[#F7F4EE]">{selectedOutfit.gender === 'women' ? 'Nữ' : 'Nam'}</strong>
                   </p>
                 </div>
 
                 {/* 2. PIECES BREAKDOWN (Bóc tách từng món đồ) */}
-                <div className="space-y-2.5">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-imperial-gold flex items-center gap-1.5">
+                <div className="space-y-2.5 font-sans">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#C5A059] flex items-center gap-1.5">
                     <Layers className="w-3.5 h-3.5" />
                     <span>Cấu Thành Phục Sức ({selectedOutfit.accessory ? '4' : '3'} món)</span>
                   </h4>
 
                   <div className="space-y-2">
                     {/* Áo */}
-                    <div className="p-2.5 rounded-xl bg-lacquer/80 border border-lacquer-border flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-lacquer-surface border border-imperial-gold/30 p-1 flex items-center justify-center flex-shrink-0">
+                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
                         <img
                           src={selectedOutfit.top.piece.thumbnailUrl || selectedOutfit.top.piece.assetUrl}
                           alt={selectedOutfit.top.piece.name}
@@ -949,22 +948,22 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-imperial-gold uppercase font-bold tracking-wider">Áo</span>
+                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Áo</span>
                           {selectedOutfit.top.piece.culturalInfo && (
-                            <span className="text-[9px] text-silk-muted">
+                            <span className="text-[9px] text-[#EDE5D8]/60">
                               {selectedOutfit.top.piece.culturalInfo.period.split('(')[0]}
                             </span>
                           )}
                         </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-silk-ivory truncate">
+                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
                           {selectedOutfit.top.piece.name}
                         </h5>
                       </div>
                     </div>
 
                     {/* Quần */}
-                    <div className="p-2.5 rounded-xl bg-lacquer/80 border border-lacquer-border flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-lacquer-surface border border-imperial-gold/30 p-1 flex items-center justify-center flex-shrink-0">
+                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
                         <img
                           src={selectedOutfit.bottom.piece.thumbnailUrl || selectedOutfit.bottom.piece.assetUrl}
                           alt={selectedOutfit.bottom.piece.name}
@@ -973,22 +972,22 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-imperial-gold uppercase font-bold tracking-wider">Quần / Váy</span>
+                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Quần / Váy</span>
                           {selectedOutfit.bottom.piece.culturalInfo && (
-                            <span className="text-[9px] text-silk-muted">
+                            <span className="text-[9px] text-[#EDE5D8]/60">
                               {selectedOutfit.bottom.piece.culturalInfo.period.split('(')[0]}
                             </span>
                           )}
                         </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-silk-ivory truncate">
+                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
                           {selectedOutfit.bottom.piece.name}
                         </h5>
                       </div>
                     </div>
 
                     {/* Giày */}
-                    <div className="p-2.5 rounded-xl bg-lacquer/80 border border-lacquer-border flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-lacquer-surface border border-imperial-gold/30 p-1 flex items-center justify-center flex-shrink-0">
+                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
                         <img
                           src={selectedOutfit.footwear.piece.thumbnailUrl || selectedOutfit.footwear.piece.assetUrl}
                           alt={selectedOutfit.footwear.piece.name}
@@ -997,14 +996,14 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-imperial-gold uppercase font-bold tracking-wider">Giày / Dép</span>
+                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Giày / Dép</span>
                           {selectedOutfit.footwear.piece.culturalInfo && (
-                            <span className="text-[9px] text-silk-muted">
+                            <span className="text-[9px] text-[#EDE5D8]/60">
                               {selectedOutfit.footwear.piece.culturalInfo.period.split('(')[0]}
                             </span>
                           )}
                         </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-silk-ivory truncate">
+                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
                           {selectedOutfit.footwear.piece.name}
                         </h5>
                       </div>
@@ -1012,8 +1011,8 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
                     {/* Phụ kiện (nếu có) */}
                     {selectedOutfit.accessory && (
-                      <div className="p-2.5 rounded-xl bg-lacquer/80 border border-lacquer-border flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-lacquer-surface border border-imperial-gold/30 p-1 flex items-center justify-center flex-shrink-0">
+                      <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
                           <img
                             src={selectedOutfit.accessory.piece.thumbnailUrl || selectedOutfit.accessory.piece.assetUrl}
                             alt={selectedOutfit.accessory.piece.name}
@@ -1021,8 +1020,8 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="text-[10px] text-imperial-gold uppercase font-bold tracking-wider block">Phụ kiện</span>
-                          <h5 className="font-bold text-xs sm:text-sm text-silk-ivory truncate">
+                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider block">Phụ kiện</span>
+                          <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
                             {selectedOutfit.accessory.piece.name}
                           </h5>
                         </div>
@@ -1033,17 +1032,17 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
                 {/* 3. Đánh giá văn hóa (Bé Nghê Cung Đình) */}
                 {selectedOutfit.aiAnalysis && (
-                  <div className="p-3.5 rounded-xl bg-lacquer/90 border border-imperial-gold/40 space-y-1.5">
+                  <div className="p-3.5 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/35 space-y-1.5 font-sans">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-imperial-gold flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-imperial-gold" />
+                      <span className="text-xs font-bold text-[#C5A059] flex items-center gap-1.5 uppercase tracking-wider">
+                        <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                         <span>Nhận Xét Điển Lễ</span>
                       </span>
-                      <span className="text-xs font-serif font-bold px-2 py-0.5 rounded-md bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                      <span className="text-xs font-sans font-medium px-2 py-0.5 rounded-[4px] bg-[#12161F] text-[#D4AF37] border border-[#C5A059]/50">
                         ★ {selectedOutfit.aiAnalysis.totalScore}/10
                       </span>
                     </div>
-                    <p className="font-serif italic text-xs text-silk-ivory leading-relaxed">
+                    <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed">
                       "{selectedOutfit.aiAnalysis.mascotQuote || selectedOutfit.aiAnalysis.explanation}"
                     </p>
                   </div>
@@ -1051,13 +1050,14 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
               </div>
 
               {/* 4. Action Buttons at bottom of modal */}
-              <div className="pt-6 border-t border-lacquer-border flex flex-col sm:flex-row items-center gap-3 mt-6">
+              <div className="pt-5 border-t border-[#C5A059]/20 flex flex-col sm:flex-row items-center gap-2.5 mt-5 font-sans">
                 <button
+                  type="button"
                   onClick={() => {
                     onLoadOutfitIntoStudio(selectedOutfit);
                     setSelectedOutfit(null);
                   }}
-                  className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-imperial-gold to-imperial-gold-light hover:brightness-105 text-lacquer font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2 transition-all"
+                  className="w-full sm:flex-1 py-2.5 px-4 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] hover:brightness-110 text-[#0A0D12] font-bold text-xs uppercase tracking-wider shadow-[0_4px_16px_rgba(212,175,55,0.25)] flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Mở Trong Studio (Remix)</span>
@@ -1065,12 +1065,13 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
                 {isLoggedIn && (
                   <button
+                    type="button"
                     onClick={() => {
                       const idToDelete = selectedOutfit.id;
                       setSelectedOutfit(null);
                       onDeleteOutfit(idToDelete);
                     }}
-                    className="py-3 px-4 rounded-xl bg-lacquer hover:bg-rose-950/60 border border-lacquer-border hover:border-rose-500/50 text-silk-muted hover:text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-4 rounded-[6px] bg-[#161B26] hover:bg-rose-950/60 border border-[#C5A059]/40 hover:border-rose-500/50 text-[#EDE5D8]/70 hover:text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     title="Xóa bộ trang phục này"
                   >
                     <Trash2 className="w-4 h-4" />

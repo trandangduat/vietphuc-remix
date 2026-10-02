@@ -12,6 +12,7 @@ import {
   ChevronRight,
   RotateCw,
 } from 'lucide-react';
+import { HeritageModal } from './heritage/HeritageFrame';
 
 interface CulturalMascotProps {
   outfit: ActiveOutfitState;
@@ -271,15 +272,16 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
         }}
         className="select-none font-sans"
       >
-        {/* SPEECH BUBBLE */}
+        {/* SPEECH BUBBLE (Heritage Mini-Popup Style) */}
         {showBubble && !isThinking && (
           <div
             style={{
               position: 'absolute',
+              borderRadius: '8px',
               ...(isRightHalf ? { right: '100%', marginRight: '14px' } : { left: '100%', marginLeft: '14px' }),
               ...(isBottomHalf ? { bottom: '-6px' } : { top: '-6px' }),
             }}
-            className="w-72 sm:w-80 bg-lacquer-card/95 backdrop-blur-xl border-2 border-imperial-gold p-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.85)] rounded-none animate-in fade-in zoom-in-95 duration-200"
+            className="w-72 sm:w-80 bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.95)] animate-in fade-in zoom-in-95 duration-200 text-[#EDE5D8]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Bubble Tail arrow pointing to mascot */}
@@ -287,8 +289,8 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
               style={{
                 position: 'absolute',
                 ...(isRightHalf
-                  ? { right: '-8px', borderLeft: '8px solid #D4AF37' }
-                  : { left: '-8px', borderRight: '8px solid #D4AF37' }),
+                  ? { right: '-8px', borderLeft: '8px solid #C5A059' }
+                  : { left: '-8px', borderRight: '8px solid #C5A059' }),
                 ...(isBottomHalf ? { bottom: '24px' } : { top: '24px' }),
                 width: 0,
                 height: 0,
@@ -298,14 +300,14 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
             />
 
             {/* Bubble Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-lacquer-border/80">
+            <div className="flex items-center justify-between pb-2 border-b border-[#C5A059]/30">
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-imperial-gold font-bold text-xs uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-imperial-gold animate-spin-slow" />
+                <span className="text-[#C5A059] font-bold text-xs uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>Bé Nghê Phán:</span>
                 </span>
                 {analysis.totalScore > 0 && (
-                  <span className="text-[11px] font-serif font-bold px-1.5 py-0.5 bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                  <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-[4px] bg-[#12161F] text-[#D4AF37] border border-[#C5A059]/50">
                     {analysis.totalScore}/10
                   </span>
                 )}
@@ -313,17 +315,18 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
 
               <div className="flex items-center gap-1.5">
                 {analysis.culturalStatus === 'suitable' ? (
-                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase bg-emerald-950 text-emerald-300 border border-emerald-500/40">
+                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase rounded-[3px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
                     Phù hợp
                   </span>
                 ) : (
-                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase bg-amber-950 text-amber-300 border border-amber-500/40">
+                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase rounded-[3px] bg-amber-950/80 text-amber-300 border border-amber-500/40">
                     Lưu ý
                   </span>
                 )}
                 <button
+                  type="button"
                   onClick={() => setShowBubble(false)}
-                  className="text-silk-muted hover:text-white p-0.5 transition-colors"
+                  className="text-[#EDE5D8]/70 hover:text-white p-0.5 transition-colors cursor-pointer"
                   title="Đóng nhận xét"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -331,18 +334,19 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
               </div>
             </div>
 
-            {/* Bubble Body: Mascot Quote */}
-            <p className="font-serif italic text-silk-ivory text-xs sm:text-[13px] leading-relaxed my-2.5">
+            {/* Bubble Body: Mascot Quote (Sans-serif) */}
+            <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed my-2.5">
               "{analysis.mascotQuote || analysis.criteria.colorHarmony.comment}"
             </p>
 
             {/* Bubble Footer Action */}
             <button
+              type="button"
               onClick={() => {
                 setShowBubble(false);
                 setIsModalOpen(true);
               }}
-              className="w-full py-1.5 px-2.5 bg-lacquer-surface hover:bg-lacquer border border-lacquer-border hover:border-imperial-gold text-[11px] font-bold text-imperial-gold flex items-center justify-center gap-1 transition-all uppercase tracking-wider"
+              className="w-full py-1.5 px-2.5 rounded-[6px] bg-[#161B26] hover:bg-[#1E2433] border border-[#C5A059]/40 hover:border-[#D4AF37] text-[11px] font-sans font-bold text-[#D4AF37] flex items-center justify-center gap-1 transition-all uppercase tracking-wider cursor-pointer"
             >
               <span>Xem luận giải chi tiết</span>
               <ChevronRight className="w-3 h-3" />
@@ -477,186 +481,153 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
       </div>
 
       {/* DETAILED CULTURAL APPRAISAL MODAL POPUP */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          {/* Modal Container */}
-          <div
-            className="w-full max-w-2xl bg-lacquer-surface border-2 border-imperial-gold shadow-[0_24px_64px_rgba(0,0,0,0.9)] max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 font-sans"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="px-5 py-4 bg-gradient-to-r from-lacquer-card via-lacquer to-lacquer-card border-b-2 border-imperial-gold/60 flex items-center justify-between flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full border border-imperial-gold bg-lacquer p-1 flex items-center justify-center shadow-inner">
-                  <Sparkles className="w-5 h-5 text-imperial-gold" />
-                </div>
-                <div>
-                  <h3 className="font-serif font-bold text-lg text-silk-ivory tracking-wide flex items-center gap-2">
-                    <span>Thẩm Định Văn Hóa Cung Đình</span>
-                  </h3>
-                  <p className="text-xs text-silk-muted">
-                    Cố vấn Phục sức & Lễ nghi • Bối cảnh: <strong className="text-imperial-gold font-medium">{outfit.event.name}</strong>
-                  </p>
-                </div>
+      <HeritageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Thẩm Định Văn Hóa Cung Đình"
+        subtitle={`Cố vấn Phục sức & Lễ nghi • Bối cảnh: ${outfit.event.name}`}
+        icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
+        badge={`${analysis.totalScore}/10 ĐIỂM`}
+        source={analysis.source}
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4 font-sans text-xs">
+          {/* Score & Verdict Banner */}
+          <div className="p-3.5 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+            <div className="flex items-center gap-3">
+              <div className="text-center p-2 rounded-[6px] bg-[#C5A059]/15 border border-[#C5A059]/40 flex-shrink-0 min-w-[70px]">
+                <span className="block text-2xl font-bold text-[#D4AF37]">
+                  {analysis.totalScore}
+                </span>
+                <span className="text-[9px] uppercase font-bold text-[#EDE5D8]/60 tracking-wider">
+                  Thang 10
+                </span>
               </div>
 
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center text-silk-muted hover:text-white border border-lacquer-border hover:border-imperial-gold transition-colors"
-                title="Đóng bảng thẩm định"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Scrollable Body */}
-            <div className="p-5 sm:p-6 space-y-5 overflow-y-auto scrollbar-thin">
-              {/* Score & Verdict Banner */}
-              <div className="p-4 bg-lacquer/90 border border-imperial-gold/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
-                <div className="flex items-center gap-4">
-                  <div className="text-center p-2.5 bg-imperial-gold/15 border border-imperial-gold/40 flex-shrink-0 min-w-[80px]">
-                    <span className="block text-2xl sm:text-3xl font-serif font-extrabold text-imperial-gold">
-                      {analysis.totalScore}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  {analysis.culturalStatus === 'suitable' ? (
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                      <span>Chuẩn mực điển lễ</span>
                     </span>
-                    <span className="text-[10px] uppercase font-bold text-silk-muted tracking-widest">
-                      Thang 10
+                  ) : (
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-amber-950/80 text-amber-300 border border-amber-500/40">
+                      <AlertTriangle className="w-3 h-3 text-amber-400" />
+                      <span>Cần cân nhắc</span>
                     </span>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {analysis.culturalStatus === 'suitable' ? (
-                        <span className="flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-500/50">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Chuẩn mực điển lễ</span>
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-500/50">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Cần cân nhắc</span>
-                        </span>
-                      )}
-                    </div>
-                    <p className="font-serif italic text-sm text-silk-ivory">
-                      "{analysis.mascotQuote || analysis.criteria.colorHarmony.comment}"
-                    </p>
-                  </div>
+                  )}
                 </div>
-
-                {!isLoggedIn && (
-                  <button
-                    onClick={() => {
-                      setIsModalOpen(false);
-                      onLoginPrompt();
-                    }}
-                    className="py-2 px-3.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider shadow transition-all whitespace-nowrap flex items-center justify-center gap-1.5"
-                  >
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>Lưu vào Lookbook</span>
-                  </button>
-                )}
-              </div>
-
-              {/* 3 Core Pillars of Cultural Criteria */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-imperial-gold flex items-center gap-2">
-                  <BookCheck className="w-4 h-4" />
-                  <span>3 Tiêu Chí Thẩm Định Cổ Phong</span>
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* 1. Hài hòa màu sắc */}
-                  <div className="p-3.5 bg-lacquer-card border border-lacquer-border flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
-                          Hài hòa màu sắc
-                        </span>
-                        <span className="font-serif font-bold text-imperial-gold text-sm">
-                          {analysis.criteria.colorHarmony.score}/10
-                        </span>
-                      </div>
-                      <p className="text-xs text-silk-ivory leading-relaxed">
-                        {analysis.criteria.colorHarmony.comment}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 2. Phù hợp sự kiện */}
-                  <div className="p-3.5 bg-lacquer-card border border-lacquer-border flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
-                          Phù hợp bối cảnh
-                        </span>
-                        <span className="font-serif font-bold text-imperial-gold text-sm">
-                          {analysis.criteria.eventFit.score}/10
-                        </span>
-                      </div>
-                      <p className="text-xs text-silk-ivory leading-relaxed">
-                        {analysis.criteria.eventFit.comment}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 3. Chuẩn mực lễ nghi */}
-                  <div className="p-3.5 bg-lacquer-card border border-lacquer-border flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-bold text-silk-muted uppercase tracking-wider text-[11px]">
-                          Chuẩn mực lễ nghi
-                        </span>
-                        <span className="font-serif font-bold text-imperial-gold text-sm">
-                          {analysis.criteria.culturalNorm.score}/10
-                        </span>
-                      </div>
-                      <p className="text-xs text-silk-ivory leading-relaxed">
-                        {analysis.criteria.culturalNorm.comment}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Curator Editorial Synthesis Block */}
-              <div className="p-4 bg-lacquer/95 border-l-4 border-imperial-gold space-y-2.5">
-                <div className="flex items-center gap-1.5 text-xs text-imperial-gold font-bold uppercase tracking-wider">
-                  <Sparkles className="w-4 h-4 text-imperial-gold" />
-                  <span>Luận Giải Của Giám Tuyển Văn Hóa</span>
-                </div>
-                <p className="font-serif italic text-sm text-silk-ivory leading-relaxed">
-                  "{analysis.explanation}"
+                <p className="font-sans text-xs text-[#EDE5D8] leading-relaxed">
+                  "{analysis.mascotQuote || analysis.criteria.colorHarmony.comment}"
                 </p>
-                {analysis.suggestion && (
-                  <p className="text-xs text-amber-300 font-medium pt-2 border-t border-lacquer-border/80">
-                    💡 <strong>Gợi ý phục sức:</strong> {analysis.suggestion}
-                  </p>
-                )}
-              </div>
-
-              {/* Historical Archival Seal */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 border-t border-lacquer-border text-xs text-silk-muted">
-                <span className="truncate">
-                  Nguồn sử liệu đối chiếu: <strong className="text-silk-ivory font-serif italic">{analysis.source}</strong>
-                </span>
-                <span className="text-[10px] tracking-widest uppercase text-imperial-gold/80 border border-imperial-gold/30 px-2 py-0.5 whitespace-nowrap self-start sm:self-auto">
-                  Di Sản Chứng Thực
-                </span>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-5 py-3.5 bg-lacquer-card border-t border-lacquer-border flex items-center justify-end gap-3 flex-shrink-0">
+            {!isLoggedIn && (
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="py-2.5 px-6 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider transition-all shadow-md"
+                type="button"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  onLoginPrompt();
+                }}
+                className="py-1.5 px-3 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] font-bold text-[11px] uppercase tracking-wider shadow transition-all whitespace-nowrap flex items-center justify-center gap-1.5 hover:brightness-110 cursor-pointer"
               >
-                Đã Hiểu • Tiếp Tục Phối Đồ
+                <Lock className="w-3 h-3" />
+                <span>Lưu vào Lookbook</span>
               </button>
+            )}
+          </div>
+
+          {/* 3 Core Pillars of Cultural Criteria */}
+          <div className="space-y-2.5">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#C5A059] flex items-center gap-1.5">
+              <BookCheck className="w-3.5 h-3.5" />
+              <span>3 Tiêu Chí Thẩm Định Cổ Phong</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {/* 1. Hài hòa màu sắc */}
+              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
+                      Hài hòa màu sắc
+                    </span>
+                    <span className="font-bold text-[#D4AF37] text-xs">
+                      {analysis.criteria.colorHarmony.score}/10
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
+                    {analysis.criteria.colorHarmony.comment}
+                  </p>
+                </div>
+              </div>
+
+              {/* 2. Phù hợp sự kiện */}
+              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
+                      Phù hợp bối cảnh
+                    </span>
+                    <span className="font-bold text-[#D4AF37] text-xs">
+                      {analysis.criteria.eventFit.score}/10
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
+                    {analysis.criteria.eventFit.comment}
+                  </p>
+                </div>
+              </div>
+
+              {/* 3. Chuẩn mực lễ nghi */}
+              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
+                      Chuẩn mực lễ nghi
+                    </span>
+                    <span className="font-bold text-[#D4AF37] text-xs">
+                      {analysis.criteria.culturalNorm.score}/10
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
+                    {analysis.criteria.culturalNorm.comment}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Curator Editorial Synthesis Block */}
+          <div className="p-3.5 rounded-[8px] bg-[#0D111A] border-l-4 border-l-[#C5A059] border border-[#C5A059]/30 space-y-2">
+            <div className="flex items-center gap-1.5 text-[11px] text-[#C5A059] font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+              <span>Luận Giải Của Giám Tuyển Văn Hóa</span>
+            </div>
+            <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed">
+              "{analysis.explanation}"
+            </p>
+            {analysis.suggestion && (
+              <p className="text-[11px] text-amber-300 font-sans pt-1.5 border-t border-[#C5A059]/20">
+                💡 <strong>Gợi ý phục sức:</strong> {analysis.suggestion}
+              </p>
+            )}
+          </div>
+
+          {/* Modal Footer button */}
+          <div className="pt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="py-2 px-5 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] hover:brightness-110 text-[#0A0D12] font-bold text-xs uppercase tracking-wider transition-all shadow cursor-pointer"
+            >
+              Đã Hiểu • Tiếp Tục Phối Đồ
+            </button>
+          </div>
         </div>
-      )}
+      </HeritageModal>
     </>
   );
 };

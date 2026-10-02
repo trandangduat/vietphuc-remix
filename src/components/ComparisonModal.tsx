@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, ExternalLink, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { ExternalLink, ShieldCheck, AlertTriangle, Layers } from 'lucide-react';
 import { SavedOutfit } from '../types';
+import { HeritageModal } from './heritage/HeritageFrame';
 
 interface ComparisonModalProps {
   isOpen: boolean;
@@ -15,49 +16,48 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
   outfits,
   onLoadOutfitIntoStudio,
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lacquer/90 backdrop-blur-md font-sans">
-      <div className="max-w-5xl w-full bg-lacquer-card border-2 border-imperial-gold rounded-none p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-none text-silk-muted hover:text-silk-ivory hover:bg-lacquer-surface transition-all border border-lacquer-border"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-1">
-          So sánh phương án phối đồ
-        </h3>
-        <p className="text-sm text-silk-muted mb-5">
-          Đối chiếu trực quan {outfits.length} phương án đã chọn để tìm ra bộ trang phục ưng ý nhất
-        </p>
-
+    <HeritageModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="So Sánh Phương Án Phối Đồ"
+      subtitle={`Đối chiếu trực quan ${outfits.length} phương án đã chọn`}
+      icon={<Layers className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
+      badge={`${outfits.length} OUTFIT`}
+      maxWidth="max-w-5xl"
+    >
+      <div className="space-y-4 font-sans text-xs">
         {/* Comparison Table */}
-        <div className="overflow-x-auto border-2 border-lacquer-border">
-          <table className="w-full text-left text-sm border-collapse">
+        <div className="overflow-x-auto rounded-[8px] border border-[#C5A059]/40 bg-[#0D111A]/90 shadow-inner">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b-2 border-lacquer-border bg-lacquer-surface">
-                <th className="py-3.5 px-4 text-silk-muted font-bold uppercase tracking-wider text-xs w-36">Tiêu chí</th>
+              <tr className="border-b border-[#C5A059]/30 bg-[#121622]">
+                <th className="py-3 px-3.5 text-[#C5A059] font-bold uppercase tracking-wider text-[11px] w-32">
+                  Tiêu chí
+                </th>
                 {outfits.map((outfit) => (
-                  <th key={outfit.id} className="py-3.5 px-4 font-sans font-bold text-silk-ivory min-w-[220px] text-base border-l border-lacquer-border">
+                  <th
+                    key={outfit.id}
+                    className="py-3 px-3.5 font-bold text-[#F7F4EE] min-w-[200px] text-xs border-l border-[#C5A059]/25"
+                  >
                     {outfit.name}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-lacquer-border">
+            <tbody className="divide-y divide-[#C5A059]/20 text-[#EDE5D8]">
               {/* Row 1: Visual Mockup */}
               <tr>
-                <td className="py-4 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Hình ảnh</td>
+                <td className="py-3.5 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Hình ảnh
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-4 px-4 border-l border-lacquer-border">
-                    <div className="relative aspect-[3/4] w-32 rounded-none overflow-hidden border-2 border-lacquer-border shadow">
+                  <td key={outfit.id} className="py-3.5 px-3.5 border-l border-[#C5A059]/20">
+                    <div className="relative aspect-[3/4] w-28 rounded-[6px] overflow-hidden border border-[#C5A059]/40 shadow bg-[#080A0F]">
                       <img
                         src={outfit.tryOnImage || outfit.top.piece.assetUrl || outfit.top.variant?.assetUrl}
                         alt={outfit.name}
-                        className="w-full h-full object-cover bg-lacquer-surface"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </td>
@@ -66,9 +66,11 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 2: Event */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Bối cảnh</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Bối cảnh
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 text-silk-ivory font-semibold border-l border-lacquer-border">
+                  <td key={outfit.id} className="py-3 px-3.5 text-[#EDE5D8] font-medium border-l border-[#C5A059]/20">
                     {outfit.event.name}
                   </td>
                 ))}
@@ -76,70 +78,86 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 3: Top */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Áo</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Áo
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
-                    <span className="text-silk-ivory font-bold block">{outfit.top.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.top.piece.colorName || outfit.top.variant?.colorName}</span>
+                  <td key={outfit.id} className="py-3 px-3.5 border-l border-[#C5A059]/20">
+                    <span className="text-[#F7F4EE] font-medium block">{outfit.top.piece.name}</span>
+                    <span className="text-[11px] text-[#EDE5D8]/60">
+                      {outfit.top.piece.colorName || outfit.top.variant?.colorName}
+                    </span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 4: Bottom */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Quần / Váy</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Quần / Váy
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
-                    <span className="text-silk-ivory font-bold block">{outfit.bottom.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.bottom.piece.colorName || outfit.bottom.variant?.colorName}</span>
+                  <td key={outfit.id} className="py-3 px-3.5 border-l border-[#C5A059]/20">
+                    <span className="text-[#F7F4EE] font-medium block">{outfit.bottom.piece.name}</span>
+                    <span className="text-[11px] text-[#EDE5D8]/60">
+                      {outfit.bottom.piece.colorName || outfit.bottom.variant?.colorName}
+                    </span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 5: Footwear */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Giày / Dép</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Giày / Dép
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
-                    <span className="text-silk-ivory font-bold block">{outfit.footwear.piece.name}</span>
-                    <span className="text-xs text-silk-muted font-medium">{outfit.footwear.piece.colorName || outfit.footwear.variant?.colorName}</span>
+                  <td key={outfit.id} className="py-3 px-3.5 border-l border-[#C5A059]/20">
+                    <span className="text-[#F7F4EE] font-medium block">{outfit.footwear.piece.name}</span>
+                    <span className="text-[11px] text-[#EDE5D8]/60">
+                      {outfit.footwear.piece.colorName || outfit.footwear.variant?.colorName}
+                    </span>
                   </td>
                 ))}
               </tr>
 
               {/* Row 6: Accessory */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Phụ kiện</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Phụ kiện
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 text-silk-ivory font-semibold border-l border-lacquer-border">
-                    {outfit.accessory ? outfit.accessory.piece.name : <span className="text-silk-muted">Không chọn</span>}
+                  <td key={outfit.id} className="py-3 px-3.5 text-[#EDE5D8] font-medium border-l border-[#C5A059]/20">
+                    {outfit.accessory ? outfit.accessory.piece.name : <span className="text-[#EDE5D8]/50">Không chọn</span>}
                   </td>
                 ))}
               </tr>
 
               {/* Row 7: AI Overview Culture */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Đánh giá AI</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Đánh giá AI
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
+                  <td key={outfit.id} className="py-3 px-3.5 border-l border-[#C5A059]/20">
                     {outfit.aiAnalysis ? (
-                      <div>
+                      <div className="space-y-1">
                         {outfit.aiAnalysis.culturalStatus === 'suitable' && (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-green-400 mb-1.5 uppercase tracking-wider">
-                            <ShieldCheck className="w-4 h-4" /> Phù hợp
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Phù hợp
                           </span>
                         )}
                         {outfit.aiAnalysis.culturalStatus === 'caution' && (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wider">
-                            <AlertTriangle className="w-4 h-4" /> Cần lưu ý
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                            <AlertTriangle className="w-3.5 h-3.5" /> Cần lưu ý
                           </span>
                         )}
-                        <p className="text-xs text-silk-muted leading-relaxed line-clamp-3">
+                        <p className="text-[11px] text-[#EDE5D8]/80 leading-relaxed line-clamp-3">
                           {outfit.aiAnalysis.explanation}
                         </p>
                       </div>
                     ) : (
-                      <span className="text-silk-muted text-xs">Chưa phân tích</span>
+                      <span className="text-[#EDE5D8]/50 text-[11px]">Chưa phân tích</span>
                     )}
                   </td>
                 ))}
@@ -147,17 +165,19 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
               {/* Row 8: Action */}
               <tr>
-                <td className="py-3.5 px-4 text-silk-muted font-bold text-xs uppercase tracking-wider">Thao tác</td>
+                <td className="py-3 px-3.5 text-[#C5A059] font-bold text-[11px] uppercase tracking-wider">
+                  Thao tác
+                </td>
                 {outfits.map((outfit) => (
-                  <td key={outfit.id} className="py-3.5 px-4 border-l border-lacquer-border">
+                  <td key={outfit.id} className="py-3 px-3.5 border-l border-[#C5A059]/20">
                     <button
                       onClick={() => {
                         onLoadOutfitIntoStudio(outfit);
                         onClose();
                       }}
-                      className="flex items-center gap-2 py-2 px-4 rounded-none bg-imperial-gold text-lacquer hover:bg-imperial-gold-light text-xs font-bold transition-all uppercase tracking-wider"
+                      className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] hover:brightness-110 text-xs font-bold transition-all uppercase tracking-wider shadow-sm cursor-pointer"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-3 h-3" />
                       <span>Mở trong Studio</span>
                     </button>
                   </td>
@@ -167,6 +187,6 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
           </table>
         </div>
       </div>
-    </div>
+    </HeritageModal>
   );
 };

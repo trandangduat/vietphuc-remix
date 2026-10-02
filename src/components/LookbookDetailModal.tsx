@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
+import {
+  CornerTopLeftTassel,
+  CornerBottomRightBrass,
+  CornerBottomLeft,
+} from './heritage/HeritageDecorations';
 
 // Bespoke traditional gold line-art icons for outfit composition
 const TraditionalRobeIcon: React.FC = () => (
@@ -77,15 +82,19 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="p-6 bg-lacquer-surface border border-imperial-gold text-center"
+          style={{ borderRadius: '10px' }}
+          className="p-6 bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 text-center max-w-sm w-full font-sans shadow-2xl relative"
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-sm text-silk-ivory mb-4">
+          <CornerTopLeftTassel />
+          <CornerBottomRightBrass />
+          <CornerBottomLeft />
+          <p className="text-xs text-[#EDE5D8] mb-4 mt-2">
             Outfit liên kết với Lookbook này không còn tồn tại.
           </p>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-imperial-gold text-lacquer font-bold text-xs"
+            className="px-4 py-1.5 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] font-bold text-xs cursor-pointer hover:brightness-110"
           >
             Đóng
           </button>
@@ -208,16 +217,22 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
     >
       {/* Outer Floating Modal Shell (Clean, sleek, border gold with soft glow) */}
       <div
-        className="w-full max-w-7xl max-h-[96vh] flex flex-col bg-[#0A0D12] border-2 border-[#D4AF37]/80 shadow-[0_24px_80px_rgba(0,0,0,0.98)] overflow-hidden relative animate-in zoom-in-95 duration-200"
+        style={{ borderRadius: '10px' }}
+        className="w-full max-w-7xl max-h-[96vh] flex flex-col bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_24px_rgba(197,160,89,0.12),inset_0_0_0_1px_rgba(197,160,89,0.2)] overflow-hidden relative animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Floating Top-Right Close Button (Discreet, no clunky header) */}
+        {/* Heritage Signature Corners */}
+        <CornerTopLeftTassel />
+        <CornerBottomRightBrass />
+        <CornerBottomLeft />
+
+        {/* Floating Top-Right Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-40 w-8 h-8 rounded-full bg-black/75 hover:bg-black/95 border border-white/20 hover:border-[#D4AF37] text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
+          className="absolute top-2.5 right-2.5 z-40 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 border border-[#C5A059]/50 hover:border-[#D4AF37] text-[#EDE5D8]/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer shadow-md print:hidden"
           title="Đóng (ESC)"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Delete Lookbook discreet button */}
@@ -228,7 +243,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
               onClose();
             }
           }}
-          className="absolute top-3.5 right-13 z-40 w-8 h-8 rounded-full bg-black/75 hover:bg-rose-950/80 border border-white/20 hover:border-rose-500/60 text-white/60 hover:text-rose-400 flex items-center justify-center transition-all cursor-pointer shadow-lg print:hidden"
+          className="absolute top-2.5 right-11 z-40 w-7 h-7 rounded-full bg-black/60 hover:bg-rose-950/80 border border-[#C5A059]/40 hover:border-rose-500/60 text-[#EDE5D8]/60 hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer shadow-md print:hidden"
           title="Xóa Lookbook này"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -532,7 +547,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
                     THÀNH PHẦN OUTFIT
                   </h4>
 
-                  <ul className="space-y-2 text-xs text-[#F7F4EE]/90 font-serif">
+                  <ul className="space-y-2 text-xs text-[#F7F4EE]/90 font-sans">
                     <li className="flex items-center gap-2.5 truncate">
                       <TraditionalRobeIcon />
                       <span className="truncate">{topPiece?.name || 'Áo tấc'}</span>
@@ -559,10 +574,10 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
               {/* Print / Save PDF Button */}
               <button
                 onClick={handlePrintPDF}
-                className="py-2.5 px-3.5 bg-black/60 hover:bg-black/90 border border-[#D4AF37]/60 hover:border-[#D4AF37] text-xs font-serif font-bold text-[#E8C87B] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                className="py-2 px-3 bg-[#161B26] hover:bg-[#1E2433] border border-[#C5A059]/40 hover:border-[#D4AF37] text-xs font-sans font-bold text-[#D4AF37] rounded-[6px] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
                 title="In hoặc Lưu PDF"
               >
-                <Printer className="w-3.5 h-3.5 text-[#E8C87B]" />
+                <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span className="hidden sm:inline">In / PDF</span>
               </button>
 
@@ -572,9 +587,9 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
                   onLoadOutfitIntoStudio(outfit);
                   onClose();
                 }}
-                className="py-2.5 px-4 bg-transparent hover:bg-[#D4AF37]/10 border border-[#D4AF37]/80 hover:border-[#D4AF37] text-xs font-serif font-bold uppercase tracking-wider text-[#F7F4EE] flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="py-2 px-3.5 bg-transparent hover:bg-[#C5A059]/15 border border-[#C5A059]/70 hover:border-[#D4AF37] text-xs font-sans font-bold uppercase tracking-wider text-[#EDE5D8] rounded-[6px] flex items-center gap-2 transition-all cursor-pointer shadow-sm"
               >
-                <ExternalLink className="w-3.5 h-3.5 text-[#E8C87B]" />
+                <ExternalLink className="w-3.5 h-3.5 text-[#C5A059]" />
                 <span>Mở Trong Studio</span>
               </button>
 
@@ -582,7 +597,7 @@ export const LookbookDetailModal: React.FC<LookbookDetailModalProps> = ({
               <button
                 onClick={handleDownloadImage}
                 disabled={isDownloading}
-                className="py-2.5 px-5 bg-gradient-to-r from-[#D4AF37] via-[#F2DCA5] to-[#D4AF37] hover:brightness-110 text-[#1B1408] text-xs font-serif font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-[0_4px_18px_rgba(212,175,55,0.45)] cursor-pointer disabled:opacity-50"
+                className="py-2 px-4 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] hover:brightness-110 text-[#0A0D12] text-xs font-sans font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-[0_4px_16px_rgba(212,175,55,0.25)] cursor-pointer disabled:opacity-50"
               >
                 {isDownloading ? (
                   <>
