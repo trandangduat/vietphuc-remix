@@ -1,7 +1,33 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
-import { Sparkles, X, Check, BookOpen, Layers, Ban } from 'lucide-react';
+import { Sparkles, X, Check, BookOpen, Layers, Ban, Shirt, Columns2, Footprints, Crown, LayoutGrid, Gem } from 'lucide-react';
 import { HeritageCulturalCard } from './heritage/HeritageCulturalCard';
+
+// Oriental Needle Diamond Separator between Category Tabs
+const TabSeparator: React.FC = () => (
+  <div className="flex items-center justify-center px-0.5 sm:px-1 flex-shrink-0 pointer-events-none select-none" aria-hidden="true">
+    <svg className="w-2.5 h-6 text-[#C5A059]/40" viewBox="0 0 10 24" fill="none" stroke="currentColor">
+      <line x1="5" y1="2" x2="5" y2="7" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M5 8L8.5 12L5 16L1.5 12Z" strokeWidth="1.2" fill="currentColor" fillOpacity="0.25" />
+      <circle cx="5" cy="12" r="1" fill="currentColor" />
+      <line x1="5" y1="17" x2="5" y2="22" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  </div>
+);
+
+// Traditional Folding Fan Icon for Cổ phong filter pill
+const FoldingFanIcon: React.FC<{ className?: string }> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3.5 15C4.5 9 8 5 12 5C16 5 19.5 9 20.5 15L13.5 19.5C12.5 20.2 11.5 20.2 10.5 19.5L3.5 15Z" />
+    <path d="M9 16.5C10 15.8 11 15.5 12 15.5C13 15.5 14 15.8 15 16.5" />
+    <line x1="12" y1="15.5" x2="12" y2="5" />
+    <line x1="10.5" y1="16" x2="7.5" y2="6.5" />
+    <line x1="13.5" y1="16" x2="16.5" y2="6.5" />
+    <line x1="9.5" y1="16.5" x2="5" y2="10" />
+    <line x1="14.5" y1="16.5" x2="19" y2="10" />
+    <circle cx="12" cy="20.5" r="1" fill="currentColor" />
+  </svg>
+);
 
 interface PieceSelectorProps {
   pieces: Piece[];
@@ -119,109 +145,156 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   const countTraditional = categoryPieces.filter((p) => p.style === 'traditional').length;
   const countModern = categoryPieces.filter((p) => p.style === 'modern').length;
 
-  const categories: {
-    id: PieceCategory | 'presets';
-    label: string;
-    hasSelection?: boolean;
-    icon?: React.ReactNode;
-  }[] = [
-    { id: 'top', label: 'Áo', hasSelection: !!selectedPieces.top },
-    { id: 'bottom', label: 'Quần / Váy', hasSelection: !!selectedPieces.bottom },
-    { id: 'footwear', label: 'Giày / Hài', hasSelection: !!selectedPieces.footwear },
-    { id: 'accessory', label: 'Phụ kiện', hasSelection: !!selectedPieces.accessory },
+  const categories = [
     {
-      id: 'presets',
+      id: 'top' as const,
+      label: 'Áo',
+      hasSelection: !!selectedPieces.top,
+      Icon: Shirt,
+    },
+    {
+      id: 'bottom' as const,
+      label: 'Quần / Váy',
+      hasSelection: !!selectedPieces.bottom,
+      Icon: Columns2,
+    },
+    {
+      id: 'footwear' as const,
+      label: 'Giày / Hài',
+      hasSelection: !!selectedPieces.footwear,
+      Icon: Footprints,
+    },
+    {
+      id: 'accessory' as const,
+      label: 'Phụ kiện',
+      hasSelection: !!selectedPieces.accessory,
+      Icon: Crown,
+    },
+    {
+      id: 'presets' as const,
       label: 'Gợi ý phối',
-      icon: <Sparkles className="w-3.5 h-3.5 text-imperial-gold" />,
+      hasSelection: false,
+      Icon: Sparkles,
     },
   ];
 
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-lacquer-card overflow-hidden font-sans relative">
-      {/* Tier 1: Haute Atelier Category Tabs (Zero Shift, Hairline Active Underline, Status Dot) */}
-      <div className="flex items-center border-b border-lacquer-border bg-lacquer-surface/90 overflow-x-auto scrollbar-none flex-shrink-0 h-12">
-        {categories.map((cat) => {
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onSelectCategory(cat.id)}
-              className={`relative h-full flex-1 min-w-[85px] sm:min-w-[100px] px-2.5 sm:px-3 text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap ${
-                isActive
-                  ? 'text-imperial-gold'
-                  : 'text-silk-muted hover:text-silk-ivory hover:bg-lacquer-hover/40'
-              }`}
-            >
-              {cat.icon}
-              <span>{cat.label}</span>
-
-              {/* Status Dot: Subtle indicator if category already has a chosen piece on mannequin */}
-              {cat.hasSelection && (
-                <span
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    isActive ? 'bg-imperial-gold ring-2 ring-imperial-gold/30' : 'bg-imperial-gold/60'
-                  }`}
-                  title="Đã chọn trang phục này"
-                />
-              )}
-
-              {/* Active Golden Hairline Indicator */}
-              {isActive && (
-                <span className="absolute bottom-0 inset-x-2 h-[2px] bg-imperial-gold shadow-[0_0_8px_rgba(198,155,86,0.8)] animate-fadeIn" />
-              )}
-            </button>
-          );
-        })}
+      {/* Decorative Top Accent Line with Diamond */}
+      <div className="relative w-full flex items-center justify-center pt-2 px-3 flex-shrink-0">
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-[#C5A059]/30 to-transparent relative flex items-center justify-center">
+          <div className="w-1.5 h-1.5 rotate-45 border border-[#C5A059]/60 bg-lacquer-card" />
+        </div>
       </div>
 
-      {/* Tier 2: Editorial Fashion Chips (Ultra-slim, Elegant, No Chunky Boxes) */}
-      {activeCategory !== 'presets' ? (
-        <div className="flex items-center justify-between px-4 sm:px-5 h-9 bg-lacquer/80 border-b border-lacquer-border/60 flex-shrink-0 text-xs font-sans">
-          {/* Style Chips Links with Piece Counts */}
-          <div className="flex items-center gap-3">
-            <span className="text-silk-muted/60 text-[11px] font-medium hidden sm:inline">Lọc theo:</span>
+      {/* Tier 1: Category Tabs with Calligraphy Brush Highlight */}
+      <div className="px-2 sm:px-3 pt-1.5 pb-2 flex-shrink-0 border-b border-[#C5A059]/15">
+        <div className="flex items-center w-full overflow-x-auto no-scrollbar scrollbar-none gap-0.5 sm:gap-1 py-1 px-0.5">
+          {categories.map((cat, index) => {
+            const isActive = activeCategory === cat.id;
+            const IconComponent = cat.Icon;
 
-            {/* Chip 1: Tất cả */}
+            return (
+              <React.Fragment key={cat.id}>
+                {index > 0 && <TabSeparator />}
+                <button
+                  onClick={() => onSelectCategory(cat.id)}
+                  className={`relative flex-1 min-w-[76px] sm:min-w-[92px] h-12 sm:h-13 px-2 sm:px-3 font-sans uppercase tracking-wider text-xs sm:text-[13px] transition-colors flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap select-none cursor-pointer ${
+                    isActive
+                      ? 'text-[#1A140E] font-bold'
+                      : 'text-[#EDE5D8]/75 hover:text-white font-medium'
+                  }`}
+                >
+                  {/* Authentic Calligraphy Brush Stroke for Active Tab (centered, unclipped, no drop shadow) */}
+                  {isActive && (
+                    <div
+                      className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%_100%] pointer-events-none z-0"
+                      style={{ backgroundImage: `url('/assets/decorations/brush-stroke-tab.png')` }}
+                    />
+                  )}
+
+                  <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
+                    {/* Category icon with solid fill/stroke weight when active */}
+                    <IconComponent
+                      className={`w-4 h-4 sm:w-4.5 sm:h-4.5 flex-shrink-0 transition-all ${
+                        isActive
+                          ? 'text-[#1A140E] fill-current stroke-[2.2]'
+                          : 'text-[#C5A059] fill-none stroke-[1.75]'
+                      }`}
+                    />
+
+                    <span>{cat.label}</span>
+
+                    {/* Status Dot: subtle indicator if category already has a chosen piece on mannequin */}
+                    {cat.hasSelection && (
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          isActive
+                            ? 'bg-[#1A140E] ring-2 ring-[#1A140E]/20'
+                            : 'bg-[#D4AF37] ring-1 ring-[#D4AF37]/40'
+                        }`}
+                        title="Đã chọn trang phục này"
+                      />
+                    )}
+                  </span>
+                </button>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tier 2: Refined Fashion Filter Pills (Matching Reference Layout) */}
+      {activeCategory !== 'presets' ? (
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-transparent">
+          {/* Style Chips Links with Piece Counts & Dedicated Reference Icons */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Pill 1: Tất cả */}
             <button
               onClick={() => onSelectStyle('all')}
-              className={`transition-colors flex items-center gap-1 ${
+              className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'all'
-                  ? 'text-imperial-gold font-semibold underline decoration-imperial-gold/60 underline-offset-4'
-                  : 'text-silk-muted hover:text-silk-ivory font-medium'
+                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
+                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
               }`}
             >
+              <LayoutGrid className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'all' ? 'text-[#1A140E] fill-current' : 'text-[#C5A059]'}`} />
               <span>Tất cả</span>
-              <span className="text-[10px] opacity-75 font-mono">({countAll})</span>
+              <span className={`text-[11px] font-mono ${styleFilter === 'all' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+                ({countAll})
+              </span>
             </button>
 
-            <span className="text-silk-muted/30 select-none">•</span>
-
-            {/* Chip 2: Cổ phong */}
+            {/* Pill 2: Cổ phong */}
             <button
               onClick={() => onSelectStyle('traditional')}
-              className={`transition-colors flex items-center gap-1 ${
+              className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'traditional'
-                  ? 'text-imperial-gold font-semibold underline decoration-imperial-gold/60 underline-offset-4'
-                  : 'text-silk-muted hover:text-silk-ivory font-medium'
+                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
+                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
               }`}
             >
+              <FoldingFanIcon className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'traditional' ? 'text-[#1A140E]' : 'text-[#C5A059]'}`} />
               <span>Cổ phong</span>
-              <span className="text-[10px] opacity-75 font-mono">({countTraditional})</span>
+              <span className={`text-[11px] font-mono ${styleFilter === 'traditional' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+                ({countTraditional})
+              </span>
             </button>
 
-            <span className="text-silk-muted/30 select-none">•</span>
-
-            {/* Chip 3: Hiện đại */}
+            {/* Pill 3: Hiện đại */}
             <button
               onClick={() => onSelectStyle('modern')}
-              className={`transition-colors flex items-center gap-1 ${
+              className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'modern'
-                  ? 'text-imperial-gold font-semibold underline decoration-imperial-gold/60 underline-offset-4'
-                  : 'text-silk-muted hover:text-silk-ivory font-medium'
+                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
+                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
               }`}
             >
+              <Gem className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'modern' ? 'text-[#1A140E] fill-current' : 'text-[#C5A059]'}`} />
               <span>Hiện đại</span>
-              <span className="text-[10px] opacity-75 font-mono">({countModern})</span>
+              <span className={`text-[11px] font-mono ${styleFilter === 'modern' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+                ({countModern})
+              </span>
             </button>
           </div>
 
@@ -229,7 +302,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
           {activeCategory === 'accessory' && selectedPieces.accessory && (
             <button
               onClick={onClearAccessory}
-              className="flex items-center gap-1 text-[11px] font-medium text-imperial-red-bright hover:text-white transition-colors"
+              className="flex items-center gap-1 rounded-full px-2.5 py-0.5 bg-rose-950/40 hover:bg-rose-950/70 border border-rose-500/40 text-rose-300 text-[11px] font-medium transition-colors cursor-pointer"
             >
               <X className="w-3 h-3" />
               <span>Bỏ phụ kiện</span>
@@ -237,9 +310,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-between px-4 sm:px-5 h-9 bg-lacquer/80 border-b border-lacquer-border/60 flex-shrink-0 text-xs font-sans">
-          <span className="text-silk-muted text-[11px] font-medium flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-imperial-gold" />
+        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 flex-shrink-0 text-xs font-sans bg-transparent">
+          <span className="text-[#EDE5D8]/75 text-xs font-medium flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#E5BA70]" />
             <span>Bộ phối chuẩn mẫu được thiết kế sẵn ({presets.length})</span>
           </span>
         </div>

@@ -17,7 +17,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { user, profile, signOut } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [profile?.avatar_url]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -139,11 +144,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-silk-ivory hover:bg-lacquer-surface/80'
                 }`}
               >
-                {/* Avatar image or monogram */}
-                {profile?.avatar_url ? (
+                {/* Avatar image or monogram with graceful fallback on error */}
+                {profile?.avatar_url && !avatarError ? (
                   <img
                     src={profile.avatar_url}
                     alt={displayName}
+                    onError={() => setAvatarError(true)}
                     className="w-7 h-7 rounded-full object-cover border border-imperial-gold/60 shadow-sm"
                   />
                 ) : (
