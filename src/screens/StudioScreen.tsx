@@ -130,8 +130,8 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
 
   return (
     <div className="w-full h-[calc(100vh-64px)] flex flex-col lg:flex-row overflow-hidden bg-lacquer">
-      {/* LEFT COLUMN: Full Height 2D Canvas Stage with All Overlaid Controls */}
-      <div className="w-full lg:w-1/2 xl:w-[52%] h-full relative overflow-hidden flex-shrink-0">
+      {/* LEFT COLUMN: 1:1 Square Preview Stage */}
+      <div className="w-full h-[50vh] lg:h-full lg:w-auto lg:aspect-square relative overflow-hidden flex-shrink-0 flex items-center justify-center bg-lacquer-surface">
         <StudioCanvas2D
           outfit={outfit}
           allEvents={allEvents}
@@ -152,8 +152,8 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
         />
       </div>
 
-      {/* RIGHT COLUMN: Docked Pieces Selector + Integrated AI Overview with Zero Container Padding & Zero Gap */}
-      <div className="w-full lg:w-1/2 xl:w-[48%] h-full flex flex-col border-t lg:border-t-0 lg:border-l border-lacquer-border bg-lacquer-card overflow-hidden relative">
+      {/* RIGHT COLUMN: Docked Pieces Selector + Integrated AI Overview with Maximum Space */}
+      <div className="flex-1 min-w-0 h-full flex flex-col border-t lg:border-t-0 lg:border-l border-lacquer-border bg-lacquer-card overflow-hidden relative">
         {/* Top: Piece Selector with Category Tabs and Swatches */}
         <PieceSelector
           pieces={PIECES}

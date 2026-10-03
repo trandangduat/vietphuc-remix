@@ -178,17 +178,70 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
     },
   ];
 
+  const outfitSlots = [
+    {
+      category: 'top' as const,
+      label: 'Áo',
+      icon: Shirt,
+      piece: selectedPieces.top,
+      emptyText: 'Chưa chọn áo',
+    },
+    {
+      category: 'bottom' as const,
+      label: 'Quần / Váy',
+      icon: Columns2,
+      piece: selectedPieces.bottom,
+      emptyText: 'Chưa chọn quần',
+    },
+    {
+      category: 'footwear' as const,
+      label: 'Giày / Hài',
+      icon: Footprints,
+      piece: selectedPieces.footwear,
+      emptyText: 'Chưa chọn giày',
+    },
+    {
+      category: 'accessory' as const,
+      label: 'Phụ kiện',
+      icon: Crown,
+      piece: selectedPieces.accessory,
+      emptyText: 'Chưa chọn phụ kiện',
+    },
+  ];
+
+  const activePiecesCount = outfitSlots.filter((s) => !!s.piece).length;
+
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-lacquer-card overflow-hidden font-sans relative">
+      {/* Editorial Ambient Background Texture & Glows (Exact Match to Gallery / Lookbook Screen) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <img
+          src="/assets/backgrounds/gallery-bg.jpg"
+          alt="Trưng bày"
+          className="w-full h-full object-cover opacity-20 filter grayscale contrast-125"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-lacquer/85 via-lacquer/60 to-lacquer/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#0A0D12_90%)]" />
+        {/* Subtle Ambient Radial Glows */}
+        <div className="absolute top-12 right-1/4 w-80 h-80 rounded-full bg-imperial-gold/10 filter blur-[90px]" />
+        <div className="absolute bottom-16 left-1/4 w-80 h-80 rounded-full bg-imperial-red/10 filter blur-[90px]" />
+        {/* Subtle royal Chim Lạc watermark */}
+        <img
+          src="/assets/decorations/chim-lac.png"
+          alt=""
+          className="absolute -bottom-10 -right-10 w-72 h-72 object-contain opacity-5 pointer-events-none select-none filter invert"
+        />
+      </div>
+
       {/* Decorative Top Accent Line with Diamond */}
-      <div className="relative w-full flex items-center justify-center pt-2 px-3 flex-shrink-0">
+      <div className="relative z-10 w-full flex items-center justify-center pt-2 px-3 flex-shrink-0">
         <div className="w-full h-px bg-gradient-to-r from-transparent via-[#C5A059]/30 to-transparent relative flex items-center justify-center">
           <div className="w-1.5 h-1.5 rotate-45 border border-[#C5A059]/60 bg-lacquer-card" />
         </div>
       </div>
 
-      {/* Tier 1: Category Tabs with Calligraphy Brush Highlight */}
-      <div className="px-2 sm:px-3 pt-1.5 pb-2 flex-shrink-0 border-b border-[#C5A059]/15">
+      {/* Tier 1: Category Tabs with Clean Rectangle Active Highlight */}
+      <div className="relative z-10 px-2 sm:px-3 pt-1.5 pb-2 flex-shrink-0 border-b border-[#C5A059]/15">
         <div className="flex items-center w-full overflow-x-auto no-scrollbar scrollbar-none gap-0.5 sm:gap-1 py-1 px-0.5">
           {categories.map((cat, index) => {
             const isActive = activeCategory === cat.id;
@@ -199,21 +252,13 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                 {index > 0 && <TabSeparator />}
                 <button
                   onClick={() => onSelectCategory(cat.id)}
-                  className={`relative flex-1 min-w-[76px] sm:min-w-[92px] h-12 sm:h-13 px-2 sm:px-3 font-sans uppercase tracking-wider text-xs sm:text-[13px] transition-colors flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap select-none cursor-pointer ${
+                  className={`relative flex-1 min-w-[76px] sm:min-w-[92px] h-10 sm:h-11 px-2 sm:px-3 rounded-md font-sans uppercase tracking-wider text-xs sm:text-[13px] transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap select-none cursor-pointer border ${
                     isActive
-                      ? 'text-[#1A140E] font-bold'
-                      : 'text-[#EDE5D8]/75 hover:text-white font-medium'
+                      ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(229,186,112,0.3)] border-[#E5BA70]'
+                      : 'bg-transparent text-[#EDE5D8]/75 hover:text-white hover:bg-white/[0.04] border-transparent font-medium'
                   }`}
                 >
-                  {/* Authentic Calligraphy Brush Stroke for Active Tab (centered, unclipped, no drop shadow) */}
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%_100%] pointer-events-none z-0"
-                      style={{ backgroundImage: `url('/assets/decorations/brush-stroke-tab.png')` }}
-                    />
-                  )}
-
-                  <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
+                  <span className="flex items-center justify-center gap-1.5 sm:gap-2">
                     {/* Category icon with solid fill/stroke weight when active */}
                     <IconComponent
                       className={`w-4 h-4 sm:w-4.5 sm:h-4.5 flex-shrink-0 transition-all ${
@@ -244,9 +289,9 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         </div>
       </div>
 
-      {/* Tier 2: Refined Fashion Filter Pills (Matching Reference Layout) */}
+      {/* Tier 2: Refined Fashion Filter Pills */}
       {activeCategory !== 'presets' ? (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-transparent">
+        <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
           {/* Style Chips Links with Piece Counts & Dedicated Reference Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Pill 1: Tất cả */}
@@ -255,12 +300,12 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
               className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'all'
                   ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
-                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
+                  : 'bg-lacquer-card/80 text-[#EDE5D8]/90 hover:text-white border-white/20 hover:border-[#E5BA70]/50 hover:bg-white/[0.06]'
               }`}
             >
               <LayoutGrid className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'all' ? 'text-[#1A140E] fill-current' : 'text-[#C5A059]'}`} />
               <span>Tất cả</span>
-              <span className={`text-[11px] font-mono ${styleFilter === 'all' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+              <span className={`text-[11px] font-mono ${styleFilter === 'all' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/60'}`}>
                 ({countAll})
               </span>
             </button>
@@ -271,12 +316,12 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
               className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'traditional'
                   ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
-                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
+                  : 'bg-lacquer-card/80 text-[#EDE5D8]/90 hover:text-white border-white/20 hover:border-[#E5BA70]/50 hover:bg-white/[0.06]'
               }`}
             >
               <FoldingFanIcon className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'traditional' ? 'text-[#1A140E]' : 'text-[#C5A059]'}`} />
               <span>Cổ phong</span>
-              <span className={`text-[11px] font-mono ${styleFilter === 'traditional' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+              <span className={`text-[11px] font-mono ${styleFilter === 'traditional' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/60'}`}>
                 ({countTraditional})
               </span>
             </button>
@@ -287,12 +332,12 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
               className={`px-3.5 sm:px-4 py-1.5 text-xs font-sans rounded-full border transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 styleFilter === 'modern'
                   ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold shadow-[0_2px_10px_rgba(212,175,55,0.35)] border-[#E5BA70]'
-                  : 'bg-transparent text-[#EDE5D8]/80 hover:text-white border-[#EDE5D8]/20 hover:border-[#E5BA70]/40 hover:bg-white/[0.03]'
+                  : 'bg-lacquer-card/80 text-[#EDE5D8]/90 hover:text-white border-white/20 hover:border-[#E5BA70]/50 hover:bg-white/[0.06]'
               }`}
             >
               <Gem className={`w-3.5 h-3.5 flex-shrink-0 ${styleFilter === 'modern' ? 'text-[#1A140E] fill-current' : 'text-[#C5A059]'}`} />
               <span>Hiện đại</span>
-              <span className={`text-[11px] font-mono ${styleFilter === 'modern' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/50'}`}>
+              <span className={`text-[11px] font-mono ${styleFilter === 'modern' ? 'text-[#1A140E]/80 font-bold' : 'text-[#EDE5D8]/60'}`}>
                 ({countModern})
               </span>
             </button>
@@ -310,8 +355,8 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 flex-shrink-0 text-xs font-sans bg-transparent">
-          <span className="text-[#EDE5D8]/75 text-xs font-medium flex items-center gap-1.5">
+        <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
+          <span className="text-[#EDE5D8]/85 text-xs font-medium flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#E5BA70]" />
             <span>Bộ phối chuẩn mẫu được thiết kế sẵn ({presets.length})</span>
           </span>
@@ -443,7 +488,127 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         )}
       </div>
 
-      {/* Floating Hover Tooltip: Tên, Giai đoạn, Ý nghĩa văn hóa, Nguồn kiểm chứng (Exact Match to Heritage Design) */}
+      {/* Dock: Thanh tổng hợp phục trang đang mặc (Sleek Clean Atelier Design) */}
+      <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-[#C5A059]/20 bg-lacquer-surface/90 backdrop-blur-md flex-shrink-0 relative z-10">
+        {/* Header: Clean minimal title with count */}
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E5BA70]" />
+            <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#E5BA70]">
+              Trang phục đang mặc
+            </span>
+            <span className="text-[11px] font-mono text-[#EDE5D8]/45">
+              ({activePiecesCount}/4)
+            </span>
+          </div>
+
+          {activePiecesCount > 0 && (
+            <button
+              onClick={() => {
+                onClearCategory('top');
+                onClearCategory('bottom');
+                onClearCategory('footwear');
+                onClearAccessory();
+              }}
+              className="text-[11px] font-sans text-[#EDE5D8]/45 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
+              title="Bỏ chọn tất cả trang phục đang mặc"
+            >
+              <span>Đặt lại</span>
+            </button>
+          )}
+        </div>
+
+        {/* 4 Sleek Slots: [ Áo ] [ Quần / Váy ] [ Giày / Hài ] [ Phụ kiện ] */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
+          {outfitSlots.map((slot) => {
+            const isSlotCategoryActive = activeCategory === slot.category;
+            const IconComp = slot.icon;
+            const piece = slot.piece;
+
+            return (
+              <div
+                key={slot.category}
+                onClick={() => onSelectCategory(slot.category)}
+                className={`group relative rounded-md px-2.5 py-1.5 transition-all duration-150 cursor-pointer border flex items-center gap-2.5 select-none h-13 ${
+                  piece
+                    ? isSlotCategoryActive
+                      ? 'bg-lacquer-card/90 border-[#E5BA70] shadow-[0_2px_12px_rgba(229,186,112,0.15)] ring-1 ring-[#E5BA70]/30'
+                      : 'bg-lacquer-card/60 border-white/10 hover:border-[#E5BA70]/50 hover:bg-lacquer-card/80'
+                    : isSlotCategoryActive
+                      ? 'bg-white/[0.02] border-[#E5BA70]/50 border-dashed'
+                      : 'bg-white/[0.01] border-white/10 border-dashed hover:border-white/20 hover:bg-white/[0.03]'
+                }`}
+              >
+                {/* Left: Thumbnail or Category Icon */}
+                <div
+                  className={`w-9 h-9 rounded flex-shrink-0 flex items-center justify-center p-1 transition-colors ${
+                    piece
+                      ? 'bg-black/50 border border-white/10'
+                      : isSlotCategoryActive
+                      ? 'bg-[#E5BA70]/10 border border-[#E5BA70]/30 text-[#E5BA70]'
+                      : 'bg-white/[0.03] border border-white/10 text-[#EDE5D8]/40'
+                  }`}
+                >
+                  {piece ? (
+                    <img
+                      src={piece.thumbnailUrl || piece.assetUrl}
+                      alt={piece.name}
+                      className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+                    />
+                  ) : (
+                    <IconComp className="w-4 h-4 opacity-70" />
+                  )}
+                </div>
+
+                {/* Middle: Category Label & Piece Name */}
+                <div className="min-w-0 flex-1">
+                  <span
+                    className={`text-[10px] font-sans font-bold uppercase tracking-wider block leading-tight ${
+                      piece
+                        ? isSlotCategoryActive
+                          ? 'text-[#E5BA70]'
+                          : 'text-[#C5A059]'
+                        : isSlotCategoryActive
+                        ? 'text-[#E5BA70]/70'
+                        : 'text-[#EDE5D8]/40'
+                    }`}
+                  >
+                    {slot.label}
+                  </span>
+                  <p
+                    className={`text-xs font-sans truncate mt-0.5 leading-tight ${
+                      piece
+                        ? 'text-silk-ivory font-medium group-hover:text-[#F0D195] transition-colors'
+                        : 'text-[#EDE5D8]/35 font-normal italic'
+                    }`}
+                    title={piece ? piece.name : slot.emptyText}
+                  >
+                    {piece ? piece.name : `+ Chọn ${slot.label.toLowerCase()}`}
+                  </p>
+                </div>
+
+                {/* Right: Quick Remove Button (only when piece is equipped) */}
+                {piece && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (slot.category === 'accessory') {
+                        onClearAccessory();
+                      } else {
+                        onClearCategory(slot.category);
+                      }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-rose-950/70 text-rose-300 hover:text-white transition-opacity flex-shrink-0 cursor-pointer"
+                    title={`Tháo ${piece.name}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       {hoveredPiece && (
         <div
           ref={tooltipRef}
