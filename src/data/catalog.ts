@@ -5,31 +5,31 @@ export const EVENTS: EventBackground[] = [
     id: 'event-tet',
     name: 'Tết Cổ Truyền',
     description: 'Phố hoa xuân rực rỡ đào mai, câu đối đỏ và không khí lễ hội đầu năm.',
-    bgUrl: '/assets/events/bg-tet-pho-co.jpg',
+    bgUrl: '/assets/events/bg-tet-pho-co.png',
   },
   {
     id: 'event-prom',
     name: 'Dạ hội School Prom',
     description: 'Sảnh tiệc dạ hội trang trọng, ánh đèn lung linh hiện đại.',
-    bgUrl: '/assets/events/bg-tet-pho-co.jpg', // can fallback or use stylized backdrop
+    bgUrl: '/assets/events/bg-school-prom.jpg',
   },
   {
     id: 'event-trung-thu',
     name: 'Tết Trung Thu',
     description: 'Phố đèn lồng truyền thống rực rỡ sắc màu dưới trăng rằm.',
-    bgUrl: '/assets/events/bg-tet-pho-co.jpg',
+    bgUrl: '/assets/events/bg-tet-trung-thu.jpg',
   },
   {
     id: 'event-ngay-hoi',
     name: 'Ngày hội trường học',
     description: 'Sân trường rợp bóng cờ hội, gian hàng triển lãm văn hóa dân gian.',
-    bgUrl: '/assets/events/bg-tet-pho-co.jpg',
+    bgUrl: '/assets/events/bg-ngay-hoi-truong.jpg',
   },
   {
     id: 'event-le-cuoi',
     name: 'Lễ cưới gia đình',
     description: 'Không gian tư gia trang trọng, phông đỏ truyền thống ấm cúng.',
-    bgUrl: '/assets/events/bg-tet-pho-co.jpg',
+    bgUrl: '/assets/events/bg-le-cuoi-gia-dinh.png',
   },
 ];
 

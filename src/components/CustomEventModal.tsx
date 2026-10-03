@@ -34,7 +34,7 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
         id: `custom-event-${Date.now()}`,
         name: prompt.slice(0, 30),
         description: prompt,
-        bgUrl: '/assets/events/bg-tet-pho-co.jpg',
+        bgUrl: '/assets/events/bg-tet-pho-co.png',
         isCustom: true,
       };
       onEventCreated(newEvent);
