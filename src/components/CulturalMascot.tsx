@@ -1,18 +1,132 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { ActiveOutfitState, AIOverviewResult } from '../types';
 import { evaluateCulturalOutfit } from '../data/culturalEvaluator';
-import {
-  Sparkles,
-  ShieldCheck,
-  AlertTriangle,
-  AlertCircle,
-  BookCheck,
-  X,
-  Lock,
-  ChevronRight,
-  RotateCw,
-} from 'lucide-react';
-import { HeritageModal } from './heritage/HeritageFrame';
+import { HeritageFrame } from './heritage/HeritageFrame';
+
+function formatAppraisalScore(score: number): string {
+  return Number.isInteger(score) ? String(score) : score.toFixed(1);
+}
+
+function ScoreSeal({ score, size = 'md' }: { score: string; size?: 'md' | 'sm' }) {
+  const box = size === 'sm' ? 'h-[58px] w-[58px]' : 'h-[72px] w-[72px]';
+  const type =
+    score.length > 1
+      ? 'text-[1.2rem]'
+      : size === 'sm'
+        ? 'text-[1.65rem]'
+        : 'text-[2rem]';
+
+  return (
+    <div
+      className={`relative shrink-0 ${box}`}
+      style={{ transform: 'rotate(-8deg)' }}
+      role="img"
+      aria-label={`${score} trên 10`}
+    >
+      <div className="absolute inset-0 bg-[#7C1C16]" />
+      <div className="absolute inset-[3px] border border-[#F0D7A2]/75" />
+      <div className="absolute inset-[6px] border border-[#F0D7A2]/30" />
+      <div className="relative flex h-full items-center justify-center text-[#F6E7C1]" aria-hidden="true">
+        <span className={`font-medium leading-none ${type}`}>{score}</span>
+      </div>
+    </div>
+  );
+}
+
+function AppraisalSlip({
+  analysis,
+  eventName,
+  onHide,
+}: {
+  analysis: AIOverviewResult;
+  eventName: string;
+  onHide: () => void;
+}) {
+  const scoreLabel = formatAppraisalScore(analysis.totalScore);
+  const verdict = analysis.explanation.replace(/!+$/, '.');
+  const criteria = [
+    analysis.criteria.colorHarmony,
+    analysis.criteria.eventFit,
+    analysis.criteria.culturalNorm,
+  ];
+
+  return (
+    <div className="font-serif flex items-center gap-5 px-2 py-1 text-left">
+      <h2 className="sr-only">Thẩm định văn hóa</h2>
+      <ScoreSeal score={scoreLabel} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-4">
+          <p className="truncate text-[0.95rem] italic text-[#F7F4EE]/55">{eventName}</p>
+          <button
+            type="button"
+            onClick={onHide}
+            className="shrink-0 border-b border-[#F7F4EE]/35 pb-0.5 text-[0.95rem] text-[#F7F4EE] transition-colors hover:border-[#F7F4EE] cursor-pointer"
+          >
+            Ẩn
+          </button>
+        </div>
+        <p className="mt-1.5 text-[1.05rem] font-medium leading-snug text-[#F7F4EE]">{verdict}</p>
+        {analysis.totalScore > 0 && (
+          <ul className="mt-3 space-y-2">
+            {criteria.map((item) => {
+              const ratio = Math.max(0, Math.min(1, item.score / item.maxScore));
+              return (
+                <li key={item.name} className="grid grid-cols-[8.75rem_minmax(0,1fr)_2.4rem] items-center gap-3">
+                  <span className="truncate text-[0.9rem] text-[#EDE5D8]/70">{item.name}</span>
+                  <span className="block h-[3px] bg-[#F7F4EE]/15" aria-hidden="true">
+                    <span className="block h-full bg-[#E8C87B]" style={{ width: `${ratio * 100}%` }} />
+                  </span>
+                  <span className="text-right text-[0.9rem] text-[#F7F4EE]">{formatAppraisalScore(item.score)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <p className="mt-2.5 truncate text-[11px] italic text-[#EDE5D8]/60">{analysis.source}</p>
+      </div>
+    </div>
+  );
+}
+
+function ScoreSummary({
+  analysis,
+  eventName,
+  onDetail,
+  onHide,
+}: {
+  analysis: AIOverviewResult;
+  eventName: string;
+  onDetail: () => void;
+  onHide: () => void;
+}) {
+  const scoreLabel = formatAppraisalScore(analysis.totalScore);
+
+  return (
+    <div className="font-serif flex items-center gap-5 px-1 py-1 text-left">
+      <h2 className="sr-only">Điểm tổng kết</h2>
+      <ScoreSeal score={scoreLabel} size="sm" />
+      <div className="min-w-0">
+        <p className="truncate text-[0.95rem] italic text-[#F7F4EE]/55">{eventName}</p>
+        <div className="mt-2 flex items-center gap-6 text-[0.95rem] text-[#F7F4EE]">
+          <button
+            type="button"
+            onClick={onDetail}
+            className="border-b border-[#F7F4EE]/35 pb-0.5 transition-colors hover:border-[#F7F4EE] cursor-pointer"
+          >
+            Chi tiết
+          </button>
+          <button
+            type="button"
+            onClick={onHide}
+            className="border-b border-[#F7F4EE]/35 pb-0.5 transition-colors hover:border-[#F7F4EE] cursor-pointer"
+          >
+            Ẩn
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface CulturalMascotProps {
   outfit: ActiveOutfitState;
@@ -23,15 +137,13 @@ interface CulturalMascotProps {
 export const CulturalMascot: React.FC<CulturalMascotProps> = ({
   outfit,
   isLoggedIn,
-  onLoginPrompt,
 }) => {
-  // Modal open state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Thinking state & speech bubble
   const [isThinking, setIsThinking] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
-  const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [phase, setPhase] = useState<'idle' | 'waiting' | 'scoring'>('idle');
+  const [bubble, setBubble] = useState<null | 'summary' | 'detail'>(null);
+  const [shownAnalysis, setShownAnalysis] = useState<AIOverviewResult | null>(null);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Current analysis result
   const analysis = useMemo<AIOverviewResult>(() => evaluateCulturalOutfit(outfit), [
@@ -42,12 +154,20 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
     outfit.event.id,
   ]);
 
-  // Track previous outfit signature to trigger "Thinking" state
+  const analysisRef = useRef(analysis);
+  analysisRef.current = analysis;
+
+  // Track previous outfit signature to trigger scoring after the outfit settles
   const prevSignatureRef = useRef<string>('');
   const isInitialMount = useRef(true);
 
   useEffect(() => {
     const currentSignature = `${outfit.topPiece?.id || 'none'}-${outfit.bottomPiece?.id || 'none'}-${outfit.footwearPiece?.id || 'none'}-${outfit.accessoryPiece?.id || 'none'}-${outfit.event.id}`;
+
+    const clearTimers = () => {
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      if (scoreTimerRef.current) clearTimeout(scoreTimerRef.current);
+    };
 
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -55,32 +175,26 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
       return;
     }
 
-    if (prevSignatureRef.current !== currentSignature) {
-      prevSignatureRef.current = currentSignature;
+    if (prevSignatureRef.current === currentSignature) return;
+    prevSignatureRef.current = currentSignature;
 
-      // Trigger Thinking state
+    clearTimers();
+    setPhase('waiting');
+    setIsThinking(false);
+    setBubble(null);
+
+    settleTimerRef.current = setTimeout(() => {
+      setPhase('scoring');
       setIsThinking(true);
-      setShowBubble(false);
-
-      if (bubbleTimerRef.current) {
-        clearTimeout(bubbleTimerRef.current);
-      }
-
-      // After 800ms of "pondering court customs", show speech bubble
-      const thinkTimer = setTimeout(() => {
+      scoreTimerRef.current = setTimeout(() => {
         setIsThinking(false);
-        setShowBubble(true);
-
-        // Auto-dismiss bubble after 5.5s
-        bubbleTimerRef.current = setTimeout(() => {
-          setShowBubble(false);
-        }, 5500);
+        setPhase('idle');
+        setShownAnalysis(analysisRef.current);
+        setBubble('summary');
       }, 800);
+    }, 5000);
 
-      return () => {
-        clearTimeout(thinkTimer);
-      };
-    }
+    return clearTimers;
   }, [
     outfit.topPiece?.id,
     outfit.bottomPiece?.id,
@@ -88,13 +202,6 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
     outfit.accessoryPiece?.id,
     outfit.event.id,
   ]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
-    };
-  }, []);
 
   // Free Dragging Position State (No snap to edge)
   const MASCOT_SIZE = 64;
@@ -245,14 +352,54 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
 
   // Click mascot action
   const handleClickMascot = () => {
-    if (hasMovedRef.current) return; // Prevent click if user dragged
-    setIsModalOpen(true);
-    setShowBubble(false);
+    if (hasMovedRef.current) return;
+    if (phase !== 'idle' || !shownAnalysis) return;
+    setBubble((current) => current ?? 'summary');
   };
 
-  // Determine speech bubble direction based on current screen position
-  const isRightHalf = position.x > (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
-  const isBottomHalf = position.y > (typeof window !== 'undefined' ? window.innerHeight - 200 : 500);
+  const [viewport, setViewport] = useState(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800,
+  }));
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useLayoutEffect(() => {
+    const node = bubbleRef.current;
+    if (!node) return;
+    const measure = () => {
+      const rect = node.getBoundingClientRect();
+      setBubbleSize((prev) => {
+        if (Math.abs(prev.width - rect.width) < 1 && Math.abs(prev.height - rect.height) < 1) return prev;
+        return { width: rect.width, height: rect.height };
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [bubble, shownAnalysis]);
+
+  const mascotSize = 64;
+  const edge = 12;
+  const spaceLeft = position.x - edge;
+  const spaceRight = viewport.width - (position.x + mascotSize) - edge;
+  const openLeft = spaceLeft >= spaceRight;
+  const beside = Math.max(180, (openLeft ? spaceLeft : spaceRight) - 14);
+  const bubbleWidth = Math.min(bubble === 'detail' ? 680 : 360, beside);
+  const fallbackHeight = bubble === 'detail' ? 248 : 132;
+  const bubbleHeight = bubbleSize.height || fallbackHeight;
+  const minOffset = edge - position.y;
+  const maxOffset = viewport.height - edge - bubbleHeight - position.y;
+  const bubbleOffsetY =
+    minOffset > maxOffset ? minOffset : Math.min(Math.max((mascotSize - bubbleHeight) / 2, minOffset), maxOffset);
+  const tailY = Math.min(Math.max(mascotSize / 2 - bubbleOffsetY, 18), Math.max(18, bubbleHeight - 18));
 
   // Forbid displaying mascot assistant if user is not logged in
   if (!isLoggedIn) {
@@ -268,89 +415,55 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
           left: `${position.x}px`,
           top: `${position.y}px`,
           zIndex: 60,
-          touchAction: 'none',
         }}
         className="select-none font-sans"
       >
-        {/* SPEECH BUBBLE (Heritage Mini-Popup Style) */}
-        {showBubble && !isThinking && (
+        {bubble && shownAnalysis && !isThinking && (
           <div
+            ref={bubbleRef}
             style={{
               position: 'absolute',
-              borderRadius: '8px',
-              ...(isRightHalf ? { right: '100%', marginRight: '14px' } : { left: '100%', marginLeft: '14px' }),
-              ...(isBottomHalf ? { bottom: '-6px' } : { top: '-6px' }),
+              width: bubbleWidth,
+              top: bubbleOffsetY,
+              maxHeight: viewport.height - edge * 2,
+              ...(openLeft ? { right: '100%', marginRight: '14px' } : { left: '100%', marginLeft: '14px' }),
             }}
-            className="w-72 sm:w-80 bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 p-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.95)] animate-in fade-in zoom-in-95 duration-200 text-[#EDE5D8]"
+            className="animate-in fade-in zoom-in-95 duration-200"
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Bubble Tail arrow pointing to mascot */}
             <div
               style={{
                 position: 'absolute',
-                ...(isRightHalf
-                  ? { right: '-8px', borderLeft: '8px solid #C5A059' }
-                  : { left: '-8px', borderRight: '8px solid #C5A059' }),
-                ...(isBottomHalf ? { bottom: '24px' } : { top: '24px' }),
+                zIndex: 2,
+                top: tailY,
+                ...(openLeft
+                  ? { right: '-7px', borderLeft: '8px solid #C5A059' }
+                  : { left: '-7px', borderRight: '8px solid #C5A059' }),
                 width: 0,
                 height: 0,
                 borderTop: '6px solid transparent',
                 borderBottom: '6px solid transparent',
               }}
             />
-
-            {/* Bubble Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-[#C5A059]/30">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-[#C5A059] font-bold text-xs uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Bé Nghê Phán:</span>
-                </span>
-                {analysis.totalScore > 0 && (
-                  <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-[4px] bg-[#12161F] text-[#D4AF37] border border-[#C5A059]/50">
-                    {analysis.totalScore}/10
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                {analysis.culturalStatus === 'suitable' ? (
-                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase rounded-[3px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-                    Phù hợp
-                  </span>
-                ) : (
-                  <span className="text-[9px] px-1.5 py-0.5 font-bold uppercase rounded-[3px] bg-amber-950/80 text-amber-300 border border-amber-500/40">
-                    Lưu ý
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowBubble(false)}
-                  className="text-[#EDE5D8]/70 hover:text-white p-0.5 transition-colors cursor-pointer"
-                  title="Đóng nhận xét"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            <div style={{ maxHeight: viewport.height - edge * 2, overflowY: 'auto' }}>
+            <HeritageFrame className="w-full">
+              {bubble === 'summary' ? (
+                <ScoreSummary
+                  analysis={shownAnalysis}
+                  eventName={outfit.event.name}
+                  onDetail={() => setBubble('detail')}
+                  onHide={() => setBubble(null)}
+                />
+              ) : (
+                <AppraisalSlip
+                  analysis={shownAnalysis}
+                  eventName={outfit.event.name}
+                  onHide={() => setBubble(null)}
+                />
+              )}
+            </HeritageFrame>
             </div>
-
-            {/* Bubble Body: Mascot Quote (Sans-serif) */}
-            <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed my-2.5">
-              "{analysis.mascotQuote || analysis.criteria.colorHarmony.comment}"
-            </p>
-
-            {/* Bubble Footer Action */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowBubble(false);
-                setIsModalOpen(true);
-              }}
-              className="w-full py-1.5 px-2.5 rounded-[6px] bg-[#161B26] hover:bg-[#1E2433] border border-[#C5A059]/40 hover:border-[#D4AF37] text-[11px] font-sans font-bold text-[#D4AF37] flex items-center justify-center gap-1 transition-all uppercase tracking-wider cursor-pointer"
-            >
-              <span>Xem luận giải chi tiết</span>
-              <ChevronRight className="w-3 h-3" />
-            </button>
           </div>
         )}
 
@@ -359,6 +472,7 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onClick={handleClickMascot}
+          style={{ touchAction: 'none' }}
           className="relative w-16 h-16 cursor-grab active:cursor-grabbing transition-transform active:scale-95 group"
           title="Bé Nghê Cung Đình - Nhấp để xem Đánh giá Văn hóa"
         >
@@ -471,163 +585,15 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
           </div>
 
           {/* PERMANENT MINI SCORE BADGE PINNED TO BOTTOM-RIGHT CORNER */}
-          {analysis.totalScore > 0 && !isThinking && (
+          {phase === 'idle' && shownAnalysis && shownAnalysis.totalScore > 0 && (
             <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-lacquer-card border border-imperial-gold text-[10px] font-serif font-bold text-imperial-gold shadow-md flex items-center gap-0.5">
               <span>★</span>
-              <span>{analysis.totalScore}</span>
+              <span>{formatAppraisalScore(shownAnalysis.totalScore)}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* DETAILED CULTURAL APPRAISAL MODAL POPUP */}
-      <HeritageModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Thẩm Định Văn Hóa Cung Đình"
-        subtitle={`Cố vấn Phục sức & Lễ nghi • Bối cảnh: ${outfit.event.name}`}
-        icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
-        badge={`${analysis.totalScore}/10 ĐIỂM`}
-        source={analysis.source}
-        maxWidth="max-w-2xl"
-      >
-        <div className="space-y-4 font-sans text-xs">
-          {/* Score & Verdict Banner */}
-          <div className="p-3.5 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
-            <div className="flex items-center gap-3">
-              <div className="text-center p-2 rounded-[6px] bg-[#C5A059]/15 border border-[#C5A059]/40 flex-shrink-0 min-w-[70px]">
-                <span className="block text-2xl font-bold text-[#D4AF37]">
-                  {analysis.totalScore}
-                </span>
-                <span className="text-[9px] uppercase font-bold text-[#EDE5D8]/60 tracking-wider">
-                  Thang 10
-                </span>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  {analysis.culturalStatus === 'suitable' ? (
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                      <span>Chuẩn mực điển lễ</span>
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-amber-950/80 text-amber-300 border border-amber-500/40">
-                      <AlertTriangle className="w-3 h-3 text-amber-400" />
-                      <span>Cần cân nhắc</span>
-                    </span>
-                  )}
-                </div>
-                <p className="font-sans text-xs text-[#EDE5D8] leading-relaxed">
-                  "{analysis.mascotQuote || analysis.criteria.colorHarmony.comment}"
-                </p>
-              </div>
-            </div>
-
-            {!isLoggedIn && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  onLoginPrompt();
-                }}
-                className="py-1.5 px-3 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] font-bold text-[11px] uppercase tracking-wider shadow transition-all whitespace-nowrap flex items-center justify-center gap-1.5 hover:brightness-110 cursor-pointer"
-              >
-                <Lock className="w-3 h-3" />
-                <span>Lưu vào Lookbook</span>
-              </button>
-            )}
-          </div>
-
-          {/* 3 Core Pillars of Cultural Criteria */}
-          <div className="space-y-2.5">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#C5A059] flex items-center gap-1.5">
-              <BookCheck className="w-3.5 h-3.5" />
-              <span>3 Tiêu Chí Thẩm Định Cổ Phong</span>
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {/* 1. Hài hòa màu sắc */}
-              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
-                      Hài hòa màu sắc
-                    </span>
-                    <span className="font-bold text-[#D4AF37] text-xs">
-                      {analysis.criteria.colorHarmony.score}/10
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
-                    {analysis.criteria.colorHarmony.comment}
-                  </p>
-                </div>
-              </div>
-
-              {/* 2. Phù hợp sự kiện */}
-              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
-                      Phù hợp bối cảnh
-                    </span>
-                    <span className="font-bold text-[#D4AF37] text-xs">
-                      {analysis.criteria.eventFit.score}/10
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
-                    {analysis.criteria.eventFit.comment}
-                  </p>
-                </div>
-              </div>
-
-              {/* 3. Chuẩn mực lễ nghi */}
-              <div className="p-3 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/25 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-[#C5A059] uppercase tracking-wider text-[10px]">
-                      Chuẩn mực lễ nghi
-                    </span>
-                    <span className="font-bold text-[#D4AF37] text-xs">
-                      {analysis.criteria.culturalNorm.score}/10
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#EDE5D8]/85 leading-relaxed font-sans">
-                    {analysis.criteria.culturalNorm.comment}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Curator Editorial Synthesis Block */}
-          <div className="p-3.5 rounded-[8px] bg-[#0D111A] border-l-4 border-l-[#C5A059] border border-[#C5A059]/30 space-y-2">
-            <div className="flex items-center gap-1.5 text-[11px] text-[#C5A059] font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
-              <span>Luận Giải Của Giám Tuyển Văn Hóa</span>
-            </div>
-            <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed">
-              "{analysis.explanation}"
-            </p>
-            {analysis.suggestion && (
-              <p className="text-[11px] text-amber-300 font-sans pt-1.5 border-t border-[#C5A059]/20">
-                💡 <strong>Gợi ý phục sức:</strong> {analysis.suggestion}
-              </p>
-            )}
-          </div>
-
-          {/* Modal Footer button */}
-          <div className="pt-2 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="py-2 px-5 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] hover:brightness-110 text-[#0A0D12] font-bold text-xs uppercase tracking-wider transition-all shadow cursor-pointer"
-            >
-              Đã Hiểu • Tiếp Tục Phối Đồ
-            </button>
-          </div>
-        </div>
-      </HeritageModal>
     </>
   );
 };
