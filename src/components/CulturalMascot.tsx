@@ -51,9 +51,11 @@ function AppraisalSlip({
   ];
 
   return (
-    <div className="font-serif flex items-center gap-5 px-2 py-1 text-left">
+    <div className="font-serif flex items-start gap-5 px-2 py-1 text-left">
       <h2 className="sr-only">Thẩm định văn hóa</h2>
-      <ScoreSeal score={scoreLabel} />
+      <div className="pt-1.5 shrink-0">
+        <ScoreSeal score={scoreLabel} />
+      </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-4">
           <p className="truncate text-[0.95rem] italic text-[#F7F4EE]/55">{eventName}</p>
@@ -67,22 +69,29 @@ function AppraisalSlip({
         </div>
         <p className="mt-1.5 text-[1.05rem] font-medium leading-snug text-[#F7F4EE]">{verdict}</p>
         {analysis.totalScore > 0 && (
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 space-y-2.5">
             {criteria.map((item) => {
               const ratio = Math.max(0, Math.min(1, item.score / item.maxScore));
               return (
-                <li key={item.name} className="grid grid-cols-[8.75rem_minmax(0,1fr)_2.4rem] items-center gap-3">
-                  <span className="truncate text-[0.9rem] text-[#EDE5D8]/70">{item.name}</span>
-                  <span className="block h-[3px] bg-[#F7F4EE]/15" aria-hidden="true">
-                    <span className="block h-full bg-[#E8C87B]" style={{ width: `${ratio * 100}%` }} />
-                  </span>
-                  <span className="text-right text-[0.9rem] text-[#F7F4EE]">{formatAppraisalScore(item.score)}</span>
+                <li key={item.name} className="space-y-1">
+                  <div className="grid grid-cols-[8.75rem_minmax(0,1fr)_2.4rem] items-center gap-3">
+                    <span className="truncate text-[0.9rem] font-medium text-[#EDE5D8]/85">{item.name}</span>
+                    <span className="block h-[3px] bg-[#F7F4EE]/15 rounded-full overflow-hidden" aria-hidden="true">
+                      <span className="block h-full bg-[#E8C87B] rounded-full transition-all duration-300" style={{ width: `${ratio * 100}%` }} />
+                    </span>
+                    <span className="text-right text-[0.9rem] font-semibold text-[#F7F4EE]">{formatAppraisalScore(item.score)}</span>
+                  </div>
+                  {item.comment && (
+                    <p className="text-[0.82rem] text-[#EDE5D8]/75 leading-relaxed italic pl-0.5 mt-0.5">
+                      {item.comment}
+                    </p>
+                  )}
                 </li>
               );
             })}
           </ul>
         )}
-        <p className="mt-2.5 truncate text-[11px] italic text-[#EDE5D8]/60">{analysis.source}</p>
+        <p className="mt-3 truncate text-[11px] italic text-[#EDE5D8]/60 border-t border-[#C5A059]/15 pt-2">{analysis.source}</p>
       </div>
     </div>
   );
@@ -394,7 +403,7 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
   const openLeft = spaceLeft >= spaceRight;
   const beside = Math.max(180, (openLeft ? spaceLeft : spaceRight) - 14);
   const bubbleWidth = Math.min(bubble === 'detail' ? 680 : 330, beside);
-  const fallbackHeight = bubble === 'detail' ? 248 : 110;
+  const fallbackHeight = bubble === 'detail' ? 300 : 110;
   const bubbleHeight = bubbleSize.height || fallbackHeight;
   const minOffset = edge - position.y;
   const maxOffset = viewport.height - edge - bubbleHeight - position.y;
