@@ -8,11 +8,6 @@ import {
   Lock,
   AlertCircle,
   RefreshCw,
-  Key,
-  ExternalLink,
-  Layers,
-  Camera,
-  Settings,
 } from 'lucide-react';
 import { ActiveOutfitState } from '../types';
 import { HeritageModal } from './heritage/HeritageFrame';
@@ -20,7 +15,6 @@ import {
   callAITryOnService,
   renderStudioPreviewCanvas,
   getSavedPollinationsApiKey,
-  savePollinationsApiKey,
 } from '../services/tryOnService';
 
 interface AITryOnModalProps {
@@ -50,16 +44,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Discreet API Key Config (hidden by default)
-  const [apiKey, setApiKey] = useState<string>('');
-  const [showKeyConfig, setShowKeyConfig] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Load saved API key on mount
-  useEffect(() => {
-    setApiKey(getSavedPollinationsApiKey());
-  }, []);
 
   // Pre-render the exact Studio canvas preview whenever modal opens or outfit changes
   useEffect(() => {
@@ -69,11 +54,6 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
         .catch((err) => console.warn('Could not pre-render studio preview:', err));
     }
   }, [isOpen, outfit]);
-
-  const handleSaveKey = () => {
-    savePollinationsApiKey(apiKey);
-    setShowKeyConfig(false);
-  };
 
   // Handle file upload from device
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +77,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   // Trigger Multimodal AI Virtual Try-On
   const handleStartGeneration = async () => {
     if (!selectedPhoto) {
-      setErrorMessage('Vui lòng chọn hoặc tải lên ảnh chân dung của bạn.');
+      setErrorMessage('Vui lòng tải lên ảnh chân dung của bạn.');
       return;
     }
 
@@ -105,6 +85,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
     setErrorMessage(null);
 
     try {
+      const apiKey = getSavedPollinationsApiKey();
       const response = await callAITryOnService(
         {
           faceImage: selectedPhoto,
@@ -122,7 +103,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(err.message || 'Không thể kết nối dịch vụ AI. Vui lòng thử lại sau.');
+      setErrorMessage(err.message || 'Không thể kết nối dịch vụ. Vui lòng thử lại sau.');
     } finally {
       setIsGenerating(false);
       setGenerationStep('');
@@ -147,62 +128,38 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
     <HeritageModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Thử Trang Phục AI"
-      subtitle={`Tái hiện chân dung người thật trong trang phục truyền thống • ${eventName}`}
+      title="Thử Trang Phục"
       icon={<Sparkles className="w-5 h-5 flex-shrink-0 text-[#C5A059]" />}
-      badge="THỬ ĐỒ AI"
       maxWidth="max-w-3xl sm:max-w-4xl"
     >
-      <div className="space-y-5 font-sans text-xs text-[#EDE5D8]">
+      <div className="space-y-4 font-sans text-xs text-[#EDE5D8]">
         {/* Error notification alert */}
         {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 animate-fadeIn space-y-2">
-            <div className="flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
-              <div className="leading-relaxed flex-1">
-                <span className="font-bold text-white">Thông báo: </span>
-                {errorMessage}
-              </div>
-              <button
-                onClick={() => setErrorMessage(null)}
-                className="text-rose-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+          <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 animate-fadeIn flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+            <div className="leading-relaxed flex-1">
+              <span className="font-bold text-white">Lỗi: </span>
+              {errorMessage}
             </div>
-
-            {(errorMessage.includes('API Key') ||
-              errorMessage.includes('401') ||
-              errorMessage.includes('403') ||
-              errorMessage.includes('hạn mức')) && (
-              <div className="pt-2 border-t border-rose-500/30 flex items-center justify-between">
-                <span className="text-[11px] text-rose-200/80">Cần kiểm tra hoặc cập nhật API Key?</span>
-                <button
-                  onClick={() => setShowKeyConfig(true)}
-                  className="px-2.5 py-1 rounded bg-[#E5BA70] hover:bg-[#F0D195] text-[#1A140E] font-bold text-[10px] transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <Key className="w-3 h-3" />
-                  <span>Cài đặt Key</span>
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-rose-400 hover:text-white cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
         {!generatedResult ? (
           /* Step 1: Input Setup */
-          <div className="space-y-5">
-            {/* 2-Column Spacious Visual Comparison Card */}
+          <div className="space-y-4">
+            {/* 2-Column Visual Comparison Card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* Left Column: Studio Outfit Reference */}
               <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-[#C5A059]" />
-                    <span>1. Trang phục đã chọn</span>
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C5A059]/15 text-[#E5BA70] border border-[#C5A059]/30">
-                    Bản phối Studio
+                <div className="mb-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70]">
+                    Trang phục đã chọn
                   </span>
                 </div>
 
@@ -210,13 +167,13 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   {studioPreview ? (
                     <img
                       src={studioPreview}
-                      alt="Bản phối Studio thực tế"
+                      alt="Trang phục đã chọn"
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-xs text-[#EDE5D8]/50 animate-pulse gap-2">
                       <div className="w-6 h-6 border-2 border-[#C5A059]/40 border-t-[#C5A059] rounded-full animate-spin" />
-                      <span>Đang tải trang phục...</span>
+                      <span>Đang tải...</span>
                     </div>
                   )}
 
@@ -229,10 +186,9 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
 
               {/* Right Column: User Portrait Upload */}
               <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1.5">
-                    <Camera className="w-4 h-4 text-[#C5A059]" />
-                    <span>2. Ảnh chân dung của bạn</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70]">
+                    Ảnh chân dung của bạn
                   </span>
                   {selectedPhoto && (
                     <button
@@ -240,7 +196,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                         setSelectedPhoto(null);
                         setPhotoName('');
                       }}
-                      className="text-[10px] text-rose-300 hover:text-white underline cursor-pointer"
+                      className="text-[11px] text-rose-300 hover:text-white underline cursor-pointer"
                     >
                       Đổi ảnh
                     </button>
@@ -264,7 +220,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                     >
                       <X className="w-4 h-4" />
                     </button>
-                    <div className="absolute bottom-0 inset-x-0 bg-black/80 px-2 py-1.5 text-[10px] text-[#EDE5D8] truncate text-center backdrop-blur-sm">
+                    <div className="absolute bottom-0 inset-x-0 bg-black/80 px-2 py-1 text-[10px] text-[#EDE5D8] truncate text-center backdrop-blur-sm">
                       {photoName || 'Ảnh chân dung'}
                     </div>
                   </div>
@@ -280,10 +236,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                       Tải ảnh chân dung lên
                     </span>
                     <span className="text-[11px] text-[#EDE5D8]/60 max-w-[200px] leading-relaxed">
-                      Chụp rõ khuôn mặt, ánh sáng tự nhiên để đạt chất lượng tốt nhất
-                    </span>
-                    <span className="mt-3 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-[#E5BA70]">
-                      Hỗ trợ JPG, PNG, WebP
+                      Chụp rõ khuôn mặt, ánh sáng tự nhiên
                     </span>
                   </div>
                 )}
@@ -300,15 +253,15 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
             />
 
             {/* Parental Consent Checkbox */}
-            <div className="p-3 rounded-xl bg-black/30 border border-[#C5A059]/20">
-              <label className="flex items-center gap-3 cursor-pointer">
+            <div className="px-1 py-1">
+              <label className="flex items-center gap-2.5 cursor-pointer text-[11px] text-[#EDE5D8]/75">
                 <input
                   type="checkbox"
                   checked={isMinorConsent}
                   onChange={(e) => setIsMinorConsent(e.target.checked)}
                   className="rounded border-[#C5A059]/50 text-[#E5BA70] focus:ring-[#E5BA70] w-4 h-4 cursor-pointer"
                 />
-                <span className="text-[#EDE5D8]/75 text-[11px] leading-relaxed">
+                <span>
                   Đối với người dưới 16 tuổi: Xác nhận đã có sự đồng ý của phụ huynh/người giám hộ.
                 </span>
               </label>
@@ -327,7 +280,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               {isGenerating ? (
                 <>
                   <div className="w-5 h-5 border-2 border-[#1A140E]/30 border-t-[#1A140E] rounded-full animate-spin" />
-                  <span>{generationStep || 'AI đang dệt trang phục và tái hiện chân dung...'}</span>
+                  <span>{generationStep || 'Đang tạo ảnh...'}</span>
                 </>
               ) : (
                 <>
@@ -336,74 +289,20 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                 </>
               )}
             </button>
-
-            {/* Discreet API Key Settings Toggle in Footer */}
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={() => setShowKeyConfig(!showKeyConfig)}
-                className="text-[10px] text-[#EDE5D8]/40 hover:text-[#E5BA70] flex items-center gap-1 transition-colors cursor-pointer py-1 px-2 rounded hover:bg-white/5"
-              >
-                <Settings className="w-3 h-3" />
-                <span>Cài đặt nâng cao</span>
-              </button>
-            </div>
-
-            {/* Hidden / Discreet API Key Modal */}
-            {showKeyConfig && (
-              <div className="p-3.5 rounded-xl bg-[#141A26] border border-[#E5BA70]/40 space-y-2.5 animate-fadeIn">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#E5BA70] flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5" />
-                    <span>Cấu hình API Key (Pollinations)</span>
-                  </span>
-                  <a
-                    href="https://enter.pollinations.ai/keys"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] text-[#E5BA70] hover:underline flex items-center gap-1"
-                  >
-                    <span>Nhận Key miễn phí</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="password"
-                    placeholder="Dán API Key (sk_...)..."
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-lg bg-black/60 border border-white/15 text-[#EDE5D8] text-xs focus:border-[#E5BA70] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveKey}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#E5BA70] text-[#1A140E] font-bold text-xs hover:bg-[#F0D195] transition-colors cursor-pointer"
-                  >
-                    Lưu Key
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           /* Step 2: Generated Result View */
-          <div className="space-y-6 text-center animate-fadeIn py-2">
+          <div className="space-y-5 text-center animate-fadeIn py-2">
             <div className="relative aspect-[3/4] max-w-[360px] sm:max-w-[420px] mx-auto rounded-2xl overflow-hidden border-2 border-[#E5BA70] shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(229,186,112,0.25)] bg-black/95">
               <img
                 src={generatedResult}
                 alt="AI Try-on result"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 left-3 px-3 py-1 rounded-md bg-black/85 backdrop-blur-md border border-[#E5BA70]/70 text-[10px] font-bold text-[#E5BA70] flex items-center gap-1.5 uppercase tracking-wider shadow-lg">
-                <Sparkles className="w-3.5 h-3.5 text-[#E5BA70] fill-current" />
-                <span>KẾT QUẢ THỬ CỔ PHỤC</span>
-              </div>
             </div>
 
             <p className="text-xs sm:text-sm text-[#EDE5D8]/80 max-w-md mx-auto leading-relaxed">
-              Bức ảnh chân dung cổ phục đã hoàn tất! Bạn có thể tải ngay về máy hoặc lưu vào Bộ sưu tập Lookbook cá nhân.
+              Bức ảnh đã hoàn tất! Bạn có thể tải ngay về máy hoặc lưu vào Lookbook cá nhân.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 max-w-lg mx-auto">
