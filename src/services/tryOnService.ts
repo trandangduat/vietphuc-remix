@@ -191,12 +191,12 @@ export function buildMultimodalTryOnPrompt(outfit: ActiveOutfitState): string {
   const eventDesc = outfit.event.description ? ` - ${outfit.event.description}` : '';
 
   return (
-    `Image 1 is a mannequin wearing a complete traditional Vietnamese outfit: ${top}, ${bottom}, ${footwear}${accessory}.\n` +
-    `Image 2 is the reference photo of the person for virtual try-on.\n\n` +
-    `Task: Generate a realistic full-body standing photograph of the person from Image 2 wearing the complete outfit from Image 1.\n` +
-    `Body Proportions & Scale: Natural, realistic human anatomical proportions with an elegant 7.5 to 8 heads tall stature. The head size must be in realistic, balanced proportion to the neck, shoulders, and tall slender body (do NOT create an oversized head, chibi, or short compressed torso).\n` +
-    `Camera & Framing: Straight-on eye-level full-length standing shot, professional fashion editorial perspective. The entire outfit flows naturally and is fully visible from head to feet: upper robe (${top}), long trousers (${bottom}), and footwear (${footwear}).\n` +
-    `Preserve the person's face, facial structure, and likeness.\n` +
+    `Image 1 is a mannequin wearing a traditional Vietnamese outfit: ${top}, ${bottom}, ${footwear}${accessory}.\n` +
+    `Image 2 is the reference photo of the person (face portrait or full-body).\n\n` +
+    `Task: Generate a realistic full-body standing photograph of this person wearing the complete outfit from Image 1.\n` +
+    `Authentic Likeness & Build: Faithfully preserve the person's face, facial structure, and their natural, authentic body shape and build.\n` +
+    `Proportion Balance: Maintain a natural, anatomically correct head-to-body proportion where the head size is naturally balanced with the neck, shoulders, and torso (avoid disproportionate head enlargement or bobblehead distortion).\n` +
+    `Framing: Straight eye-level shot showing the complete standing person from head to toe. The full outfit is completely visible: flowing robe (${top}), trousers (${bottom}), and shoes (${footwear}).\n` +
     `Setting/Background: ${eventName}${eventDesc}.`
   );
 }
