@@ -45,6 +45,14 @@
   scrollbar-width: none;
 }
 
+/* Modal backdrop may scroll on tiny viewports; keep scrollbars off the frame interior */
+.heritage-modal-active {
+  scrollbar-width: none;
+}
+.heritage-modal-active::-webkit-scrollbar {
+  display: none;
+}
+
 /* Floating animations for scattered atelier pieces */
 @keyframes floatGentle {
   0%, 100% {
@@ -99,7 +107,46 @@
   width: max-content;
   animation: marquee 35s linear infinite;
 }
-.animate-marquee:hover {
-  animation-play-state: paused;
+
+/* Apple Human Interface Guidelines - Sleek slider styling */
+.apple-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  transition: all 0.2s ease;
+}
+.apple-slider:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+.apple-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.apple-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.apple-slider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
+  background: #0071e3;
+}
+.apple-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
 }
 

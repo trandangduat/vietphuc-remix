@@ -39,11 +39,61 @@ export const evaluateCulturalOutfit = (outfit: ActiveOutfitState): AIOverviewRes
   const isAoTacDo = outfit.topPiece?.id === 'piece-ao-tac-do' || outfit.topPiece?.id === 'piece-ao-tac';
   const isAoTacXanh = outfit.topPiece?.id === 'piece-ao-tac-xanh';
   const isAoTac = isAoTacDo || isAoTacXanh;
-  const isQuanLua = outfit.bottomPiece?.id === 'piece-quan-lua';
+  const isAoNguThan = outfit.topPiece?.id === 'piece-ao-ngu-than-nam';
+  const isAoSomiLinen = outfit.topPiece?.id === 'piece-ao-somi-linen-nam';
+
+  const isQuanLuaTrang = outfit.bottomPiece?.id === 'piece-quan-lua';
+  const isQuanLuaDen = outfit.bottomPiece?.id === 'piece-quan-lua-den';
+  const isQuanLua = isQuanLuaTrang || isQuanLuaDen;
   const isQuanTay = outfit.bottomPiece?.id === 'piece-quan-tay';
-  const isHaiNhung = outfit.footwearPiece?.id === 'piece-hai-nhung';
+  const isQuanAuBeige = outfit.bottomPiece?.id === 'piece-quan-au-beige';
+  const isQuanAu = isQuanTay || isQuanAuBeige;
+
+  const isHaiNhungDo = outfit.footwearPiece?.id === 'piece-hai-nhung';
+  const isHaiNhungDen = outfit.footwearPiece?.id === 'piece-hai-nhung-den';
+  const isHaiNhung = isHaiNhungDo || isHaiNhungDen;
   const isLoafer = outfit.footwearPiece?.id === 'piece-loafer';
+  const isDerby = outfit.footwearPiece?.id === 'piece-giay-derby-den';
+  const isGiayTay = isLoafer || isDerby;
+
+  const isKhanDong = outfit.accessoryPiece?.id === 'piece-khan-dong-hoang-gia';
   const isEventTet = outfit.event.id === 'event-tet';
+
+  // Case 0: Royal Traditional Men (Áo ngũ thân vàng đồng + Quần lụa đen/trắng + Hài nhung)
+  if (isAoNguThan && isQuanLua && isHaiNhung) {
+    return {
+      totalScore: isEventTet ? 9.9 : 9.7,
+      criteria: {
+        colorHarmony: {
+          name: 'Hài hòa màu sắc',
+          score: 9.9,
+          maxScore: 10,
+          comment: 'Sắc vàng đồng hoàng tộc của gấm dệt chữ Thọ và hoa văn mây cát tường hòa quyện cùng sắc đen tuyền trang nhã của quần lụa và hài nhung. Bảng màu quyền uy, đĩnh đạc và mực thước theo điển lễ vương triều.',
+        },
+        eventFit: {
+          name: 'Phù hợp sự kiện',
+          score: isEventTet ? 10.0 : 9.6,
+          maxScore: 10,
+          comment: isEventTet
+            ? 'Quốc phục chuẩn mực của nam giới thời Nguyễn cho ngày đầu năm mới: dâng hương tế tự, chúc Tết gia tộc và tiếp đón khách quý trong không khí trang nghiêm đầu xuân.'
+            : 'Tuyệt đối mực thước cho các đại lễ kỷ niệm, sự kiện văn hóa cổ điển và nghi thức truyền thống.',
+        },
+        culturalNorm: {
+          name: 'Chuẩn mực lễ nghi',
+          score: 9.9,
+          maxScore: 10,
+          comment: `Điển chế quốc phục nam giới chuẩn chỉ triều Nguyễn. Năm thân áo và năm khuy cài tượng trưng cho tứ thân phụ mẫu và đạo Ngũ thường (Nhân, Lễ, Nghĩa, Trí, Tín)${isKhanDong ? ', kết hợp khăn đóng chữ Nhân hoàn hảo' : ''}.`,
+        },
+      },
+      colorHarmony: 'Vàng đồng hoàng gia tương phản sắc sảo trên nền lụa đen quý phái.',
+      eventFit: isEventTet ? 'Hoàn hảo tuyệt đối cho Tết Cổ Truyền và nghi lễ gia tiên.' : 'Mực thước, trang trọng cho sự kiện văn hóa truyền thống.',
+      culturalStatus: 'suitable',
+      explanation: 'Bộ quốc phục áo ngũ thân tay chẽn vàng đồng kết hợp cùng quần lụa đen và hài nhung thể hiện trọn vẹn phong thái quân tử đĩnh đạc của nam giới Việt xưa.',
+      source: 'Bảo tàng Cổ vật Cung đình Huế & "Ngàn năm áo mũ"',
+      mascotQuote: 'Phong thái bậc vương giả quân tử! Áo ngũ thân vàng đồng uy nghiêm rạng rỡ!',
+      mascotMood: 'reverent',
+    };
+  }
 
   // Case 1A: Pure Traditional Royal (Áo tấc đỏ + Quần lụa + Hài nhung)
   if (isAoTacDo && isQuanLua && isHaiNhung) {
@@ -153,6 +203,75 @@ export const evaluateCulturalOutfit = (outfit: ActiveOutfitState): AIOverviewRes
       source: 'Chuyên khảo Văn hóa Mặc đương đại & Bảo tàng Phụ nữ Nam Bộ',
       mascotQuote: 'Phối đồ Remix rất phá cách và có gu! Nhưng nhớ tránh mặc đi cúng lễ gia tiên nha!',
       mascotMood: 'happy',
+    };
+  }
+
+  // Case 2B: Contemporary Smart Casual / Heritage Remix Men (Áo sơ mi linen + Quần âu + Giày Tây)
+  if (isAoSomiLinen && isQuanAu && isGiayTay) {
+    return {
+      totalScore: 9.2,
+      criteria: {
+        colorHarmony: {
+          name: 'Hài hòa màu sắc',
+          score: 9.4,
+          maxScore: 10,
+          comment: 'Sắc trắng ngà mộc mạc của linen tự nhiên phối cùng tông be cát ấm áp và sắc đen bóng của giày Derby tạo nên bảng màu Minimalism tinh tế, thanh nhã và đậm chất thời trang đương đại.',
+        },
+        eventFit: {
+          name: 'Phù hợp sự kiện',
+          score: outfit.event.id === 'event-prom' || outfit.event.id === 'event-ngay-hoi' ? 9.8 : 8.9,
+          maxScore: 10,
+          comment: 'Rất ấn tượng cho các dịp dạ hội trường học (Prom), ngày hội văn hóa giới trẻ, triển lãm sáng tạo và gặp gỡ giao lưu nghệ thuật.',
+        },
+        culturalNorm: {
+          name: 'Chuẩn mực lễ nghi',
+          score: 8.5,
+          maxScore: 10,
+          comment: 'Lấy cảm hứng từ cổ đứng truyền thống Việt Nam nhưng giản lược theo ngôn ngữ sơ mi hiện đại. Đây là lối tiếp cận di sản bằng thời trang ứng dụng thực tế, gần gũi với thế hệ trẻ.',
+        },
+      },
+      colorHarmony: 'Tối giản đương đại (Trắng ngà linen, be cát và da đen bóng).',
+      eventFit: 'Hoàn hảo cho sự kiện trường học, dạ hội Prom và không gian sáng tạo trẻ trung.',
+      culturalStatus: 'suitable',
+      explanation: 'Phong cách Heritage Remix trẻ trung: Áo sơ mi cổ trụ linen kết hợp quần âu xếp ly và giày Derby bóng bẩy mang hơi thở hiện đại lấy cảm hứng từ trang phục truyền thống.',
+      source: 'Xu hướng Thời trang Bền vững & Tạp chí ELLE Man Việt Nam',
+      mascotQuote: 'Trang phục tân thời cực kỳ lịch lãm và có gu! Rất hợp với các bạn trẻ yêu văn hóa!',
+      mascotMood: 'happy',
+    };
+  }
+
+  // Case 2C: Ngũ thân Remix (Áo ngũ thân + Quần âu / Giày Tây)
+  if (isAoNguThan && (isQuanAu || isGiayTay)) {
+    return {
+      totalScore: 8.6,
+      criteria: {
+        colorHarmony: {
+          name: 'Hài hòa màu sắc',
+          score: 8.9,
+          maxScore: 10,
+          comment: 'Sắc vàng đồng của áo ngũ thân nổi bật trên nền âu phục phương Tây, tạo điểm nhấn tương phản độc đáo giữa truyền thống và hiện đại.',
+        },
+        eventFit: {
+          name: 'Phù hợp sự kiện',
+          score: 8.8,
+          maxScore: 10,
+          comment: 'Lựa chọn phong cách cho các buổi biểu diễn nghệ thuật, tuần lễ thời trang di sản hoặc chụp ảnh lookbook đương đại.',
+        },
+        culturalNorm: {
+          name: 'Chuẩn mực lễ nghi',
+          score: 8.0,
+          maxScore: 10,
+          comment: 'Thử nghiệm cách tân phá cách. Vẫn giữ phẩm cách vạt áo ngũ thân nhưng kết hợp cùng hạ y hiện đại.',
+        },
+      },
+      colorHarmony: 'Gấm vàng đồng vương giả phối hợp cùng âu phục đương đại.',
+      eventFit: 'Thích hợp cho tuần lễ thời trang, chụp ảnh concept và sự kiện văn hóa nghệ thuật trẻ.',
+      culturalStatus: 'caution',
+      explanation: 'Sự kết hợp phá cách giữa áo ngũ thân triều Nguyễn và âu phục hiện đại. Thích hợp cho sự kiện nghệ thuật, dạo phố.',
+      suggestion: 'Khi tham gia các nghi thức cúng lễ truyền thống, nên phối cùng Quần lụa đen và Hài nhung để đạt chuẩn mực cao nhất.',
+      source: 'Bảo tàng Cổ vật Cung đình Huế & Trào lưu Việt phục đương đại',
+      mascotQuote: 'Phối ngũ thân cùng âu phục trông rất cá tính và nghệ thuật đấy!',
+      mascotMood: 'curious',
     };
   }
 

@@ -264,7 +264,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
             </button>
           </div>
 
-          {/* Accessory Clear Action (if active) */}
+          {/* Right side: Accessory Clear Action (if active) */}
           {activeCategory === 'accessory' && selectedPieces.accessory && (
             <button
               onClick={onClearAccessory}
@@ -279,7 +279,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
           <span className="text-[#EDE5D8]/85 text-xs font-medium flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#E5BA70]" />
-            <span>Bộ phối chuẩn mẫu được thiết kế sẵn ({presets.length})</span>
+            <span>Bộ phối chuẩn mẫu ({presets.length})</span>
           </span>
         </div>
       )}
@@ -300,9 +300,11 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                     <h4 className="font-sans font-bold text-base text-silk-ivory group-hover:text-imperial-gold transition-colors">
                       {preset.name}
                     </h4>
-                    <span className="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
-                      {preset.style}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
+                        {preset.style}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-sm text-silk-muted leading-relaxed mb-3">
                     {preset.description}

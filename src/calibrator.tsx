@@ -5,7 +5,7 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div className="min-h-screen bg-lacquer text-silk-ivory">
+    <div className="min-h-screen bg-[#000000] text-[#f5f5f7]">
       <DevCalibratorScreen />
     </div>
   </React.StrictMode>

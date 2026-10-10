@@ -6,6 +6,7 @@ import {
   getAlignmentStyle,
   PieceAlignment,
 } from '../data/pieceAlignments';
+import { drawAlignedLayer, drawImageContained } from '../services/tryOnService';
 
 interface StudioCanvas2DProps {
   outfit: ActiveOutfitState;
@@ -81,7 +82,9 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
       if (outfit.event.bgUrl) layersToDraw.push({ url: outfit.event.bgUrl, isCover: true });
 
       // 1. Mannequin
-      layersToDraw.push({ url: '/assets/mannequins/mannequin-base.png' });
+      layersToDraw.push({
+        url: outfit.mannequinGender === 'men' ? '/assets/mannequins/mannequin-men.png' : '/assets/mannequins/mannequin-base.png',
+      });
 
       // 2. Bottoms
       if (bottomPiece) {
@@ -118,21 +121,9 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         if (item.isCover) {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         } else if (item.alignment) {
-          const align = item.alignment;
-          ctx.save();
-          const cx = canvas.width / 2 + (align.x / 100) * canvas.width;
-          const cy = canvas.height / 2 + (align.y / 100) * canvas.height;
-          ctx.translate(cx, cy);
-          if (align.rotate) {
-            ctx.rotate((align.rotate * Math.PI) / 180);
-          }
-          const sx = align.scale * (align.scaleX ?? 1);
-          const sy = align.scale * (align.scaleY ?? 1);
-          ctx.scale(sx, sy);
-          ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-          ctx.restore();
+          drawAlignedLayer(ctx, img, item.alignment, canvas.width, canvas.height);
         } else {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          drawImageContained(ctx, img, 0, 0, canvas.width, canvas.height);
         }
       }
 
@@ -178,8 +169,8 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         {/* Layer 1: Mannequin */}
         <div className="absolute inset-0 pointer-events-none">
           <img
-            src="/assets/mannequins/mannequin-base.png"
-            alt="Ma-nơ-canh chuẩn"
+            src={outfit.mannequinGender === 'men' ? '/assets/mannequins/mannequin-men.png' : '/assets/mannequins/mannequin-base.png'}
+            alt={outfit.mannequinGender === 'men' ? 'Ma-nơ-canh nam' : 'Ma-nơ-canh chuẩn'}
             className="w-full h-full object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)]"
           />
         </div>

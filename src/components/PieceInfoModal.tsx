@@ -55,7 +55,7 @@ export const PieceInfoModal: React.FC<PieceInfoModalProps> = ({
       onClose={onClose}
       maxWidth="max-w-5xl"
       className="p-0"
-      contentClassName="p-0"
+      contentClassName="overflow-y-auto p-0"
     >
       <div className="flex flex-col lg:flex-row min-h-[520px] lg:min-h-[580px]">
         {/* ======================================================== */}
@@ -74,9 +74,11 @@ export const PieceInfoModal: React.FC<PieceInfoModalProps> = ({
                 <span>{categoryLabel}</span>
               </span>
             </div>
-            <span className="text-[11px] font-mono tracking-wider px-2 py-0.5 bg-imperial-gold/15 text-imperial-gold-light border border-imperial-gold/30">
-              {piece.style === 'traditional' ? 'CỔ PHONG' : piece.style === 'modern' ? 'HIỆN ĐẠI' : 'REMIX'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono tracking-wider px-2 py-0.5 bg-imperial-gold/15 text-imperial-gold-light border border-imperial-gold/30">
+                {piece.style === 'traditional' ? 'CỔ PHONG' : piece.style === 'modern' ? 'HIỆN ĐẠI' : 'REMIX'}
+              </span>
+            </div>
           </div>
 
           {/* Central Piece Hero Visual: Big, High-Resolution, Maximized */}

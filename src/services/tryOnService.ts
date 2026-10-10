@@ -57,6 +57,65 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+/** Match Studio DOM: image letterboxed inside a box (object-contain). */
+export function drawImageContained(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  boxX: number,
+  boxY: number,
+  boxW: number,
+  boxH: number
+) {
+  const imageAspect = img.naturalWidth / img.naturalHeight;
+  const boxAspect = boxW / boxH;
+  let drawW: number;
+  let drawH: number;
+  let drawX: number;
+  let drawY: number;
+
+  if (imageAspect > boxAspect) {
+    drawW = boxW;
+    drawH = boxW / imageAspect;
+    drawX = boxX;
+    drawY = boxY + (boxH - drawH) / 2;
+  } else {
+    drawH = boxH;
+    drawW = boxH * imageAspect;
+    drawX = boxX + (boxW - drawW) / 2;
+    drawY = boxY;
+  }
+
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+}
+
+/** Match Studio DOM: transformed layer with object-contain piece art. */
+export function drawAlignedLayer(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  alignment: PieceAlignment,
+  canvasW: number,
+  canvasH: number
+) {
+  ctx.save();
+  const cx = canvasW / 2 + (alignment.x / 100) * canvasW;
+  const cy = canvasH / 2 + (alignment.y / 100) * canvasH;
+  ctx.translate(cx, cy);
+  if (alignment.rotate) {
+    ctx.rotate((alignment.rotate * Math.PI) / 180);
+  }
+  const sx = alignment.scale * (alignment.scaleX ?? 1);
+  const sy = alignment.scale * (alignment.scaleY ?? 1);
+  ctx.scale(sx, sy);
+  drawImageContained(ctx, img, -canvasW / 2, -canvasH / 2, canvasW, canvasH);
+  ctx.restore();
+}
+
+function mannequinAssetFor(outfit: ActiveOutfitState): string {
+  return outfit.mannequinGender === 'men'
+    ? '/assets/mannequins/mannequin-men.png'
+    : '/assets/mannequins/mannequin-base.png';
+}
+
 /**
  * Resizes an image (base64 or URL) to a maximum dimension to ensure fast network upload
  */
@@ -97,8 +156,8 @@ export async function optimizeImageForAI(
  */
 export async function renderStudioPreviewCanvas(
   outfit: ActiveOutfitState,
-  width: number = 768,
-  height: number = 1024
+  width: number = 900,
+  height: number = 1200
 ): Promise<string> {
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -117,14 +176,19 @@ export async function renderStudioPreviewCanvas(
     isCover?: boolean;
   }
 
-  // 0. Neutral clean studio backdrop (no event background)
-  ctx.fillStyle = '#E8EAED';
+  // Dark studio sweep: lifted behind the figure, lacquer at the edges.
+  const cx = canvas.width / 2;
+  const cy = canvas.height * 0.46;
+  const backdrop = ctx.createRadialGradient(cx, cy, canvas.width * 0.06, cx, cy, canvas.width * 0.78);
+  backdrop.addColorStop(0, '#2C3340');
+  backdrop.addColorStop(0.55, '#171C26');
+  backdrop.addColorStop(1, '#0A0D12');
+  ctx.fillStyle = backdrop;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const layers: LayerItem[] = [];
 
-  // 1. Mannequin Base
-  layers.push({ url: '/assets/mannequins/mannequin-base.png' });
+  layers.push({ url: mannequinAssetFor(outfit) });
 
   // 3. Bottoms
   if (bottomPiece?.assetUrl) {
@@ -152,21 +216,9 @@ export async function renderStudioPreviewCanvas(
       if (item.isCover) {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       } else if (item.alignment) {
-        const align = item.alignment;
-        ctx.save();
-        const cx = canvas.width / 2 + (align.x / 100) * canvas.width;
-        const cy = canvas.height / 2 + (align.y / 100) * canvas.height;
-        ctx.translate(cx, cy);
-        if (align.rotate) {
-          ctx.rotate((align.rotate * Math.PI) / 180);
-        }
-        const sx = align.scale * (align.scaleX ?? 1);
-        const sy = align.scale * (align.scaleY ?? 1);
-        ctx.scale(sx, sy);
-        ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-        ctx.restore();
+        drawAlignedLayer(ctx, img, item.alignment, canvas.width, canvas.height);
       } else {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        drawImageContained(ctx, img, 0, 0, canvas.width, canvas.height);
       }
     } catch (err) {
       console.warn(`Layer render skipped: ${item.url}`, err);

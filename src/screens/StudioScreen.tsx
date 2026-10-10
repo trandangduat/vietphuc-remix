@@ -45,9 +45,31 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
     (outfit.footwearPiece || outfit.footwearVariant)
   );
 
-  // Switch Mannequin Gender
+  // Switch Mannequin Gender (Chuyển đổi ma-nơ-canh & tự động cập nhật đồ phù hợp)
   const handleSelectGender = (gender: GenderSelection) => {
-    setOutfit((prev) => ({ ...prev, mannequinGender: gender }));
+    if (gender === outfit.mannequinGender) return;
+
+    // Kiểm tra xem trang phục hiện tại có chứa món không tương thích với giới tính mới không
+    const isTopIncompatible = outfit.topPiece && outfit.topPiece.gender !== gender && outfit.topPiece.gender !== 'unisex';
+    const isBottomIncompatible = outfit.bottomPiece && outfit.bottomPiece.gender !== gender && outfit.bottomPiece.gender !== 'unisex';
+    const isFootwearIncompatible = outfit.footwearPiece && outfit.footwearPiece.gender !== gender && outfit.footwearPiece.gender !== 'unisex';
+    const isAccessoryIncompatible = outfit.accessoryPiece && outfit.accessoryPiece.gender !== gender && outfit.accessoryPiece.gender !== 'unisex';
+
+    // Nếu trang phục hiện tại không tương thích, tự động nạp preset chuẩn mặc định của giới tính đó
+    if (isTopIncompatible || isBottomIncompatible || isFootwearIncompatible || !outfit.topPiece) {
+      const defaultPreset = PRESET_OUTFITS.find((p) => p.gender === gender);
+      if (defaultPreset) {
+        handleSelectPreset(defaultPreset);
+        return;
+      }
+    }
+
+    setOutfit((prev) => ({
+      ...prev,
+      mannequinGender: gender,
+      accessoryPiece: isAccessoryIncompatible ? undefined : prev.accessoryPiece,
+      accessoryVariant: isAccessoryIncompatible ? undefined : prev.accessoryVariant,
+    }));
   };
 
   // Switch Event
@@ -156,8 +178,12 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
       <div className="flex-1 min-w-0 h-full flex flex-col border-t lg:border-t-0 lg:border-l border-lacquer-border bg-lacquer-card overflow-hidden relative">
         {/* Top: Piece Selector with Category Tabs and Swatches */}
         <PieceSelector
-          pieces={PIECES}
-          presets={PRESET_OUTFITS}
+          pieces={PIECES.filter(
+            (p) => p.gender === outfit.mannequinGender || p.gender === 'unisex'
+          )}
+          presets={PRESET_OUTFITS.filter(
+            (pr) => pr.gender === outfit.mannequinGender
+          )}
           activeCategory={activeCategory}
           onSelectCategory={setActiveCategory}
           styleFilter={outfit.styleFilter}

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
+  Shirt,
   Sparkles,
   Upload,
   Download,
+  Check,
   CheckCircle2,
   X,
   Lock,
@@ -26,6 +28,30 @@ interface AITryOnModalProps {
   onLoginPrompt?: () => void;
 }
 
+/** Column is exactly the 3:4 plate width, so labels and captions share the image edges. */
+const PREVIEW_COLUMN = 'flex w-[min(100%,calc(min(48dvh,480px)*0.75))] flex-col';
+const PREVIEW_TILE =
+  'relative aspect-[3/4] w-full overflow-hidden bg-[radial-gradient(ellipse_at_50%_38%,_#1c2433_0%,_#10141c_48%,_#0a0d12_100%)] ring-1 ring-inset ring-imperial-gold/25';
+
+function SlotMeta({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="min-w-0 pt-2">
+      <p className="truncate text-[15px] font-medium leading-snug text-silk-ivory">{title}</p>
+      <p className="mt-0.5 truncate text-[13px] leading-snug text-silk-muted">{subtitle}</p>
+    </div>
+  );
+}
+
+function primaryActionClass(active: boolean, busy?: boolean) {
+  return [
+    'flex min-h-[3rem] w-full items-center justify-center gap-2 px-5 text-[15px] font-semibold transition-[color,background-color,transform,box-shadow] duration-200',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-lacquer',
+    active
+      ? `border border-imperial-gold bg-imperial-gold text-lacquer shadow-gold-glow hover:bg-imperial-gold-light active:scale-[0.99] ${busy ? 'cursor-wait' : 'cursor-pointer'}`
+      : 'cursor-not-allowed border border-imperial-gold/25 bg-transparent text-silk-muted',
+  ].join(' ');
+}
+
 export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   isOpen,
   onClose,
@@ -39,7 +65,6 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   const [studioPreview, setStudioPreview] = useState<string | null>(null);
   const [isMinorConsent, setIsMinorConsent] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<string>('');
   const [generatedResult, setGeneratedResult] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -93,7 +118,6 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
           outfit,
           apiKey: apiKey.trim() || undefined,
         },
-        (progress) => setGenerationStep(progress)
       );
 
       if (response.status === 'success' && response.imageUrl) {
@@ -106,7 +130,6 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
       setErrorMessage(err.message || 'Không thể kết nối dịch vụ. Vui lòng thử lại sau.');
     } finally {
       setIsGenerating(false);
-      setGenerationStep('');
     }
   };
 
@@ -124,79 +147,70 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   const topName = outfit.topPiece?.name || outfit.topVariant?.name || 'Áo tấc truyền thống';
   const eventName = outfit.event.name || 'Không gian cổ kính';
 
+  const canStart = Boolean(selectedPhoto) && isMinorConsent;
+
   return (
     <HeritageModal
       isOpen={isOpen}
       onClose={onClose}
       title="Thử Trang Phục"
-      icon={<Sparkles className="w-5 h-5 flex-shrink-0 text-[#C5A059]" />}
-      maxWidth="max-w-3xl sm:max-w-4xl"
+      subtitle="Bản phối Studio và ảnh chân dung của bạn."
+      icon={<Shirt className="h-6 w-6 flex-shrink-0 text-imperial-gold" fill="currentColor" strokeWidth={0} />}
+      bareIcon
+      maxWidth="max-w-4xl"
+      contentClassName="overflow-hidden"
     >
-      <div className="space-y-4 font-sans text-xs text-[#EDE5D8]">
-        {/* Error notification alert */}
+      <div className="font-sans text-silk-ivory">
         {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 animate-fadeIn flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
-            <div className="leading-relaxed flex-1">
-              <span className="font-bold text-white">Lỗi: </span>
-              {errorMessage}
-            </div>
+          <div
+            role="alert"
+            className="mb-5 flex items-start gap-3 border border-rose-400/35 bg-rose-950/40 px-3 py-2 text-[13px] leading-relaxed text-rose-100"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-300" />
+            <p className="min-w-0 flex-1 pt-px">{errorMessage}</p>
             <button
+              type="button"
               onClick={() => setErrorMessage(null)}
-              className="text-rose-400 hover:text-white cursor-pointer"
+              aria-label="Đóng thông báo"
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-rose-300 hover:text-silk-ivory cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         )}
 
         {!generatedResult ? (
-          /* Step 1: Input Setup */
-          <div className="space-y-4">
-            {/* 2-Column Visual Comparison Card */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {/* Left Column: Studio Outfit Reference */}
-              <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
-                <div className="mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70]">
-                    Trang phục đã chọn
-                  </span>
-                </div>
-
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#C5A059]/40 bg-black/60 shadow-lg flex-1">
+          <div className="flex flex-col gap-4">
+            <div className="mx-auto grid w-full grid-cols-1 justify-items-center gap-y-4 sm:grid-cols-2 sm:gap-x-8">
+              <section className={PREVIEW_COLUMN}>
+                <h4 className="mb-2 text-[13px] font-medium text-silk-muted">Trang phục đã chọn</h4>
+                <div className={PREVIEW_TILE}>
                   {studioPreview ? (
                     <img
                       src={studioPreview}
                       alt="Trang phục đã chọn"
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-contain object-center"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-xs text-[#EDE5D8]/50 animate-pulse gap-2">
-                      <div className="w-6 h-6 border-2 border-[#C5A059]/40 border-t-[#C5A059] rounded-full animate-spin" />
-                      <span>Đang tải...</span>
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-[13px] text-silk-muted">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-imperial-gold/30 border-t-imperial-gold" />
+                      <span>Đang tải trang phục</span>
                     </div>
                   )}
-
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-3 text-center">
-                    <div className="text-xs font-bold text-[#F7F4EE] tracking-wide">{topName}</div>
-                    <div className="text-[11px] text-[#E5BA70] mt-0.5">{eventName}</div>
-                  </div>
                 </div>
-              </div>
+                <div className="min-h-[2.75rem]">
+                  {studioPreview && <SlotMeta title={topName} subtitle={eventName} />}
+                </div>
+              </section>
 
-              {/* Right Column: User Portrait Upload */}
-              <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70]">
-                    Ảnh chân dung của bạn
-                  </span>
+              <section className={PREVIEW_COLUMN}>
+                <div className="mb-2 flex min-h-[1.25rem] items-center justify-between gap-3">
+                  <h4 className="text-[13px] font-medium text-silk-muted">Ảnh chân dung</h4>
                   {selectedPhoto && (
                     <button
-                      onClick={() => {
-                        setSelectedPhoto(null);
-                        setPhotoName('');
-                      }}
-                      className="text-[11px] text-rose-300 hover:text-white underline cursor-pointer"
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-[13px] font-medium text-imperial-gold-light transition-colors hover:text-silk-ivory cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold"
                     >
                       Đổi ảnh
                     </button>
@@ -204,139 +218,99 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                 </div>
 
                 {selectedPhoto ? (
-                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 border-[#E5BA70] bg-black/60 shadow-lg group flex-1">
+                  <div className={PREVIEW_TILE}>
                     <img
                       src={selectedPhoto}
-                      alt="Ảnh chân dung đã chọn"
-                      className="w-full h-full object-cover"
+                      alt={photoName ? `Ảnh chân dung ${photoName}` : 'Ảnh chân dung đã chọn'}
+                      className="h-full w-full object-cover object-[center_22%]"
                     />
-                    <button
-                      onClick={() => {
-                        setSelectedPhoto(null);
-                        setPhotoName('');
-                      }}
-                      className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/80 hover:bg-rose-900 text-rose-300 border border-white/20 transition-all cursor-pointer shadow-md"
-                      title="Chọn ảnh khác"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <div className="absolute bottom-0 inset-x-0 bg-black/80 px-2 py-1 text-[10px] text-[#EDE5D8] truncate text-center backdrop-blur-sm">
-                      {photoName || 'Ảnh chân dung'}
-                    </div>
                   </div>
                 ) : (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-[#C5A059]/40 hover:border-[#E5BA70] hover:bg-[#E5BA70]/5 bg-[#0D111A]/70 flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all flex-1 group"
+                    className={`${PREVIEW_TILE} flex cursor-pointer flex-col items-center justify-center gap-3 text-center transition-colors hover:bg-imperial-gold/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold`}
                   >
-                    <div className="w-14 h-14 rounded-full bg-[#E5BA70]/10 border border-[#E5BA70]/30 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-[#E5BA70]/20 transition-transform">
-                      <Upload className="w-6 h-6 text-[#E5BA70]" />
-                    </div>
-                    <span className="text-sm font-bold text-[#F7F4EE] mb-1">
-                      Tải ảnh chân dung lên
+                    <span className="flex h-11 w-11 items-center justify-center border border-imperial-gold/40 bg-imperial-gold/[0.07]">
+                      <Upload className="h-5 w-5 text-imperial-gold" strokeWidth={1.5} />
                     </span>
-                    <span className="text-[11px] text-[#EDE5D8]/60 max-w-[200px] leading-relaxed">
-                      Chụp rõ khuôn mặt, ánh sáng tự nhiên
-                    </span>
-                  </div>
+                    <span className="text-[15px] font-medium text-silk-ivory">Tải ảnh chân dung</span>
+                  </button>
                 )}
-              </div>
+
+                <div className="min-h-[2.75rem]">
+                  {selectedPhoto && (
+                    <SlotMeta title={photoName || 'Ảnh đã chọn'} subtitle="Sẵn sàng để thử" />
+                  )}
+                </div>
+              </section>
             </div>
 
-            {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/png,image/jpeg,image/webp,image/jpg"
-              className="hidden"
+              className="sr-only"
               onChange={handleFileChange}
             />
 
-            {/* Parental Consent Checkbox */}
-            <div className="px-1 py-1">
-              <label className="flex items-center gap-2.5 cursor-pointer text-[11px] text-[#EDE5D8]/75">
+            <div className="flex flex-col gap-3 border-t border-imperial-gold/15 pt-4">
+              <label className="flex min-h-11 cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   checked={isMinorConsent}
                   onChange={(e) => setIsMinorConsent(e.target.checked)}
-                  className="rounded border-[#C5A059]/50 text-[#E5BA70] focus:ring-[#E5BA70] w-4 h-4 cursor-pointer"
+                  className="peer sr-only"
                 />
-                <span>
-                  Đối với người dưới 16 tuổi: Xác nhận đã có sự đồng ý của phụ huynh/người giám hộ.
+                <span
+                  aria-hidden
+                  className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center border border-imperial-gold/50 text-lacquer peer-checked:border-imperial-gold peer-checked:bg-imperial-gold peer-focus-visible:ring-2 peer-focus-visible:ring-imperial-gold-light peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-lacquer"
+                >
+                  {isMinorConsent && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                </span>
+                <span className="text-[13px] leading-relaxed text-silk-ivory/75">
+                  Dưới 16 tuổi: xác nhận đã có sự đồng ý của phụ huynh hoặc người giám hộ.
                 </span>
               </label>
-            </div>
-
-            {/* Primary Action Button */}
-            <button
-              onClick={handleStartGeneration}
-              disabled={!selectedPhoto || isGenerating || !isMinorConsent}
-              className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-lg cursor-pointer ${
-                selectedPhoto && !isGenerating && isMinorConsent
-                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] hover:brightness-110 shadow-[0_4px_24px_rgba(229,186,112,0.4)]'
-                  : 'bg-[#161B26] text-[#EDE5D8]/40 border border-[#C5A059]/20 cursor-not-allowed'
-              }`}
-            >
-              {isGenerating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-[#1A140E]/30 border-t-[#1A140E] rounded-full animate-spin" />
-                  <span>{generationStep || 'Đang tạo ảnh...'}</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 text-[#1A140E] fill-current" />
-                  <span>Thử Cổ Phục Ngay</span>
-                </>
-              )}
-            </button>
-          </div>
-        ) : (
-          /* Step 2: Generated Result View */
-          <div className="space-y-5 text-center animate-fadeIn py-2">
-            <div className="relative aspect-[3/4] max-w-[360px] sm:max-w-[420px] mx-auto rounded-2xl overflow-hidden border-2 border-[#E5BA70] shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(229,186,112,0.25)] bg-black/95">
-              <img
-                src={generatedResult}
-                alt="AI Try-on result"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#EDE5D8]/80 max-w-md mx-auto leading-relaxed">
-              Bức ảnh đã hoàn tất! Bạn có thể tải ngay về máy hoặc lưu vào Lookbook cá nhân.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 max-w-lg mx-auto">
-              <button
-                onClick={() => {
-                  setGeneratedResult(null);
-                  setSelectedPhoto(null);
-                  setPhotoName('');
-                  setErrorMessage(null);
-                }}
-                className="w-full sm:w-auto py-3 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-bold text-[#EDE5D8] transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Thử ảnh khác</span>
-              </button>
 
               <button
-                onClick={handleDownload}
-                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-[#E5BA70]/15 hover:bg-[#E5BA70]/25 border border-[#E5BA70]/70 text-xs font-bold text-[#E5BA70] transition-colors cursor-pointer flex items-center justify-center gap-2"
+                type="button"
+                onClick={handleStartGeneration}
+                disabled={!canStart || isGenerating}
+                aria-busy={isGenerating}
+                aria-label={isGenerating ? 'Đang thử trang phục' : 'Thử trang phục'}
+                className={primaryActionClass(canStart, isGenerating)}
               >
-                {downloadSuccess ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-300">Đã tải về máy!</span>
-                  </>
+                {isGenerating ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-lacquer/30 border-t-lacquer" />
                 ) : (
                   <>
-                    <Download className="w-4 h-4" />
-                    <span>Tải ảnh về máy</span>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Thử trang phục</span>
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4 sm:gap-5">
+            <div className="mx-auto w-[min(100%,calc(min(52dvh,460px)*0.75))]">
+              <div className={PREVIEW_TILE}>
+                <img
+                  src={generatedResult}
+                  alt="Ảnh thử trang phục"
+                  className="h-full w-full object-cover object-[center_20%]"
+                />
+              </div>
+            </div>
 
+            <p className="max-w-md text-center text-[15px] leading-relaxed text-silk-muted">
+              Ảnh đã sẵn sàng — tải về hoặc lưu vào bộ sưu tập.
+            </p>
+
+            <div className="flex w-full max-w-sm flex-col gap-2.5">
               <button
+                type="button"
                 onClick={() => {
                   if (!isLoggedIn) {
                     onLoginPrompt?.();
@@ -345,10 +319,42 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   onSaveToLookbook(generatedResult);
                   onClose();
                 }}
-                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold text-xs hover:brightness-110 shadow-[0_4px_16px_rgba(229,186,112,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
+                className={primaryActionClass(true)}
               >
-                {!isLoggedIn && <Lock className="w-4 h-4" />}
-                <span>{isLoggedIn ? 'Lưu Lookbook' : 'Đăng nhập để lưu'}</span>
+                {!isLoggedIn && <Lock className="h-4 w-4" />}
+                <span>{isLoggedIn ? 'Lưu vào bộ sưu tập' : 'Đăng nhập để lưu'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 border border-imperial-gold/30 bg-black/20 px-4 text-[15px] font-medium text-silk-ivory transition-colors hover:border-imperial-gold/60 hover:bg-imperial-gold/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold"
+              >
+                {downloadSuccess ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-imperial-gold-light" />
+                    <span>Đã tải về máy</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    <span>Tải về máy</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setGeneratedResult(null);
+                  setSelectedPhoto(null);
+                  setPhotoName('');
+                  setErrorMessage(null);
+                }}
+                className="flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 text-[14px] font-medium text-silk-muted transition-colors hover:text-silk-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Thử ảnh khác</span>
               </button>
             </div>
           </div>

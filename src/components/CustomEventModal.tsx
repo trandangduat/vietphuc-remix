@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Check, Sparkles } from 'lucide-react';
 import { EventBackground } from '../types';
 import { HeritageModal } from './heritage/HeritageFrame';
 
@@ -42,67 +42,78 @@ export const CustomEventModal: React.FC<CustomEventModalProps> = ({
     }, 1800);
   };
 
+  const canCreate = Boolean(prompt.trim());
+
   return (
     <HeritageModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Tạo Bối Cảnh Sự Kiện (AI)"
-      subtitle="Nhập mô tả không gian để AI sinh một nền độc nhất cho Studio"
-      icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
-      badge="AI GENERATION"
-      maxWidth="max-w-md"
+      title="Tạo Bối Cảnh"
+      subtitle="Mô tả không gian để có một nền riêng cho Studio"
+      icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-imperial-gold" />}
+      maxWidth="max-w-lg"
+      contentClassName="overflow-hidden"
     >
-      <div className="space-y-4 font-sans text-xs">
-        <div>
-          <label className="block text-[11px] font-bold text-[#C5A059] mb-2 uppercase tracking-wider">
-            Mô tả không gian hoặc bối cảnh:
+      <div className="flex flex-col gap-4 font-sans sm:gap-5">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="custom-event-prompt" className="text-[13px] font-medium text-silk-muted">
+            Mô tả không gian
           </label>
           <textarea
+            id="custom-event-prompt"
             rows={3}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Ví dụ: Hoàng hôn bên dòng sông Hương, phố đèn lồng Hội An lung linh..."
-            className="w-full p-3 rounded-[6px] bg-[#0D111A] border border-[#C5A059]/40 focus:border-[#D4AF37] text-xs sm:text-sm text-[#EDE5D8] placeholder-[#EDE5D8]/40 focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-colors resize-none font-sans"
+            placeholder="Hoàng hôn bên sông Hương, phố đèn lồng Hội An…"
+            className="w-full resize-none border border-imperial-gold/25 bg-black/30 px-4 py-3.5 text-[15px] leading-relaxed text-silk-ivory placeholder:text-silk-muted/80 focus:border-imperial-gold-light focus:outline-none"
           />
         </div>
 
-        <div>
-          <span className="text-[11px] font-bold text-[#C5A059] block mb-2 uppercase tracking-wider">
-            Gợi ý nhanh:
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setPrompt(item)}
-                className="px-2.5 py-1 rounded-[6px] text-xs bg-[#121622] border border-[#C5A059]/30 text-[#EDE5D8]/80 hover:text-[#D4AF37] hover:border-[#D4AF37]/60 transition-all text-left font-sans cursor-pointer"
-              >
-                {item}
-              </button>
-            ))}
+        <div className="flex flex-col gap-2">
+          <span className="text-[13px] font-medium text-silk-muted">Gợi ý</span>
+          <div className="border border-imperial-gold/20">
+            {SUGGESTIONS.map((item) => {
+              const selected = prompt === item;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setPrompt(item)}
+                  aria-pressed={selected}
+                  className={`flex min-h-11 w-full cursor-pointer items-center gap-3 border-b border-imperial-gold/15 px-3.5 py-2.5 text-left text-[13px] leading-snug last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-imperial-gold ${
+                    selected
+                      ? 'bg-imperial-gold/10 text-imperial-gold-light'
+                      : 'text-silk-ivory/85 hover:bg-white/[0.04] hover:text-silk-ivory'
+                  }`}
+                >
+                  <span className="min-w-0 flex-1">{item}</span>
+                  {selected && <Check className="h-4 w-4 flex-shrink-0 text-imperial-gold" strokeWidth={2.5} />}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={!prompt.trim() || isGenerating}
-          className={`w-full py-3 rounded-[6px] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
-            prompt.trim() && !isGenerating
-              ? 'bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] hover:brightness-110 shadow-[0_4px_16px_rgba(212,175,55,0.25)]'
-              : 'bg-[#161B26] text-[#EDE5D8]/40 border border-[#C5A059]/25 cursor-not-allowed'
+          disabled={!canCreate || isGenerating}
+          aria-busy={isGenerating}
+          className={`flex min-h-12 w-full items-center justify-center gap-2 border px-4 text-[15px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-imperial-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-lacquer ${
+            canCreate
+              ? `border-imperial-gold bg-imperial-gold text-lacquer shadow-gold-glow hover:bg-imperial-gold-light active:scale-[0.99] ${isGenerating ? 'cursor-wait' : 'cursor-pointer'}`
+              : 'cursor-not-allowed border-imperial-gold/25 bg-transparent text-silk-muted'
           }`}
         >
           {isGenerating ? (
             <>
-              <div className="w-4 h-4 border-2 border-[#0A0D12]/30 border-t-[#0A0D12] rounded-full animate-spin" />
-              <span>AI đang vẽ bối cảnh...</span>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-lacquer/30 border-t-lacquer" />
+              <span>Đang tạo bối cảnh</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4 text-[#0A0D12]" />
-              <span>Sinh Nền Event Mới & Áp dụng</span>
+              <Sparkles className="h-4 w-4" />
+              <span>Tạo và áp dụng</span>
             </>
           )}
         </button>

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AncientCloudDivider, HeritageBookIcon } from './HeritageDecorations';
+import { HeritageBookIcon } from './HeritageDecorations';
 import { X } from 'lucide-react';
 
 export interface HeritageFrameProps {
@@ -8,6 +8,8 @@ export interface HeritageFrameProps {
   subtitle?: string;
   badge?: string;
   icon?: React.ReactNode;
+  /** Skip the bordered plate around the title icon. */
+  bareIcon?: boolean;
   source?: string;
   citationUrl?: string;
   onClose?: () => void;
@@ -16,39 +18,37 @@ export interface HeritageFrameProps {
   contentClassName?: string;
 }
 
+/** Flat bezel outside the outer gold rail — solid only, no gradients. */
+const FRAME_BEZEL = 'p-2 sm:p-2.5';
+/** Tight gutter between outer and inner gold rails. */
+const FRAME_RAIL_GAP = 'p-[2px] sm:p-[3px]';
+
 /**
- * Minimal Slender Imperial Brass Corner Bracket for sharp square double-frame
+ * Corner bracket on the outer rail apex; caps both frame lines.
  */
 export const BrassCorner: React.FC<{ position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }> = ({ position }) => {
-  const getTransform = () => {
-    switch (position) {
-      case 'top-left':
-        return 'top-1.5 left-1.5';
-      case 'top-right':
-        return 'top-1.5 right-1.5 rotate-90';
-      case 'bottom-right':
-        return 'bottom-1.5 right-1.5 rotate-180';
-      case 'bottom-left':
-        return 'bottom-1.5 left-1.5 -rotate-90';
-    }
+  const placement: Record<typeof position, string> = {
+    'top-left': 'top-0 left-0 origin-top-left -translate-x-px -translate-y-px',
+    'top-right': 'top-0 right-0 origin-top-right rotate-90 translate-x-px -translate-y-px',
+    'bottom-right': 'bottom-0 right-0 origin-bottom-right rotate-180 translate-x-px translate-y-px',
+    'bottom-left': 'bottom-0 left-0 origin-bottom-left -rotate-90 -translate-x-px translate-y-px',
   };
 
   return (
-    <div className={`absolute ${getTransform()} pointer-events-none select-none z-20 w-4 h-4 text-imperial-gold/70`}>
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M2 12 V2 H12" strokeLinecap="square" />
-        <rect x="2" y="2" width="5" height="5" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="0.8" />
+    <div
+      className={`absolute ${placement[position]} pointer-events-none z-20 h-5 w-5 text-imperial-gold/85`}
+    >
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M3 15 V3 H15" stroke="currentColor" strokeWidth="1.35" strokeLinecap="square" />
+        <path d="M6 14 V6 H14" stroke="currentColor" strokeWidth="1" strokeLinecap="square" opacity="0.55" />
+        <rect x="3" y="3" width="5" height="5" fill="currentColor" fillOpacity="0.22" stroke="currentColor" strokeWidth="0.75" />
       </svg>
     </div>
   );
 };
 
 /**
- * Reusable Sharp Lacquered Atelier Frame with Authentic Website Ambient Background:
- * - Exact Website Background Texture (gallery-bg.jpg + lacquer vignette)
- * - Imperial Gold & Vermilion Ambient Radial Glows
- * - Sharp double-frame with 4 Brass Corners (NO ROUNDED CARD CORNERS)
- * - Minimalist square close button
+ * Sharp lacquered double-frame: flat outer bezel, decorative fill only inside the gold rails.
  */
 export const HeritageFrame: React.FC<HeritageFrameProps> = React.memo(({
   children,
@@ -56,6 +56,7 @@ export const HeritageFrame: React.FC<HeritageFrameProps> = React.memo(({
   subtitle,
   badge,
   icon,
+  bareIcon = false,
   source,
   citationUrl,
   onClose,
@@ -65,105 +66,109 @@ export const HeritageFrame: React.FC<HeritageFrameProps> = React.memo(({
 }) => {
   return (
     <div
-      className={`relative bg-lacquer text-silk-ivory border border-imperial-gold/40 shadow-[0_35px_110px_rgba(0,0,0,0.98),0_0_60px_rgba(198,155,86,0.12)] font-sans select-none overflow-hidden rounded-none ${className}`}
+      className={`relative flex min-h-0 flex-col overflow-hidden rounded-none bg-[#07090d] font-sans text-silk-ivory shadow-[0_35px_110px_rgba(0,0,0,0.98),0_0_60px_rgba(198,155,86,0.12)] select-none ${FRAME_BEZEL} ${className}`}
     >
-      {/* ======================================================== */}
-      {/* CLEAN LACQUER ATELIER BACKGROUND (NO BACKGROUND IMAGES) */}
-      {/* ======================================================== */}
-      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
-        {/* Pure Lacquer Ambient Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-b from-lacquer via-lacquer/95 to-lacquer" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#0A0D12_95%)]" />
+      {/* Outer rail — gutter between rails stays flat #07090d (no lacquer bleed) */}
+      <div
+        className={`relative flex min-h-0 max-h-full flex-1 flex-col overflow-hidden border border-imperial-gold/40 bg-[#07090d] ${FRAME_RAIL_GAP}`}
+      >
+        <BrassCorner position="top-left" />
+        <BrassCorner position="top-right" />
+        <BrassCorner position="bottom-left" />
+        <BrassCorner position="bottom-right" />
 
-        {/* Subtle Ambient Radial Glows (Imperial Gold & Vermilion) */}
-        <div className="absolute top-12 right-1/4 w-80 h-80 rounded-full bg-imperial-gold/10 filter blur-[100px]" />
-        <div className="absolute bottom-16 left-1/4 w-80 h-80 rounded-full bg-imperial-red/10 filter blur-[100px]" />
-      </div>
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden border border-imperial-gold/25 [contain:paint]">
+          <div className="pointer-events-none absolute inset-0 isolate overflow-hidden bg-lacquer select-none">
+            <div className="absolute inset-0 bg-gradient-to-b from-lacquer via-lacquer/[0.98] to-[#080b10]" />
+          </div>
 
-      {/* Slender Inner Brass Filament Line (Double Frame Effect - Sharp 90deg edges) */}
-      <div className="absolute inset-1.5 sm:inset-2 border border-imperial-gold/20 pointer-events-none z-10" />
-
-      {/* 4 Minimalist Antique Brass Corners */}
-      <BrassCorner position="top-left" />
-      <BrassCorner position="top-right" />
-      <BrassCorner position="bottom-left" />
-      <BrassCorner position="bottom-right" />
-
-      {/* Optional Sharp Square Close Button */}
-      {showCloseButton && onClose && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-30 w-8 h-8 rounded-none bg-lacquer-surface/90 hover:bg-imperial-gold border border-imperial-gold/40 hover:border-imperial-gold-light text-silk-ivory/80 hover:text-lacquer flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg group active:scale-95"
-          title="Đóng (ESC)"
-        >
-          <X className="w-4 h-4 transition-transform group-hover:rotate-90 duration-200" />
-        </button>
-      )}
-
-      {/* Main Inner Content Area */}
-      <div className={`relative z-10 px-5 sm:px-7 pt-5 pb-5 flex flex-col ${contentClassName}`}>
-        {/* Optional Header (Icon + Title + Subtitle + Badge) */}
-        {title && (
-          <div className="flex flex-col mb-2 flex-shrink-0">
-            <div className="flex items-center justify-between gap-3 pr-8">
-              {/* Left: Icon + Title */}
-              <div className="flex items-center gap-2.5 min-w-0">
-                {icon !== undefined ? (
-                  icon
-                ) : (
-                  <HeritageBookIcon className="w-4 h-4 flex-shrink-0 text-imperial-gold" />
-                )}
-                <div className="min-w-0">
-                  <h3 className="font-serif font-bold text-base sm:text-lg text-silk-ivory tracking-wide truncate">
-                    {title}
-                  </h3>
-                  {subtitle && (
-                    <p className="font-sans text-[11px] text-silk-muted mt-0.5 truncate">
-                      {subtitle}
-                    </p>
+          <div
+            className={`relative z-10 flex min-h-0 flex-1 flex-col px-5 py-5 sm:px-7 sm:py-6 ${contentClassName}`}
+          >
+          {title && (
+            <header className="flex flex-shrink-0 flex-col">
+              <div className="flex items-center justify-between gap-3 pr-10">
+                <div className="flex min-w-0 items-center gap-3">
+                  {bareIcon ? (
+                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center text-imperial-gold">
+                      {icon !== undefined ? (
+                        icon
+                      ) : (
+                        <HeritageBookIcon className="h-5 w-5 text-imperial-gold" />
+                      )}
+                    </span>
+                  ) : (
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-imperial-gold/40 bg-imperial-gold/[0.08] text-imperial-gold">
+                      {icon !== undefined ? (
+                        icon
+                      ) : (
+                        <HeritageBookIcon className="h-4 w-4 text-imperial-gold" />
+                      )}
+                    </span>
                   )}
+                  <div className="min-w-0">
+                    <h3 className="truncate font-serif text-[1.15rem] font-semibold leading-tight tracking-wide text-silk-ivory sm:text-xl">
+                      {title}
+                    </h3>
+                    {subtitle && (
+                      <p className="mt-1 max-w-[34rem] truncate font-sans text-[13px] leading-snug text-silk-muted">
+                        {subtitle}
+                      </p>
+                    )}
+                  </div>
                 </div>
+
+                {badge && (
+                  <span className="whitespace-nowrap rounded-none border border-imperial-gold/40 bg-imperial-gold/15 px-2.5 py-0.5 font-sans text-[11px] font-medium text-imperial-gold-light shadow-sm">
+                    {badge}
+                  </span>
+                )}
               </div>
 
-              {/* Right: Badge */}
-              {badge && (
-                <span className="px-2.5 py-0.5 rounded-none bg-imperial-gold/15 border border-imperial-gold/40 text-imperial-gold-light text-[11px] font-sans font-medium whitespace-nowrap shadow-sm">
-                  {badge}
-                </span>
-              )}
+              <div className="mt-4 flex items-center gap-3" aria-hidden>
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-imperial-gold/30 to-imperial-gold/75" />
+                <span className="h-[5px] w-[5px] rotate-45 bg-imperial-gold shadow-[0_0_8px_rgba(229,186,112,0.7)]" />
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent via-imperial-gold/30 to-imperial-gold/75" />
+              </div>
+            </header>
+          )}
+
+          <div className={`min-h-0 flex-1 ${title ? 'pt-4 sm:pt-5' : ''}`}>{children}</div>
+
+          {source && (
+            <div className="mt-3.5 flex flex-shrink-0 items-start gap-2 border-t border-imperial-gold/20 pt-2.5 font-sans text-xs text-imperial-gold">
+              <HeritageBookIcon className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-imperial-gold opacity-90" />
+              <div className="font-sans text-[11px] leading-relaxed">
+                <span className="font-semibold text-imperial-gold">Nguồn: </span>
+                {citationUrl ? (
+                  <a
+                    href={citationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer italic text-silk-ivory/90 underline decoration-imperial-gold/50 underline-offset-2 transition-colors hover:text-imperial-gold-light"
+                  >
+                    {source}
+                  </a>
+                ) : (
+                  <span className="italic text-silk-ivory/90">{source}</span>
+                )}
+              </div>
             </div>
-
-            {/* Ancient Calligraphic Cloud Divider */}
-            <AncientCloudDivider className="my-2.5" />
+          )}
           </div>
-        )}
+        </div>
 
-        {/* Dynamic Body Content */}
-        <div className="flex-1 min-h-0">{children}</div>
-
-        {/* Optional Source Citation Footer */}
-        {source && (
-          <div className="mt-3.5 pt-2.5 border-t border-imperial-gold/20 flex items-start gap-2 text-xs font-sans text-imperial-gold flex-shrink-0">
-            <HeritageBookIcon className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 opacity-90 text-imperial-gold" />
-            <div className="leading-relaxed text-[11px] font-sans">
-              <span className="font-semibold text-imperial-gold">Nguồn: </span>
-              {citationUrl ? (
-                <a
-                  href={citationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="italic text-silk-ivory/90 hover:text-imperial-gold-light underline decoration-imperial-gold/50 underline-offset-2 transition-colors cursor-pointer"
-                >
-                  {source}
-                </a>
-              ) : (
-                <span className="italic text-silk-ivory/90">{source}</span>
-              )}
-            </div>
-          </div>
+        {showCloseButton && onClose && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-2.5 right-2.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-none border border-imperial-gold/40 bg-[#07090d]/95 text-silk-ivory/80 shadow-lg transition-all duration-200 hover:border-imperial-gold-light hover:bg-imperial-gold hover:text-lacquer group active:scale-95 sm:top-3 sm:right-3"
+            title="Đóng (ESC)"
+          >
+            <X className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+          </button>
         )}
       </div>
     </div>
@@ -188,7 +193,6 @@ export const HeritageModal: React.FC<HeritageModalProps> = ({
   contentClassName = '',
   ...props
 }) => {
-  // ESC key listener
   useEffect(() => {
     if (!isOpen || !onClose) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -204,19 +208,19 @@ export const HeritageModal: React.FC<HeritageModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[100] heritage-modal-active flex items-center justify-center p-3 sm:p-6 lg:p-8 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 select-none overflow-y-auto font-sans"
+      className="heritage-modal-active fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/85 p-4 font-sans backdrop-blur-md select-none animate-in fade-in duration-200 sm:p-8 lg:p-10"
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidth} my-auto animate-in zoom-in-95 duration-200`}
+        className={`my-auto w-full ${maxWidth} animate-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         <HeritageFrame
           {...props}
           onClose={onClose}
           showCloseButton={Boolean(onClose)}
-          className={`w-full max-h-[92vh] flex flex-col ${className}`}
-          contentClassName={`overflow-y-auto ${contentClassName}`}
+          className={`flex max-h-[min(92dvh,880px)] w-full flex-col ${className}`}
+          contentClassName={`overflow-hidden ${contentClassName}`}
         />
       </div>
     </div>
