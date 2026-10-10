@@ -23,6 +23,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS profiles_updated_at ON public.profiles;
 CREATE TRIGGER profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
@@ -75,6 +76,7 @@ CREATE TABLE IF NOT EXISTS public.outfits (
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
+DROP TRIGGER IF EXISTS outfits_updated_at ON public.outfits;
 CREATE TRIGGER outfits_updated_at
   BEFORE UPDATE ON public.outfits
   FOR EACH ROW
@@ -97,12 +99,26 @@ CREATE TABLE IF NOT EXISTS public.lookbooks (
   updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
+DROP TRIGGER IF EXISTS lookbooks_updated_at ON public.lookbooks;
 CREATE TRIGGER lookbooks_updated_at
   BEFORE UPDATE ON public.lookbooks
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
 CREATE INDEX IF NOT EXISTS idx_lookbooks_user_id ON public.lookbooks(user_id);
+
+-- 4. BẢNG SCENE BACKGROUNDS (BỐI CẢNH AI NGƯỜI DÙNG LƯU LẠI)
+CREATE TABLE IF NOT EXISTS public.scene_backgrounds (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_scene_backgrounds_user_id ON public.scene_backgrounds(user_id);
+CREATE INDEX IF NOT EXISTS idx_scene_backgrounds_created_at ON public.scene_backgrounds(created_at DESC);
 
 -- ==============================================================================
 -- BẢO MẬT PHÂN QUYỀN HÀNG (ROW LEVEL SECURITY - RLS)
@@ -112,48 +128,84 @@ CREATE INDEX IF NOT EXISTS idx_lookbooks_user_id ON public.lookbooks(user_id);
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.outfits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lookbooks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scene_backgrounds ENABLE ROW LEVEL SECURITY;
 
 -- 1. Policies cho Profiles
+DROP POLICY IF EXISTS "Mọi người có thể xem hồ sơ công khai" ON public.profiles;
 CREATE POLICY "Mọi người có thể xem hồ sơ công khai"
   ON public.profiles FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Người dùng chỉ có thể cập nhật hồ sơ của chính mình" ON public.profiles;
 CREATE POLICY "Người dùng chỉ có thể cập nhật hồ sơ của chính mình"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
 -- 2. Policies cho Outfits
+DROP POLICY IF EXISTS "Người dùng xem outfit của mình hoặc outfit công khai" ON public.outfits;
 CREATE POLICY "Người dùng xem outfit của mình hoặc outfit công khai"
   ON public.outfits FOR SELECT
   USING (auth.uid() = user_id OR is_public = true);
 
+DROP POLICY IF EXISTS "Người dùng có thể tạo outfit cho chính mình" ON public.outfits;
 CREATE POLICY "Người dùng có thể tạo outfit cho chính mình"
   ON public.outfits FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Người dùng có thể cập nhật outfit của chính mình" ON public.outfits;
 CREATE POLICY "Người dùng có thể cập nhật outfit của chính mình"
   ON public.outfits FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Người dùng có thể xóa outfit của chính mình" ON public.outfits;
 CREATE POLICY "Người dùng có thể xóa outfit của chính mình"
   ON public.outfits FOR DELETE
   USING (auth.uid() = user_id);
 
 -- 3. Policies cho Lookbooks
+DROP POLICY IF EXISTS "Xem lookbook của mình hoặc lookbook công khai" ON public.lookbooks;
 CREATE POLICY "Xem lookbook của mình hoặc lookbook công khai"
   ON public.lookbooks FOR SELECT
   USING (auth.uid() = user_id OR is_public = true);
 
+DROP POLICY IF EXISTS "Tạo lookbook cho chính mình" ON public.lookbooks;
 CREATE POLICY "Tạo lookbook cho chính mình"
   ON public.lookbooks FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Cập nhật lookbook của chính mình" ON public.lookbooks;
 CREATE POLICY "Cập nhật lookbook của chính mình"
   ON public.lookbooks FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Xóa lookbook của chính mình" ON public.lookbooks;
 CREATE POLICY "Xóa lookbook của chính mình"
   ON public.lookbooks FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- 4. Policies cho Scene Backgrounds
+DROP POLICY IF EXISTS "Người dùng xem bối cảnh của chính mình" ON public.scene_backgrounds;
+DROP POLICY IF EXISTS "Người dùng tạo bối cảnh cho chính mình" ON public.scene_backgrounds;
+DROP POLICY IF EXISTS "Người dùng xóa bối cảnh của chính mình" ON public.scene_backgrounds;
+DROP POLICY IF EXISTS "scene_backgrounds_select_own" ON public.scene_backgrounds;
+DROP POLICY IF EXISTS "scene_backgrounds_insert_own" ON public.scene_backgrounds;
+DROP POLICY IF EXISTS "scene_backgrounds_delete_own" ON public.scene_backgrounds;
+
+GRANT SELECT, INSERT, DELETE ON public.scene_backgrounds TO authenticated;
+
+CREATE POLICY "scene_backgrounds_select_own"
+  ON public.scene_backgrounds FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "scene_backgrounds_insert_own"
+  ON public.scene_backgrounds FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "scene_backgrounds_delete_own"
+  ON public.scene_backgrounds FOR DELETE
+  TO authenticated
   USING (auth.uid() = user_id);
 
 -- ==============================================================================

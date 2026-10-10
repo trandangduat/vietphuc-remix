@@ -286,6 +286,113 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
   }
 }
 
+const MISSING_API_KEY_MESSAGE =
+  'Chưa có API Key. Vui lòng bấm nút "API Key" ở trên để nhập key miễn phí từ enter.pollinations.ai/keys.';
+
+/**
+ * Shared Pollinations image call used by try-on and custom scene backgrounds.
+ * Optional imageUrls are sent in order after the text prompt.
+ */
+async function requestPollinationsImage(options: {
+  prompt: string;
+  imageUrls?: string[];
+  apiKey?: string;
+  model?: string;
+}): Promise<string> {
+  const apiKey = options.apiKey || getSavedPollinationsApiKey();
+  if (!apiKey) {
+    throw new Error(MISSING_API_KEY_MESSAGE);
+  }
+
+  const model = options.model || DEFAULT_AI_MODEL;
+  const content: Array<Record<string, unknown>> = [{ type: 'text', text: options.prompt }];
+  for (const url of options.imageUrls ?? []) {
+    content.push({ type: 'image_url', image_url: { url } });
+  }
+
+  const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content }],
+    }),
+  });
+
+  if (!response.ok) {
+    let errText = '';
+    try {
+      const errJson = await response.json();
+      errText = errJson.error?.message || response.statusText;
+    } catch {
+      errText = await response.text();
+    }
+
+    if (response.status === 402 || errText.includes('INSUFFICIENT_BALANCE')) {
+      throw new Error(
+        `Mô hình "${model}" yêu cầu số dư Paid Pollen. Bạn có thể đổi sang mô hình "GPT Image 2" hoặc "GPT Image Mini" để tiếp tục.`
+      );
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('API Key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại key.');
+    }
+
+    throw new Error(`AI phản hồi lỗi (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  const assistantContent = data.choices?.[0]?.message?.content;
+  if (!assistantContent) {
+    throw new Error('Mô hình không trả về nội dung hình ảnh.');
+  }
+
+  const urlMatch =
+    assistantContent.match(/https:\/\/media\.pollinations\.ai\/[a-zA-Z0-9_\-]+/i) ||
+    assistantContent.match(/https?:\/\/[^\s\)\"\'\<\>]+/i);
+
+  if (!urlMatch || !urlMatch[0]) {
+    throw new Error(`AI phản hồi dạng văn bản thay vì ảnh: ${assistantContent}`);
+  }
+
+  return fetchImageAsDataUrl(urlMatch[0]);
+}
+
+function toImageError(err: unknown, fallback: string): AITryOnResponse {
+  const message = err instanceof Error ? err.message : fallback;
+  return {
+    imageUrl: '',
+    promptUsed: '',
+    status: 'error',
+    errorMessage: message || fallback,
+  };
+}
+
+/**
+ * Text-to-image scene for the Studio backdrop, using the same model and key as try-on.
+ */
+export async function generateSceneBackground(description: string): Promise<AITryOnResponse> {
+  const prompt =
+    `Photorealistic empty environment photograph for a fashion studio backdrop.\n` +
+    `Scene: ${description.trim()}\n` +
+    `Composition: leave the vertical center open for a standing person. ` +
+    `A clear, flat walkway or courtyard floor runs through the middle of the frame, from the foreground to the distance, with nothing on it. ` +
+    `Tables, chairs, stalls, plants, lanterns, and other objects stay on the left and right sides only. ` +
+    `The lower center, where feet would rest, is empty ground, not furniture.\n` +
+    `No people, no mannequins, no clothing, no text, no logos, no watermark. Natural light, sharp detail, vertical composition.`;
+
+  try {
+    const imageUrl = await requestPollinationsImage({ prompt });
+    return { imageUrl, promptUsed: prompt, status: 'success' };
+  } catch (err) {
+    console.error('Scene background error:', err);
+    return { ...toImageError(err, 'Đã xảy ra lỗi khi tạo bối cảnh.'), promptUsed: prompt };
+  }
+}
+
 /**
  * Dispatches multimodal Virtual Try-On request to Pollinations OpenAI-compatible API
  * using: [Target Face Image] + [Studio Outfit Reference Image] + [Custom Try-On Prompt]
@@ -294,19 +401,17 @@ export async function callAITryOnService(
   request: AITryOnRequest,
   onProgress?: (message: string) => void
 ): Promise<AITryOnResponse> {
-  const apiKey = request.apiKey || getSavedPollinationsApiKey();
-
-  if (!apiKey) {
+  if (!getSavedPollinationsApiKey() && !request.apiKey?.trim()) {
     return {
       imageUrl: '',
       promptUsed: '',
       status: 'error',
-      errorMessage:
-        'Chưa có API Key. Vui lòng bấm nút "API Key" ở trên để nhập key miễn phí từ enter.pollinations.ai/keys.',
+      errorMessage: MISSING_API_KEY_MESSAGE,
     };
   }
 
   const model = request.model || DEFAULT_AI_MODEL;
+  let prompt = '';
 
   try {
     onProgress?.('Đang chuẩn bị ảnh chân dung của bạn...');
@@ -317,87 +422,23 @@ export async function callAITryOnService(
       request.studioPreviewImage || (await renderStudioPreviewCanvas(request.outfit));
     const optimizedStudio = await optimizeImageForAI(studioPreview, 1024);
 
-    const prompt = request.customPrompt || buildMultimodalTryOnPrompt(request.outfit);
+    prompt = request.customPrompt || buildMultimodalTryOnPrompt(request.outfit);
 
     onProgress?.(`Đang gửi dữ liệu tới AI đa phương thức (${model})...`);
-
-    const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: optimizedStudio } }, // Image 1: Mannequin wearing the outfit
-              { type: 'image_url', image_url: { url: optimizedFace } },   // Image 2: Person for try-on
-            ],
-          },
-        ],
-      }),
+    const imageUrl = await requestPollinationsImage({
+      prompt,
+      imageUrls: [optimizedStudio, optimizedFace],
+      apiKey: request.apiKey,
+      model,
     });
 
-    if (!response.ok) {
-      let errText = '';
-      try {
-        const errJson = await response.json();
-        errText = errJson.error?.message || response.statusText;
-      } catch {
-        errText = await response.text();
-      }
-
-      if (response.status === 402 || errText.includes('INSUFFICIENT_BALANCE')) {
-        throw new Error(
-          `Mô hình "${model}" yêu cầu số dư Paid Pollen. Bạn có thể đổi sang mô hình "GPT Image 2" hoặc "GPT Image Mini" để tiếp tục.`
-        );
-      }
-
-      if (response.status === 401 || response.status === 403) {
-        throw new Error('API Key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại key.');
-      }
-
-      throw new Error(`AI phản hồi lỗi (${response.status}): ${errText}`);
-    }
-
-    onProgress?.('AI đang hoàn thiện và render ảnh thử đồ...');
-    const data = await response.json();
-
-    const assistantContent = data.choices?.[0]?.message?.content;
-    if (!assistantContent) {
-      throw new Error('Mô hình không trả về nội dung hình ảnh.');
-    }
-
-    // Extract image URL from response (Markdown ![Image](url) or raw URL)
-    const urlMatch =
-      assistantContent.match(/https:\/\/media\.pollinations\.ai\/[a-zA-Z0-9_\-]+/i) ||
-      assistantContent.match(/https?:\/\/[^\s\)\"\'\<\>]+/i);
-
-    if (!urlMatch || !urlMatch[0]) {
-      throw new Error(`AI phản hồi dạng văn bản thay vì ảnh: ${assistantContent}`);
-    }
-
-    const generatedImageUrl = urlMatch[0];
-
-    onProgress?.('Đang tải ảnh chất lượng cao về máy...');
-    const base64DataUrl = await fetchImageAsDataUrl(generatedImageUrl);
-
     return {
-      imageUrl: base64DataUrl,
+      imageUrl,
       promptUsed: prompt,
       status: 'success',
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Try-On Error:', err);
-    return {
-      imageUrl: '',
-      promptUsed: '',
-      status: 'error',
-      errorMessage: err.message || 'Đã xảy ra lỗi khi tạo ảnh thử đồ.',
-    };
+    return { ...toImageError(err, 'Đã xảy ra lỗi khi tạo ảnh thử đồ.'), promptUsed: prompt };
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Sparkles, Heart, CheckCircle2, ChevronDown, Plus } from 'lucide-react';
+import { Download, Sparkles, Heart, CheckCircle2, ChevronDown } from 'lucide-react';
 import { ActiveOutfitState, EventBackground, GenderSelection } from '../types';
 import {
   getPieceAlignment,
@@ -276,16 +276,16 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-            className="flex items-center gap-2 py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-lg bg-lacquer/85 backdrop-blur-md border border-[#C5A059]/25 text-xs sm:text-sm font-semibold text-silk-ivory hover:border-[#E5BA70]/60 hover:text-[#E5BA70] shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all cursor-pointer"
+            className="flex max-w-[min(78vw,28rem)] items-center gap-2 py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-lg bg-lacquer/85 backdrop-blur-md border border-[#C5A059]/25 text-xs sm:text-sm font-semibold text-silk-ivory hover:border-[#E5BA70]/60 hover:text-[#E5BA70] shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all cursor-pointer"
           >
             <span className="w-2 h-2 rounded-full bg-[#E5BA70] shadow-[0_0_6px_rgba(229,186,112,0.6)] flex-shrink-0" />
-            <span className="max-w-[110px] sm:max-w-[160px] truncate">Bối cảnh: {outfit.event.name}</span>
+            <span className="min-w-0 truncate">Bối cảnh: {outfit.event.name}</span>
             <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C5A059] transition-transform flex-shrink-0 ${isEventDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Dropdown Menu */}
           {isEventDropdownOpen && (
-            <div className="absolute right-0 mt-1.5 w-64 rounded-xl bg-lacquer/95 backdrop-blur-xl border border-[#C5A059]/30 shadow-[0_12px_32px_rgba(0,0,0,0.85)] p-2 z-50 animate-fadeIn font-sans">
+            <div className="absolute right-0 mt-1.5 w-[min(78vw,28rem)] rounded-xl bg-lacquer/95 backdrop-blur-xl border border-[#C5A059]/30 shadow-[0_12px_32px_rgba(0,0,0,0.85)] p-2 z-50 animate-fadeIn font-sans">
               <div className="px-3 py-1.5 text-[11px] font-sans font-bold uppercase tracking-wider text-[#E5BA70] border-b border-white/10 mb-1 flex items-center justify-between">
                 <span>Chọn bối cảnh sự kiện</span>
                 <span className="text-[10px] text-[#EDE5D8]/40 font-mono">({allEvents.length})</span>
@@ -304,7 +304,7 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
                         : 'text-silk-ivory hover:bg-white/[0.06] hover:text-[#E5BA70] border border-transparent'
                     }`}
                   >
-                    <span>{evt.name}</span>
+                    <span className="min-w-0 flex-1 leading-snug">{evt.name}</span>
                     {outfit.event.id === evt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#E5BA70]" />}
                   </button>
                 ))}
@@ -316,10 +316,9 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
                     setIsEventDropdownOpen(false);
                     onOpenCustomEventModal();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold text-[#E5BA70] hover:bg-[#E5BA70]/15 transition-all cursor-pointer border border-[#E5BA70]/25"
+                  className="w-full flex items-center px-3 py-2 rounded-lg text-xs font-bold text-[#E5BA70] hover:bg-[#E5BA70]/15 transition-all cursor-pointer border border-[#E5BA70]/25"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Tạo Event AI mới</span>
+                  <span>Tạo bối cảnh bằng AI</span>
                 </button>
               </div>
             </div>

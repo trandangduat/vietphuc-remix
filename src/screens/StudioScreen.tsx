@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StudioCanvas2D } from '../components/StudioCanvas2D';
 import { PieceSelector } from '../components/PieceSelector';
 import { CulturalMascot } from '../components/CulturalMascot';
 import { AITryOnModal } from '../components/AITryOnModal';
 import { CustomEventModal } from '../components/CustomEventModal';
 import { PIECES, EVENTS, PRESET_OUTFITS } from '../data/catalog';
+import { useAuth } from '../context/AuthContext';
+import { fetchUserScenes } from '../services/sceneService';
 import {
   ActiveOutfitState,
   Piece,
@@ -36,7 +38,22 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
   const [activeCategory, setActiveCategory] = useState<PieceCategory | 'presets'>('top');
   const [isTryOnModalOpen, setIsTryOnModalOpen] = useState(false);
   const [isCustomEventModalOpen, setIsCustomEventModalOpen] = useState(false);
+  const { user } = useAuth();
   const [allEvents, setAllEvents] = useState<EventBackground[]>(EVENTS);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setAllEvents(EVENTS);
+      return;
+    }
+    let cancelled = false;
+    fetchUserScenes(user.id).then((scenes) => {
+      if (!cancelled) setAllEvents([...EVENTS, ...scenes]);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   // Check if outfit has required 3 pieces (Top, Bottom, Footwear)
   const canTryOn = Boolean(
@@ -146,7 +163,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
 
   // Add custom AI generated event
   const handleEventCreated = (newEvent: EventBackground) => {
-    setAllEvents((prev) => [newEvent, ...prev]);
+    setAllEvents((prev) => [...prev, newEvent]);
     setOutfit((prev) => ({ ...prev, event: newEvent }));
   };
 
@@ -224,6 +241,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
       <CustomEventModal
         isOpen={isCustomEventModalOpen}
         onClose={() => setIsCustomEventModalOpen(false)}
+        userId={user?.id}
         onEventCreated={handleEventCreated}
       />
     </div>

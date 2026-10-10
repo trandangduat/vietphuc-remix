@@ -273,6 +273,10 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                 </span>
               </label>
 
+              <p className="text-center text-[13px] leading-relaxed text-silk-muted">
+                Giai đoạn này có thể mất vài phút.
+              </p>
+
               <button
                 type="button"
                 onClick={handleStartGeneration}
