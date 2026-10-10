@@ -117,14 +117,13 @@ export async function renderStudioPreviewCanvas(
     isCover?: boolean;
   }
 
+  // 0. Neutral clean studio backdrop (no event background)
+  ctx.fillStyle = '#E8EAED';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   const layers: LayerItem[] = [];
 
-  // 1. Background
-  if (outfit.event.bgUrl) {
-    layers.push({ url: outfit.event.bgUrl, isCover: true });
-  }
-
-  // 2. Mannequin Base
+  // 1. Mannequin Base
   layers.push({ url: '/assets/mannequins/mannequin-base.png' });
 
   // 3. Bottoms
@@ -178,27 +177,25 @@ export async function renderStudioPreviewCanvas(
 }
 
 /**
- * Builds the multimodal Virtual Try-On prompt that instructs AI to combine:
- * 1. Image 1: The user's portrait/face
- * 2. Image 2: The exact Studio outfit & background composition
+ * Builds the simplified Virtual Try-On prompt:
+ * Image 1 = Mannequin wearing the outfit (no background)
+ * Image 2 = Person's portrait photo
+ * The event setting is described via text.
  */
 export function buildMultimodalTryOnPrompt(outfit: ActiveOutfitState): string {
-  const top = outfit.topPiece?.name || 'Áo tấc truyền thống';
-  const bottom = outfit.bottomPiece?.name || 'Quần lụa truyền thống';
-  const footwear = outfit.footwearPiece?.name || 'Hài nhung';
+  const top = outfit.topPiece?.name || outfit.topVariant?.name || 'Áo tấc truyền thống';
+  const bottom = outfit.bottomPiece?.name || outfit.bottomVariant?.name || 'Quần lụa truyền thống';
+  const footwear = outfit.footwearPiece?.name || outfit.footwearVariant?.name || 'Hài nhung';
   const accessory = outfit.accessoryPiece ? `, phụ kiện: ${outfit.accessoryPiece.name}` : '';
-  const event = outfit.event.name;
+  const eventName = outfit.event.name || 'Không gian cổ kính';
+  const eventDesc = outfit.event.description ? ` - ${outfit.event.description}` : '';
 
   return (
-    `CRITICAL TASK: Photorealistic Virtual Try-On Fashion Portrait.\n\n` +
-    `INPUT REFERENCE IMAGES PROVIDED:\n` +
-    `• IMAGE 1 (Source Person): Reference portrait of the person. You MUST preserve this individual's facial likeness, facial structure, eyes, nose, mouth, skin tone, and expression.\n` +
-    `• IMAGE 2 (Reference Outfit & Scene): The EXACT Vietnamese traditional attire (${top}, ${bottom}, ${footwear}${accessory}) set in ${event}.\n\n` +
-    `GENERATION INSTRUCTIONS:\n` +
-    `1. DRESS the person from Image 1 in the EXACT Vietnamese traditional costume shown in Image 2.\n` +
-    `2. Faithfully reproduce the garment colors, rich silk jacquard weaves, intricate metallic gold embroidery, seam drape, and silhouette from Image 2.\n` +
-    `3. Place the person naturally in the historical environment and ambient lighting shown in Image 2.\n` +
-    `4. Output must be a single high-fashion photographic portrait, 8k resolution, natural skin texture, realistic hands, seamless fabric folds, authentic Vietnamese cultural heritage masterpiece.`
+    `Image 1 is a mannequin wearing a traditional Vietnamese outfit: ${top}, ${bottom}, ${footwear}${accessory}.\n` +
+    `Image 2 is the reference photo of the person for virtual try-on.\n\n` +
+    `Task: Generate a realistic portrait of the person from Image 2 wearing the exact outfit from Image 1.\n` +
+    `Preserve the person's face, facial structure, and likeness.\n` +
+    `Setting/Background: ${eventName}${eventDesc}.`
   );
 }
 
@@ -283,8 +280,8 @@ export async function callAITryOnService(
             role: 'user',
             content: [
               { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: optimizedFace } },
-              { type: 'image_url', image_url: { url: optimizedStudio } },
+              { type: 'image_url', image_url: { url: optimizedStudio } }, // Image 1: Mannequin wearing the outfit
+              { type: 'image_url', image_url: { url: optimizedFace } },   // Image 2: Person for try-on
             ],
           },
         ],
