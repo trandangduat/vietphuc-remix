@@ -191,9 +191,10 @@ export function buildMultimodalTryOnPrompt(outfit: ActiveOutfitState): string {
   const eventDesc = outfit.event.description ? ` - ${outfit.event.description}` : '';
 
   return (
-    `Image 1 is a mannequin wearing a traditional Vietnamese outfit: ${top}, ${bottom}, ${footwear}${accessory}.\n` +
+    `Image 1 is a mannequin wearing a complete traditional Vietnamese outfit: ${top}, ${bottom}, ${footwear}${accessory}.\n` +
     `Image 2 is the reference photo of the person for virtual try-on.\n\n` +
-    `Task: Generate a realistic portrait of the person from Image 2 wearing the exact outfit from Image 1.\n` +
+    `Task: Generate a realistic full-body standing photograph of the person from Image 2 wearing the complete outfit from Image 1.\n` +
+    `Framing: Full-length shot from head to toe showing the complete person standing. The full outfit must be entirely visible from head to feet: the upper robe (${top}), the full-length trousers (${bottom}), and footwear (${footwear}). Do NOT crop at the waist or knees.\n` +
     `Preserve the person's face, facial structure, and likeness.\n` +
     `Setting/Background: ${eventName}${eventDesc}.`
   );
