@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Heart,
   Sparkles,
   Download,
   Trash2,
@@ -142,7 +141,6 @@ interface LookbookScreenProps {
   onLoadOutfitIntoStudio: (outfit: SavedOutfit) => void;
   onDeleteOutfit: (id: string) => void;
   onRenameOutfit: (id: string, newName: string) => void;
-  onToggleFavorite?: (id: string) => void;
   onOpenStudio: () => void;
   showToast?: (msg: string) => void;
 }
@@ -154,7 +152,6 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   onLoadOutfitIntoStudio,
   onDeleteOutfit,
   onRenameOutfit,
-  onToggleFavorite,
   onOpenStudio,
   showToast = () => {},
 }) => {
@@ -802,26 +799,6 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 <Trash2 className="w-4 h-4" />
                 <span>Xóa</span>
               </button>
-
-              {/* Yêu thích */}
-              {onToggleFavorite && (
-                <button
-                  onClick={() => onToggleFavorite(viewingItem.outfit.id)}
-                  className={`flex cursor-pointer items-center gap-1.5 border px-3.5 py-2 text-[13px] font-medium transition-colors ${
-                    viewingItem.outfit.isFavorite
-                      ? 'border-rose-400/40 bg-rose-950/30 text-rose-200'
-                      : 'border-imperial-gold/30 text-silk-muted hover:border-imperial-gold/60 hover:text-silk-ivory'
-                  }`}
-                  title={viewingItem.outfit.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
-                >
-                  <Heart
-                    className={`w-4 h-4 ${
-                      viewingItem.outfit.isFavorite ? 'fill-rose-400' : ''
-                    }`}
-                  />
-                  <span>{viewingItem.outfit.isFavorite ? 'Đã thích' : 'Yêu thích'}</span>
-                </button>
-              )}
 
               {/* Tải ảnh về máy */}
               <button

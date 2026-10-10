@@ -420,7 +420,6 @@ export function App() {
       <Navbar
         currentScreen={currentScreen}
         onNavigate={handleNavigate}
-        sessionCount={isLoggedIn ? savedOutfits.length : 0}
         onOpenAuth={() => setShowAuthModal(true)}
       />
 
@@ -460,20 +459,6 @@ export function App() {
                   prev.map((o) => (o.id === id ? { ...o, name: newName } : o))
                 );
                 updateOutfitInDb(id, { name: newName });
-              }
-            }}
-            onToggleFavorite={(id) => {
-              if (user) {
-                setSavedOutfits((prev) =>
-                  prev.map((o) => {
-                    if (o.id === id) {
-                      const newFav = !o.isFavorite;
-                      updateOutfitInDb(id, { isFavorite: newFav });
-                      return { ...o, isFavorite: newFav };
-                    }
-                    return o;
-                  })
-                );
               }
             }}
             onOpenStudio={() => setCurrentScreen('studio')}

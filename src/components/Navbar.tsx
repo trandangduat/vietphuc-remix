@@ -5,14 +5,12 @@ import { useAuth } from '../context/AuthContext';
 interface NavbarProps {
   currentScreen: 'landing' | 'studio' | 'lookbook';
   onNavigate: (screen: 'landing' | 'studio' | 'lookbook') => void;
-  sessionCount: number;
   onOpenAuth: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentScreen,
   onNavigate,
-  sessionCount,
   onOpenAuth,
 }) => {
   const { user, profile, signOut } = useAuth();
@@ -51,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = [
     { id: 'landing' as const, label: 'Trang chủ', requiresAuth: false },
     { id: 'studio' as const, label: 'Studio phối đồ', requiresAuth: false },
-    { id: 'lookbook' as const, label: 'Bộ sưu tập', count: sessionCount, requiresAuth: true },
+    { id: 'lookbook' as const, label: 'Bộ sưu tập', requiresAuth: true },
   ];
 
   return (
@@ -107,19 +105,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Lock indicator for member-only screens */}
                 {isGated && (
                   <Lock className="w-3 h-3 text-imperial-gold/70 stroke-[2.2]" />
-                )}
-
-                {/* Lookbook Count Badge */}
-                {!isGated && item.count !== undefined && item.count > 0 && (
-                  <span
-                    className={`px-1.5 py-0.2 text-[10px] font-bold rounded-none transition-colors ${
-                      isActive
-                        ? 'bg-imperial-gold text-lacquer shadow-sm'
-                        : 'bg-imperial-gold/15 text-imperial-gold border border-imperial-gold/30'
-                    }`}
-                  >
-                    {item.count}
-                  </span>
                 )}
 
                 {/* Active Golden Hairline Indicator */}

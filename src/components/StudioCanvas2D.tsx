@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Sparkles, Heart, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Download, Sparkles, Bookmark, CheckCircle2, ChevronDown } from 'lucide-react';
 import { ActiveOutfitState, EventBackground, GenderSelection } from '../types';
 import {
   getPieceAlignment,
@@ -366,17 +366,17 @@ export const StudioCanvas2D: React.FC<StudioCanvas2DProps> = ({
             aria-label="Lưu outfit"
             className={`w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-md shadow-[0_6px_20px_rgba(0,0,0,0.65)] ${
               canTryOn
-                ? 'bg-lacquer/85 border border-[#C5A059]/30 hover:border-rose-400 hover:scale-110 active:scale-95 text-rose-300 hover:shadow-[0_0_20px_rgba(244,114,182,0.4)] cursor-pointer'
+                ? 'bg-lacquer/85 border border-[#C5A059]/30 hover:border-[#E5BA70] hover:scale-110 active:scale-95 text-[#E5BA70] hover:shadow-[0_0_20px_rgba(229,186,112,0.4)] cursor-pointer'
                 : 'bg-lacquer/60 border border-white/10 text-white/30 cursor-not-allowed'
             }`}
           >
-            <Heart className={`w-6 h-6 sm:w-7 sm:h-7 transition-transform ${canTryOn ? 'text-rose-300 group-hover:fill-rose-300/40 group-hover:scale-110' : 'text-white/30'}`} />
+            <Bookmark className={`w-6 h-6 sm:w-7 sm:h-7 transition-transform ${canTryOn ? 'text-[#E5BA70] group-hover:fill-[#E5BA70]/40 group-hover:scale-110' : 'text-white/30'}`} />
           </button>
 
           {/* Left-floating Tooltip */}
           <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 flex items-center opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 translate-x-1 group-hover:translate-x-0 z-50">
             <div className="bg-lacquer/95 text-silk-ivory text-xs font-sans font-semibold px-3 py-1.5 rounded-lg border border-[#C5A059]/40 shadow-2xl backdrop-blur-md whitespace-nowrap">
-              {canTryOn ? (isLoggedIn ? 'Lưu vào Lookbook cá nhân' : 'Đăng nhập để lưu outfit') : 'Chọn đủ Áo, Quần, Giày để lưu'}
+              {canTryOn ? (isLoggedIn ? 'Lưu vào bộ sưu tầm cá nhân' : 'Đăng nhập để lưu outfit') : 'Chọn đủ Áo, Quần, Giày để lưu'}
             </div>
             <div className="w-0 h-0 border-y-4 border-y-transparent border-l-4 border-l-[#C5A059]/40" />
           </div>
