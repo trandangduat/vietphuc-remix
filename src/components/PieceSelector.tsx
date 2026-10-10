@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
-import { Info, Sparkles, X, Check, BookOpen, Layers, Ban, Shirt, Columns2, Footprints, Crown, LayoutGrid, Gem } from 'lucide-react';
+import { Piece, PieceCategory, StyleFilter } from '../types';
+import { Info, X, Check, BookOpen, Layers, Ban, Shirt, Columns2, Footprints, Crown, LayoutGrid, Gem } from 'lucide-react';
 import { PieceInfoModal } from './PieceInfoModal';
 
 // Oriental Needle Diamond Separator between Category Tabs
@@ -31,9 +31,8 @@ const FoldingFanIcon: React.FC<{ className?: string }> = ({ className = "w-3.5 h
 
 interface PieceSelectorProps {
   pieces: Piece[];
-  presets: PresetOutfit[];
-  activeCategory: PieceCategory | 'presets';
-  onSelectCategory: (category: PieceCategory | 'presets') => void;
+  activeCategory: PieceCategory;
+  onSelectCategory: (category: PieceCategory) => void;
   styleFilter: StyleFilter;
   onSelectStyle: (style: StyleFilter) => void;
   selectedPieces: {
@@ -46,12 +45,10 @@ interface PieceSelectorProps {
   onSelectVariant?: (piece: Piece, variant: any) => void;
   onClearAccessory: () => void;
   onClearCategory: (category: PieceCategory) => void;
-  onSelectPreset: (preset: PresetOutfit) => void;
 }
 
 export const PieceSelector: React.FC<PieceSelectorProps> = ({
   pieces,
-  presets,
   activeCategory,
   onSelectCategory,
   styleFilter,
@@ -61,7 +58,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   onSelectVariant,
   onClearAccessory,
   onClearCategory,
-  onSelectPreset,
 }) => {
   const [inspectedPiece, setInspectedPiece] = useState<Piece | null>(null);
 
@@ -75,7 +71,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
 
   // Filter pieces by active category & 3 styles (Tất cả, Cổ phong, Hiện đại)
   const filteredPieces = pieces.filter((p) => {
-    if (activeCategory === 'presets') return false;
     if (p.category !== activeCategory) return false;
     if (styleFilter === 'all') return true;
     return p.style === styleFilter;
@@ -121,12 +116,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       label: 'Phụ kiện',
       hasSelection: !!selectedPieces.accessory,
       Icon: Crown,
-    },
-    {
-      id: 'presets' as const,
-      label: 'Gợi ý phối',
-      hasSelection: false,
-      Icon: Sparkles,
     },
   ];
 
@@ -211,8 +200,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
       </div>
 
       {/* Tier 2: Refined Fashion Filter Pills */}
-      {activeCategory !== 'presets' ? (
-        <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
+      <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
           {/* Style Chips Links with Piece Counts & Dedicated Reference Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Pill 1: Tất cả */}
@@ -275,50 +263,10 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
             </button>
           )}
         </div>
-      ) : (
-        <div className="relative z-10 flex items-center justify-between px-3 sm:px-4 py-2.5 flex-shrink-0 text-xs font-sans bg-lacquer-surface/40 backdrop-blur-sm border-b border-[#C5A059]/10">
-          <span className="text-[#EDE5D8]/85 text-xs font-medium flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#E5BA70]" />
-            <span>Bộ phối chuẩn mẫu ({presets.length})</span>
-          </span>
-        </div>
-      )}
 
       {/* Main Piece Selection Area (Gallery Grid) */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">
-        {activeCategory === 'presets' ? (
-          /* Presets List */
-          <div className="grid grid-cols-1 gap-3">
-            {presets.map((preset) => (
-              <div
-                key={preset.id}
-                onClick={() => onSelectPreset(preset)}
-                className="p-4 rounded-none bg-lacquer-surface border-2 border-lacquer-border hover:border-imperial-gold cursor-pointer transition-all group hover:bg-lacquer-hover flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <h4 className="font-sans font-bold text-base text-silk-ivory group-hover:text-imperial-gold transition-colors">
-                      {preset.name}
-                    </h4>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-none bg-imperial-gold/20 text-imperial-gold border border-imperial-gold/40">
-                        {preset.style}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-silk-muted leading-relaxed mb-3">
-                    {preset.description}
-                  </p>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-lacquer-border text-xs text-imperial-gold font-bold uppercase tracking-wider">
-                  <span>Nhấn để nạp vào Studio</span>
-                  <span className="group-hover:translate-x-1.5 transition-transform">→</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* PURE VISUAL GALLERY: Compact uniform tiles with Option 0: Không chọn gì cả */
+          {/* PURE VISUAL GALLERY: Compact uniform tiles with Option 0: Không chọn gì cả */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-5 gap-2.5">
             {/* OPTION 0: Không chọn gì cả (Default selection) */}
             <div
@@ -419,7 +367,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
               );
             })}
           </div>
-        )}
       </div>
 
 

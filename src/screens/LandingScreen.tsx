@@ -3,8 +3,6 @@ import { PresetOutfit, EventBackground } from '../types';
 import { ParallaxScatteredHero } from '../components/landing/ParallaxScatteredHero';
 import { MarqueeTicker } from '../components/landing/MarqueeTicker';
 import { TaglineScrollReveal } from '../components/landing/TaglineScrollReveal';
-import { EditorialRunwaySpreads } from '../components/landing/EditorialRunwaySpreads';
-import { AtelierProofAndFaq } from '../components/landing/AtelierProofAndFaq';
 import { AtelierPortalFooter } from '../components/landing/AtelierPortalFooter';
 import { AmbientSoundController } from '../components/landing/AmbientSoundController';
 
@@ -27,13 +25,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ onOpenStudio }) =>
       {/* 3. TAGLINE SCROLL REVEAL: Kích hoạt tuyên ngôn theo nhịp thở cuộn trang */}
       <TaglineScrollReveal />
 
-      {/* 4. CHAPTER 1: SÀN DIỄN DI SẢN THỰC TẾ (Ngập tràn ảnh bối cảnh và y phục 3D) */}
-      <EditorialRunwaySpreads onOpenStudio={onOpenStudio} />
-
-      {/* 5. CHAPTER 2: BẢO CHỨNG BẢO TÀNG & HỎI ĐÁP TINH GỌN (Museum Vault + Compact FAQ) */}
-      <AtelierProofAndFaq />
-
-      {/* 6. FINALE: CÁNH CỬA ATELIER & HAUTE FOOTER (Grand CTA + Privacy + Newsletter) */}
+      {/* 4. FINALE: CÁNH CỬA ATELIER & HAUTE FOOTER (Grand CTA + Privacy + Newsletter) */}
       <AtelierPortalFooter onOpenStudio={() => onOpenStudio()} />
     </div>
   );

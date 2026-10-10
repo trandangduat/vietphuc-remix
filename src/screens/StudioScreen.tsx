@@ -35,7 +35,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
   onSaveOutfit,
   onSaveTryOnToLookbook,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<PieceCategory | 'presets'>('top');
+  const [activeCategory, setActiveCategory] = useState<PieceCategory>('top');
   const [isTryOnModalOpen, setIsTryOnModalOpen] = useState(false);
   const [isCustomEventModalOpen, setIsCustomEventModalOpen] = useState(false);
   const { user } = useAuth();
@@ -198,9 +198,6 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           pieces={PIECES.filter(
             (p) => p.gender === outfit.mannequinGender || p.gender === 'unisex'
           )}
-          presets={PRESET_OUTFITS.filter(
-            (pr) => pr.gender === outfit.mannequinGender
-          )}
           activeCategory={activeCategory}
           onSelectCategory={setActiveCategory}
           styleFilter={outfit.styleFilter}
@@ -215,7 +212,6 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           onSelectVariant={handleSelectPiece}
           onClearAccessory={handleClearAccessory}
           onClearCategory={handleClearCategory}
-          onSelectPreset={handleSelectPreset}
         />
       </div>
 

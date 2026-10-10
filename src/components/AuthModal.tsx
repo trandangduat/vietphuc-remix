@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, ShieldCheck, CheckCircle2, User } from 'lucide-react';
+import { AlertCircle, User } from 'lucide-react';
 import { HeritageModal } from './heritage/HeritageFrame';
 
 interface AuthModalProps {
@@ -68,17 +68,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     <HeritageModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Đăng Nhập Việt Phục"
-      subtitle="Đồng bộ dữ liệu và lưu trữ bộ sưu tập"
+      title="Đăng nhập"
       icon={<User className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
-      badge="Đăng nhập"
-      maxWidth="max-w-md"
+      bareIcon
+      maxWidth="max-w-sm"
     >
-      <div className="space-y-4 font-sans text-xs">
-        <p className="text-xs text-[#EDE5D8]/85 font-sans leading-relaxed text-center px-1">
-          Lưu trữ vĩnh viễn các tác phẩm phối đồ cổ phong, đồng bộ dữ liệu và xuất bản Lookbook của riêng bạn
-        </p>
-
+      <div className="space-y-4 py-2 font-sans text-xs">
         {/* Error Message */}
         {errorMsg && (
           <div className="p-2.5 rounded-[6px] bg-red-950/80 border border-red-500/60 text-red-200 text-xs flex items-center gap-2 animate-in fade-in duration-200 font-sans">
@@ -88,46 +83,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         {/* Primary Action: Google Sign-in Button */}
-        <div className="pt-1 space-y-2">
-          <button
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-gray-800 font-semibold text-xs rounded-[6px] shadow-md border border-gray-200 hover:shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <GoogleIcon className="w-4 h-4" />
-                <span className="font-sans font-bold text-gray-900 tracking-wide text-xs">
-                  Đăng nhập nhanh với Google
-                </span>
-              </>
-            )}
-          </button>
-          <p className="text-[11px] text-center text-[#EDE5D8]/60 font-sans">
-            An toàn • Nhanh chóng • Không cần mật khẩu
-          </p>
-        </div>
+        <button
+          onClick={handleGoogleLogin}
+          disabled={isLoading}
+          className="w-full py-3 px-4 rounded-none bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-semibold text-xs shadow-[0_2px_10px_rgba(229,186,112,0.35)] hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
+        >
+          {isLoading ? (
+            <div className="w-4 h-4 border-2 border-[#1A140E]/60 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <GoogleIcon className="w-4 h-4" />
+              <span className="font-sans font-bold text-[#1A140E] tracking-wide text-xs">
+                Đăng nhập nhanh với Google
+              </span>
+            </>
+          )}
+        </button>
 
-        {/* Benefits Feature List */}
-        <div className="pt-3 border-t border-[#C5A059]/20 space-y-2 font-sans">
-          <div className="flex items-center gap-2 text-xs text-[#EDE5D8]/90">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Tự do lưu trữ không giới hạn bộ sưu tập outfit</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[#EDE5D8]/90">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Xuất bản Lookbook tạp chí thời trang độ phân giải cao</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[#EDE5D8]/90">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Đồng bộ tự động giữa các thiết bị</span>
-          </div>
-        </div>
-
-        {/* Guest / Footer info */}
-        <div className="pt-3 border-t border-[#C5A059]/15 flex flex-col items-center gap-2 font-sans">
+        {/* Guest */}
+        <div className="flex justify-center">
           <button
             type="button"
             onClick={onClose}
@@ -135,11 +109,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           >
             Tiếp tục trải nghiệm chế độ khách
           </button>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-[#EDE5D8]/50 font-sans">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#C5A059]" />
-            <span>Bảo mật an toàn qua giao thức OAuth Google</span>
-          </div>
         </div>
       </div>
     </HeritageModal>
