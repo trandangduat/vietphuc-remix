@@ -1,20 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
-  Shield,
   Upload,
   Download,
   CheckCircle2,
   X,
   Lock,
-  Shirt,
-  Calendar,
   AlertCircle,
   RefreshCw,
   Key,
   ExternalLink,
   Layers,
-  User,
+  Camera,
+  Settings,
 } from 'lucide-react';
 import { ActiveOutfitState } from '../types';
 import { HeritageModal } from './heritage/HeritageFrame';
@@ -23,7 +21,6 @@ import {
   renderStudioPreviewCanvas,
   getSavedPollinationsApiKey,
   savePollinationsApiKey,
-  DEFAULT_AI_MODEL,
 } from '../services/tryOnService';
 
 interface AITryOnModalProps {
@@ -34,25 +31,6 @@ interface AITryOnModalProps {
   isLoggedIn?: boolean;
   onLoginPrompt?: () => void;
 }
-
-// Sample faces for quick demo
-const SAMPLE_FACES = [
-  {
-    id: 'face-nu-1',
-    label: 'Chân dung Nữ 1',
-    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'face-nam-1',
-    label: 'Chân dung Nam 1',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'face-nu-2',
-    label: 'Chân dung Nữ 2',
-    url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-  },
-];
 
 export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   isOpen,
@@ -72,10 +50,9 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Pollinations API Key & Multimodal Model Selection
+  // Discreet API Key Config (hidden by default)
   const [apiKey, setApiKey] = useState<string>('');
   const [showKeyConfig, setShowKeyConfig] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_AI_MODEL);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -120,7 +97,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   // Trigger Multimodal AI Virtual Try-On
   const handleStartGeneration = async () => {
     if (!selectedPhoto) {
-      setErrorMessage('Vui lòng tải lên hoặc chọn một ảnh khuôn mặt/người mẫu.');
+      setErrorMessage('Vui lòng chọn hoặc tải lên ảnh chân dung của bạn.');
       return;
     }
 
@@ -134,7 +111,6 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
           studioPreviewImage: studioPreview || undefined,
           outfit,
           apiKey: apiKey.trim() || undefined,
-          model: selectedModel,
         },
         (progress) => setGenerationStep(progress)
       );
@@ -164,130 +140,49 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
     setTimeout(() => setDownloadSuccess(false), 3000);
   };
 
+  const topName = outfit.topPiece?.name || outfit.topVariant?.name || 'Áo tấc truyền thống';
+  const eventName = outfit.event.name || 'Không gian cổ kính';
+
   return (
     <HeritageModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Thử Trang Phục AI (AI Try On)"
-      subtitle={`Tạo ảnh người thật mặc cổ phục qua AI • Bối cảnh: ${outfit.event.name}`}
-      icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
-      badge="MULTIMODAL AI TRY-ON"
-      maxWidth="max-w-xl"
+      title="Thử Trang Phục AI"
+      subtitle={`Tái hiện chân dung người thật trong trang phục truyền thống • ${eventName}`}
+      icon={<Sparkles className="w-5 h-5 flex-shrink-0 text-[#C5A059]" />}
+      badge="THỬ ĐỒ AI"
+      maxWidth="max-w-3xl sm:max-w-4xl"
     >
-      <div className="space-y-4 font-sans text-xs">
-        {/* Top Controls: Model Switcher & API Key */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-[#0D111A] border border-[#C5A059]/25 text-xs">
-          <div className="flex items-center gap-2 text-[#EDE5D8]/90">
-            <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span className="text-[11px] leading-tight font-medium">
-              Mô hình: <strong className="text-[#F7F4EE]">{selectedModel.split('/').pop()?.toUpperCase()}</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            {/* Model switcher */}
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-black/60 border border-white/15 text-[#EDE5D8] text-[11px] rounded px-2 py-1 focus:border-[#E5BA70] focus:outline-none cursor-pointer"
-            >
-              <option value="openai/gpt-image-2">GPT Image 2 (Khuyên dùng)</option>
-              <option value="openai/gpt-image-1-mini">GPT Image Mini (Nhanh)</option>
-              <option value="google/gemini-nano-banana-2.1">Nano Banana 2.1 (Google)</option>
-            </select>
-
-            {/* API Key settings button */}
-            <button
-              type="button"
-              onClick={() => setShowKeyConfig(!showKeyConfig)}
-              className={`px-2 py-1 rounded text-[11px] font-medium border flex items-center gap-1 transition-colors cursor-pointer ${
-                apiKey
-                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                  : 'bg-white/5 border-white/10 text-[#EDE5D8]/70 hover:text-white'
-              }`}
-              title="Cấu hình API Key"
-            >
-              <Key className="w-3 h-3" />
-              <span>{apiKey ? 'Key OK' : 'API Key'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* API Key Configuration Dropdown */}
-        {showKeyConfig && (
-          <div className="p-3 rounded-lg bg-[#141A26] border border-[#E5BA70]/40 space-y-2 animate-fadeIn">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#E5BA70] flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5" />
-                <span>Cấu hình API Key (Pollinations)</span>
-              </span>
-              <a
-                href="https://enter.pollinations.ai/keys"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[10px] text-[#E5BA70] hover:underline flex items-center gap-1"
-              >
-                <span>Lấy Key miễn phí</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </div>
-
-            <p className="text-[11px] text-[#EDE5D8]/70 leading-relaxed">
-              Dán API Key (bắt đầu bằng <code>sk_...</code> hoặc <code>pk_...</code>) để kích hoạt mô hình đa phương thức:
-            </p>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="password"
-                placeholder="Dán API Key..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="flex-1 px-2.5 py-1.5 rounded bg-black/60 border border-white/15 text-[#EDE5D8] text-xs focus:border-[#E5BA70] focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleSaveKey}
-                className="px-3 py-1.5 rounded bg-[#E5BA70] text-[#1A140E] font-bold text-xs hover:bg-[#F0D195] transition-colors cursor-pointer"
-              >
-                Lưu
-              </button>
-            </div>
-          </div>
-        )}
-
+      <div className="space-y-5 font-sans text-xs text-[#EDE5D8]">
         {/* Error notification alert */}
         {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-xs text-rose-200 animate-fadeIn space-y-2">
+          <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 animate-fadeIn space-y-2">
             <div className="flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
               <div className="leading-relaxed flex-1">
-                <span className="font-bold text-white">Thông báo từ AI: </span>
+                <span className="font-bold text-white">Thông báo: </span>
                 {errorMessage}
               </div>
               <button
                 onClick={() => setErrorMessage(null)}
                 className="text-rose-400 hover:text-white cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Prompt to add API Key if 401, 402, 403, or quota is returned */}
-            {(errorMessage.includes('402') ||
-              errorMessage.includes('403') ||
+            {(errorMessage.includes('API Key') ||
               errorMessage.includes('401') ||
-              errorMessage.includes('API Key') ||
-              errorMessage.includes('Paid Pollen')) && (
+              errorMessage.includes('403') ||
+              errorMessage.includes('hạn mức')) && (
               <div className="pt-2 border-t border-rose-500/30 flex items-center justify-between">
-                <span className="text-[11px] text-rose-200/90">
-                  Cần kiểm tra API Key hoặc đổi mô hình khác:
-                </span>
+                <span className="text-[11px] text-rose-200/80">Cần kiểm tra hoặc cập nhật API Key?</span>
                 <button
                   onClick={() => setShowKeyConfig(true)}
                   className="px-2.5 py-1 rounded bg-[#E5BA70] hover:bg-[#F0D195] text-[#1A140E] font-bold text-[10px] transition-colors cursor-pointer flex items-center gap-1"
                 >
                   <Key className="w-3 h-3" />
-                  <span>Cấu hình Key</span>
+                  <span>Cài đặt Key</span>
                 </button>
               </div>
             )}
@@ -295,55 +190,23 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
         )}
 
         {!generatedResult ? (
-          <div className="space-y-4">
-            {/* Visual Input Overview: 2 Reference Images Fed to AI */}
-            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/10">
-              {/* Input 1: User Person / Face Image */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  <span>1. Ảnh khuôn mặt / Người mẫu</span>
-                </span>
-                {selectedPhoto ? (
-                  <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-[#E5BA70]/50 bg-black/60 group">
-                    <img
-                      src={selectedPhoto}
-                      alt="Ảnh người mẫu"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      onClick={() => {
-                        setSelectedPhoto(null);
-                        setPhotoName('');
-                      }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/75 hover:bg-rose-900 text-rose-300 transition-colors"
-                      title="Đổi ảnh khác"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                    <div className="absolute bottom-0 inset-x-0 bg-black/75 px-1.5 py-0.5 text-[9px] text-[#EDE5D8] truncate text-center">
-                      {photoName || 'Đã chọn'}
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="aspect-[3/4] rounded-lg border-2 border-dashed border-[#C5A059]/35 hover:border-[#E5BA70] bg-[#0D111A]/60 flex flex-col items-center justify-center p-2 text-center cursor-pointer transition-all"
-                  >
-                    <Upload className="w-5 h-5 text-[#E5BA70] mb-1" />
-                    <span className="text-[10px] font-bold text-[#EDE5D8]">Bấm tải ảnh lên</span>
-                    <span className="text-[9px] text-[#EDE5D8]/50">Khuôn mặt rõ nét</span>
-                  </div>
-                )}
-              </div>
+          /* Step 1: Input Setup */
+          <div className="space-y-5">
+            {/* 2-Column Spacious Visual Comparison Card */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Left Column: Studio Outfit Reference */}
+              <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-[#C5A059]" />
+                    <span>1. Trang phục đã chọn</span>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C5A059]/15 text-[#E5BA70] border border-[#C5A059]/30">
+                    Bản phối Studio
+                  </span>
+                </div>
 
-              {/* Input 2: Studio Preview Reference (Outfit + Background) */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1">
-                  <Layers className="w-3 h-3" />
-                  <span>2. Bản phối Studio thực tế</span>
-                </span>
-                <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-[#C5A059]/40 bg-black/60">
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#C5A059]/40 bg-black/60 shadow-lg flex-1">
                   {studioPreview ? (
                     <img
                       src={studioPreview}
@@ -351,14 +214,79 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[10px] text-[#EDE5D8]/50 animate-pulse">
-                      Đang kết xuất bản phối...
+                    <div className="w-full h-full flex flex-col items-center justify-center text-xs text-[#EDE5D8]/50 animate-pulse gap-2">
+                      <div className="w-6 h-6 border-2 border-[#C5A059]/40 border-t-[#C5A059] rounded-full animate-spin" />
+                      <span>Đang tải trang phục...</span>
                     </div>
                   )}
-                  <div className="absolute bottom-0 inset-x-0 bg-black/80 px-1.5 py-0.5 text-[9px] text-[#E5BA70] truncate text-center">
-                    {outfit.topPiece?.name || 'Áo tấc'} • {outfit.event.name}
+
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-3 text-center">
+                    <div className="text-xs font-bold text-[#F7F4EE] tracking-wide">{topName}</div>
+                    <div className="text-[11px] text-[#E5BA70] mt-0.5">{eventName}</div>
                   </div>
                 </div>
+              </div>
+
+              {/* Right Column: User Portrait Upload */}
+              <div className="flex flex-col rounded-2xl bg-black/40 border border-[#C5A059]/30 p-3.5 sm:p-4 shadow-inner">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-[#C5A059]" />
+                    <span>2. Ảnh chân dung của bạn</span>
+                  </span>
+                  {selectedPhoto && (
+                    <button
+                      onClick={() => {
+                        setSelectedPhoto(null);
+                        setPhotoName('');
+                      }}
+                      className="text-[10px] text-rose-300 hover:text-white underline cursor-pointer"
+                    >
+                      Đổi ảnh
+                    </button>
+                  )}
+                </div>
+
+                {selectedPhoto ? (
+                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden border-2 border-[#E5BA70] bg-black/60 shadow-lg group flex-1">
+                    <img
+                      src={selectedPhoto}
+                      alt="Ảnh chân dung đã chọn"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedPhoto(null);
+                        setPhotoName('');
+                      }}
+                      className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/80 hover:bg-rose-900 text-rose-300 border border-white/20 transition-all cursor-pointer shadow-md"
+                      title="Chọn ảnh khác"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/80 px-2 py-1.5 text-[10px] text-[#EDE5D8] truncate text-center backdrop-blur-sm">
+                      {photoName || 'Ảnh chân dung'}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative aspect-[3/4] rounded-xl border-2 border-dashed border-[#C5A059]/40 hover:border-[#E5BA70] hover:bg-[#E5BA70]/5 bg-[#0D111A]/70 flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all flex-1 group"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-[#E5BA70]/10 border border-[#E5BA70]/30 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-[#E5BA70]/20 transition-transform">
+                      <Upload className="w-6 h-6 text-[#E5BA70]" />
+                    </div>
+                    <span className="text-sm font-bold text-[#F7F4EE] mb-1">
+                      Tải ảnh chân dung lên
+                    </span>
+                    <span className="text-[11px] text-[#EDE5D8]/60 max-w-[200px] leading-relaxed">
+                      Chụp rõ khuôn mặt, ánh sáng tự nhiên để đạt chất lượng tốt nhất
+                    </span>
+                    <span className="mt-3 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-[#E5BA70]">
+                      Hỗ trợ JPG, PNG, WebP
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -371,95 +299,114 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               onChange={handleFileChange}
             />
 
-            {/* Sample Faces Shortcuts */}
-            {!selectedPhoto && (
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#EDE5D8]/50 block mb-1.5">
-                  Hoặc thử nhanh với ảnh chân dung mẫu:
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  {SAMPLE_FACES.map((face) => (
-                    <div
-                      key={face.id}
-                      onClick={() => {
-                        setSelectedPhoto(face.url);
-                        setPhotoName(face.label);
-                        setErrorMessage(null);
-                      }}
-                      className="p-1.5 rounded-lg border border-white/10 bg-[#0D111A]/70 hover:border-[#E5BA70]/50 cursor-pointer transition-all flex items-center gap-2 select-none"
-                    >
-                      <img
-                        src={face.url}
-                        alt={face.label}
-                        className="w-7 h-7 rounded-full object-cover border border-[#E5BA70]/40 flex-shrink-0"
-                      />
-                      <span className="text-[11px] text-[#EDE5D8] font-medium truncate">
-                        {face.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Parental Consent Checkbox */}
-            <div className="p-2.5 rounded-lg bg-[#0D111A] border border-[#C5A059]/25">
-              <label className="flex items-start gap-2.5 cursor-pointer text-xs">
+            <div className="p-3 rounded-xl bg-black/30 border border-[#C5A059]/20">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isMinorConsent}
                   onChange={(e) => setIsMinorConsent(e.target.checked)}
-                  className="mt-0.5 rounded border-[#C5A059]/50 text-[#E5BA70] focus:ring-[#E5BA70] w-4 h-4 cursor-pointer"
+                  className="rounded border-[#C5A059]/50 text-[#E5BA70] focus:ring-[#E5BA70] w-4 h-4 cursor-pointer"
                 />
-                <span className="text-[#EDE5D8]/80 leading-relaxed font-normal text-[11px]">
-                  Đối với người dưới 16 tuổi: Tôi xác nhận đã có sự đồng ý của phụ huynh/người giám hộ khi tải ảnh khuôn mặt lên hệ thống.
+                <span className="text-[#EDE5D8]/75 text-[11px] leading-relaxed">
+                  Đối với người dưới 16 tuổi: Xác nhận đã có sự đồng ý của phụ huynh/người giám hộ.
                 </span>
               </label>
             </div>
 
-            {/* Submit Action Button */}
+            {/* Primary Action Button */}
             <button
               onClick={handleStartGeneration}
               disabled={!selectedPhoto || isGenerating || !isMinorConsent}
-              className={`w-full py-3.5 rounded-lg font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
+              className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-lg cursor-pointer ${
                 selectedPhoto && !isGenerating && isMinorConsent
-                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] hover:brightness-110 shadow-[0_4px_16px_rgba(229,186,112,0.35)]'
+                  ? 'bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] hover:brightness-110 shadow-[0_4px_24px_rgba(229,186,112,0.4)]'
                   : 'bg-[#161B26] text-[#EDE5D8]/40 border border-[#C5A059]/20 cursor-not-allowed'
               }`}
             >
               {isGenerating ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-[#1A140E]/30 border-t-[#1A140E] rounded-full animate-spin" />
-                  <span>{generationStep || 'AI đang xử lý ghép ảnh đa phương thức...'}</span>
+                  <div className="w-5 h-5 border-2 border-[#1A140E]/30 border-t-[#1A140E] rounded-full animate-spin" />
+                  <span>{generationStep || 'AI đang dệt trang phục và tái hiện chân dung...'}</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-[#1A140E] fill-current" />
-                  <span>Tạo ảnh AI Try On (Khuôn mặt + Bộ đồ Studio)</span>
+                  <Sparkles className="w-5 h-5 text-[#1A140E] fill-current" />
+                  <span>Thử Cổ Phục Ngay</span>
                 </>
               )}
             </button>
+
+            {/* Discreet API Key Settings Toggle in Footer */}
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => setShowKeyConfig(!showKeyConfig)}
+                className="text-[10px] text-[#EDE5D8]/40 hover:text-[#E5BA70] flex items-center gap-1 transition-colors cursor-pointer py-1 px-2 rounded hover:bg-white/5"
+              >
+                <Settings className="w-3 h-3" />
+                <span>Cài đặt nâng cao</span>
+              </button>
+            </div>
+
+            {/* Hidden / Discreet API Key Modal */}
+            {showKeyConfig && (
+              <div className="p-3.5 rounded-xl bg-[#141A26] border border-[#E5BA70]/40 space-y-2.5 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#E5BA70] flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5" />
+                    <span>Cấu hình API Key (Pollinations)</span>
+                  </span>
+                  <a
+                    href="https://enter.pollinations.ai/keys"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[10px] text-[#E5BA70] hover:underline flex items-center gap-1"
+                  >
+                    <span>Nhận Key miễn phí</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    placeholder="Dán API Key (sk_...)..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-black/60 border border-white/15 text-[#EDE5D8] text-xs focus:border-[#E5BA70] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveKey}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#E5BA70] text-[#1A140E] font-bold text-xs hover:bg-[#F0D195] transition-colors cursor-pointer"
+                  >
+                    Lưu Key
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* Step 2: Generated Result View */
-          <div className="space-y-4 text-center animate-fadeIn">
-            <div className="relative aspect-[3/4] max-w-[320px] mx-auto rounded-xl overflow-hidden border-2 border-[#E5BA70] shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(229,186,112,0.2)] bg-black/90">
+          <div className="space-y-6 text-center animate-fadeIn py-2">
+            <div className="relative aspect-[3/4] max-w-[360px] sm:max-w-[420px] mx-auto rounded-2xl overflow-hidden border-2 border-[#E5BA70] shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(229,186,112,0.25)] bg-black/95">
               <img
                 src={generatedResult}
                 alt="AI Try-on result"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-black/85 backdrop-blur-md border border-[#E5BA70]/60 text-[10px] font-bold text-[#E5BA70] flex items-center gap-1.5 uppercase tracking-wider shadow">
-                <Sparkles className="w-3 h-3 text-[#E5BA70] fill-current" />
-                <span>AI TRY-ON RESULT</span>
+              <div className="absolute top-3 left-3 px-3 py-1 rounded-md bg-black/85 backdrop-blur-md border border-[#E5BA70]/70 text-[10px] font-bold text-[#E5BA70] flex items-center gap-1.5 uppercase tracking-wider shadow-lg">
+                <Sparkles className="w-3.5 h-3.5 text-[#E5BA70] fill-current" />
+                <span>KẾT QUẢ THỬ CỔ PHỤC</span>
               </div>
             </div>
 
-            <p className="text-xs text-[#EDE5D8]/80 max-w-sm mx-auto leading-relaxed">
-              Bức ảnh thử trang phục hoàn tất! Bạn có thể tải ngay file ảnh về máy hoặc lưu vào Bộ sưu tập Lookbook cá nhân.
+            <p className="text-xs sm:text-sm text-[#EDE5D8]/80 max-w-md mx-auto leading-relaxed">
+              Bức ảnh chân dung cổ phục đã hoàn tất! Bạn có thể tải ngay về máy hoặc lưu vào Bộ sưu tập Lookbook cá nhân.
             </p>
 
-            <div className="grid grid-cols-3 gap-2.5 pt-1">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 max-w-lg mx-auto">
               <button
                 onClick={() => {
                   setGeneratedResult(null);
@@ -467,25 +414,25 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   setPhotoName('');
                   setErrorMessage(null);
                 }}
-                className="py-2.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-bold text-[#EDE5D8] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto py-3 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-bold text-[#EDE5D8] transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className="w-4 h-4" />
                 <span>Thử ảnh khác</span>
               </button>
 
               <button
                 onClick={handleDownload}
-                className="py-2.5 px-3 rounded-lg bg-[#E5BA70]/15 hover:bg-[#E5BA70]/25 border border-[#E5BA70]/60 text-xs font-bold text-[#E5BA70] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-[#E5BA70]/15 hover:bg-[#E5BA70]/25 border border-[#E5BA70]/70 text-xs font-bold text-[#E5BA70] transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
                 {downloadSuccess ? (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-300">Đã tải!</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-300">Đã tải về máy!</span>
                   </>
                 ) : (
                   <>
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Tải ảnh</span>
+                    <Download className="w-4 h-4" />
+                    <span>Tải ảnh về máy</span>
                   </>
                 )}
               </button>
@@ -499,10 +446,10 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
                   onSaveToLookbook(generatedResult);
                   onClose();
                 }}
-                className="py-2.5 px-3 rounded-lg bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold text-xs hover:brightness-110 shadow-[0_4px_16px_rgba(229,186,112,0.3)] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-bold text-xs hover:brightness-110 shadow-[0_4px_16px_rgba(229,186,112,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                {!isLoggedIn && <Lock className="w-3.5 h-3.5" />}
-                <span>{isLoggedIn ? 'Lưu Lookbook' : 'Đăng nhập lưu'}</span>
+                {!isLoggedIn && <Lock className="w-4 h-4" />}
+                <span>{isLoggedIn ? 'Lưu Lookbook' : 'Đăng nhập để lưu'}</span>
               </button>
             </div>
           </div>
