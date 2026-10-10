@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from 'vite';
+import { defineConfig, loadEnv, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -127,8 +127,78 @@ function devPollinationsProxyPlugin(): Plugin {
   };
 }
 
+function devGroqAppraisePlugin(): Plugin {
+  return {
+    name: 'dev-groq-appraise',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/api/appraise', (req, res, next) => {
+        if (req.method !== 'POST') {
+          next();
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+        let size = 0;
+        let rejected = false;
+
+        req.on('data', (chunk: Buffer) => {
+          size += chunk.length;
+          if (size > 2_000_000) {
+            rejected = true;
+            res.statusCode = 413;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'payload_too_large' }));
+            req.destroy();
+            return;
+          }
+          chunks.push(chunk);
+        });
+
+        req.on('end', async () => {
+          if (rejected) return;
+          try {
+            const env = loadEnv(server.config.mode, server.config.envDir, '');
+            const apiKey = (env.GROQ_API_KEY || '').trim();
+            const model = (env.GROQ_MODEL || 'qwen/qwen3.8-27b').trim();
+            if (!apiKey) {
+              res.statusCode = 503;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: 'missing_key' }));
+              return;
+            }
+
+            const payload = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+            payload.model = model;
+            const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify(payload),
+            });
+            const text = await upstream.text();
+            if (!upstream.ok) {
+              console.warn('[appraise]', upstream.status, text.slice(0, 240));
+            }
+            res.statusCode = upstream.status;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(text);
+          } catch (err: any) {
+            if (res.writableEnded) return;
+            res.statusCode = 502;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: err?.message || 'groq_proxy_failed' }));
+          }
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), devSaveAlignmentsPlugin(), devPollinationsProxyPlugin()],
+  plugins: [react(), devSaveAlignmentsPlugin(), devPollinationsProxyPlugin(), devGroqAppraisePlugin()],
   server: {
     port: 3000,
     open: false,

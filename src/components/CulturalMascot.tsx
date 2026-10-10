@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { ActiveOutfitState, AIOverviewResult } from '../types';
 import { evaluateCulturalOutfit } from '../data/culturalEvaluator';
+import { appraiseOutfit, outfitAppraisalSignature } from '../services/appraisalService';
 import { HeritageFrame } from './heritage/HeritageFrame';
 
 function formatAppraisalScore(score: number): string {
@@ -97,6 +98,76 @@ function AppraisalSlip({
   );
 }
 
+function InviteBubble({
+  eventName,
+  onAccept,
+  onHide,
+}: {
+  eventName: string;
+  onAccept: () => void;
+  onHide: () => void;
+}) {
+  return (
+    <div className="font-serif px-2 py-0.5 text-left">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="truncate text-[0.92rem] italic text-[#F7F4EE]/55">{eventName}</p>
+        <button
+          type="button"
+          onClick={onHide}
+          className="shrink-0 border-b border-[#F7F4EE]/35 pb-0.5 text-[0.92rem] text-[#F7F4EE]/80 hover:text-[#F7F4EE] transition-colors cursor-pointer"
+        >
+          Ẩn
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={onAccept}
+        className="mt-2 block w-full cursor-pointer text-left text-[1.05rem] font-medium leading-snug text-[#F7F4EE]"
+      >
+        Bạn có muốn nhận điểm, nhận xét của tôi về outfit này không?
+      </button>
+      <div className="mt-3 flex items-center justify-end">
+        <button
+          type="button"
+          onClick={onAccept}
+          className="px-3 py-1 rounded-[6px] bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-serif font-bold text-xs hover:brightness-110 shadow-[0_2px_10px_rgba(229,186,112,0.35)] transition-all cursor-pointer"
+        >
+          Chấm điểm
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ErrorBubble({ onRetry, onHide }: { onRetry: () => void; onHide: () => void }) {
+  return (
+    <div className="font-serif px-2 py-0.5 text-left">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="truncate text-[0.92rem] italic text-[#F7F4EE]/55">Bé Cáo</p>
+        <button
+          type="button"
+          onClick={onHide}
+          className="shrink-0 border-b border-[#F7F4EE]/35 pb-0.5 text-[0.92rem] text-[#F7F4EE]/80 hover:text-[#F7F4EE] transition-colors cursor-pointer"
+        >
+          Ẩn
+        </button>
+      </div>
+      <p className="mt-2 text-[1.05rem] font-medium leading-snug text-[#F7F4EE]">
+        Mình chưa chấm được outfit này. Bạn bấm để thử lại nhé.
+      </p>
+      <div className="mt-3 flex items-center justify-end">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="px-3 py-1 rounded-[6px] bg-gradient-to-r from-[#F0D195] via-[#E5BA70] to-[#DCAB5E] text-[#1A140E] font-serif font-bold text-xs hover:brightness-110 shadow-[0_2px_10px_rgba(229,186,112,0.35)] transition-all cursor-pointer"
+        >
+          Thử lại
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function MiniScoreBubble({
   analysis,
   eventName,
@@ -153,65 +224,124 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
   isLoggedIn,
 }) => {
   const [isThinking, setIsThinking] = useState(false);
-  const [bubble, setBubble] = useState<null | 'summary' | 'detail'>(null);
+  const [bubble, setBubble] = useState<null | 'invite' | 'summary' | 'detail' | 'error'>(null);
   const [shownAnalysis, setShownAnalysis] = useState<AIOverviewResult | null>(null);
-  const scoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const analysisRef = useRef<AIOverviewResult | null>(null);
+  const outfitRef = useRef(outfit);
+  outfitRef.current = outfit;
+  const scoredSignatureRef = useRef<string | null>(null);
+  const requestIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const appraisalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Current analysis result
-  const analysis = useMemo<AIOverviewResult>(() => evaluateCulturalOutfit(outfit), [
-    outfit.topPiece?.id,
-    outfit.bottomPiece?.id,
-    outfit.footwearPiece?.id,
-    outfit.accessoryPiece?.id,
-    outfit.event.id,
-  ]);
+  const signature = outfitAppraisalSignature(outfit);
+  const prevSignatureRef = useRef<string | null>(null);
 
-  const analysisRef = useRef(analysis);
-  analysisRef.current = analysis;
+  const clearAppraisalTimers = () => {
+    if (appraisalTimerRef.current) clearTimeout(appraisalTimerRef.current);
+    if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+    appraisalTimerRef.current = null;
+    fallbackTimerRef.current = null;
+  };
 
-  // Track previous outfit signature to immediately trigger thinking & scoring
-  const prevSignatureRef = useRef<string>('');
-  const isInitialMount = useRef(true);
+  const revealAppraisal = (result: AIOverviewResult, forSignature: string) => {
+    if (outfitAppraisalSignature(outfitRef.current) !== forSignature) return;
+    analysisRef.current = result;
+    scoredSignatureRef.current = forSignature;
+    setShownAnalysis(result);
+    setIsThinking(false);
+    setBubble('summary');
+  };
 
-  useEffect(() => {
-    const currentSignature = `${outfit.topPiece?.id || 'none'}-${outfit.bottomPiece?.id || 'none'}-${outfit.footwearPiece?.id || 'none'}-${outfit.accessoryPiece?.id || 'none'}-${outfit.event.id}-${outfit.mannequinGender}`;
+  const beginAppraisal = () => {
+    const currentOutfit = outfitRef.current;
+    const forSignature = outfitAppraisalSignature(currentOutfit);
+    const hasAnyPiece = Boolean(
+      currentOutfit.topPiece ||
+        currentOutfit.bottomPiece ||
+        currentOutfit.footwearPiece ||
+        currentOutfit.accessoryPiece
+    );
 
-    const clearTimers = () => {
-      if (scoreTimerRef.current) clearTimeout(scoreTimerRef.current);
-    };
+    abortRef.current?.abort();
+    clearAppraisalTimers();
+    const requestId = ++requestIdRef.current;
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      prevSignatureRef.current = currentSignature;
-      setShownAnalysis(analysisRef.current);
+    if (!hasAnyPiece) {
+      const local = evaluateCulturalOutfit(currentOutfit);
+      analysisRef.current = local;
+      scoredSignatureRef.current = forSignature;
+      setShownAnalysis(local);
+      setIsThinking(false);
+      setBubble('detail');
       return;
     }
 
-    if (prevSignatureRef.current === currentSignature) return;
-    prevSignatureRef.current = currentSignature;
-
-    clearTimers();
-
-    // 1. Immediately switch to Thinking state and close old bubble
+    const controller = new AbortController();
+    abortRef.current = controller;
     setIsThinking(true);
     setBubble(null);
+    const started = Date.now();
 
-    // 2. After ~1.3s thinking duration, switch back to Normal and show mini score bubble
-    scoreTimerRef.current = setTimeout(() => {
+    const showAppraisalError = () => {
+      if (requestIdRef.current !== requestId) return;
+      if (outfitAppraisalSignature(outfitRef.current) !== forSignature) return;
       setIsThinking(false);
-      setShownAnalysis(analysisRef.current);
-      setBubble('summary');
-    }, 1300);
+      setBubble('error');
+    };
 
-    return clearTimers;
-  }, [
-    outfit.topPiece?.id,
-    outfit.bottomPiece?.id,
-    outfit.footwearPiece?.id,
-    outfit.accessoryPiece?.id,
-    outfit.event.id,
-    outfit.mannequinGender,
-  ]);
+    fallbackTimerRef.current = window.setTimeout(showAppraisalError, 20000);
+
+    appraiseOutfit(currentOutfit, controller.signal)
+      .then((result) => {
+        if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+        if (requestIdRef.current !== requestId) return;
+        const wait = Math.max(0, 700 - (Date.now() - started));
+        appraisalTimerRef.current = window.setTimeout(() => {
+          if (requestIdRef.current !== requestId) return;
+          revealAppraisal(result, forSignature);
+        }, wait);
+      })
+      .catch((error: unknown) => {
+        if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+        if (requestIdRef.current !== requestId) return;
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        console.warn('Groq appraisal failed', error);
+        showAppraisalError();
+      });
+  };
+
+  useEffect(() => {
+    const previous = prevSignatureRef.current;
+    prevSignatureRef.current = signature;
+
+    if (previous !== null && previous !== signature) {
+      abortRef.current?.abort();
+      requestIdRef.current += 1;
+      clearAppraisalTimers();
+      setIsThinking(false);
+      analysisRef.current = null;
+      scoredSignatureRef.current = null;
+      setShownAnalysis(null);
+      const currentOutfit = outfitRef.current;
+      const hasAnyPiece = Boolean(
+        currentOutfit.topPiece ||
+          currentOutfit.bottomPiece ||
+          currentOutfit.footwearPiece ||
+          currentOutfit.accessoryPiece
+      );
+      setBubble(hasAnyPiece ? 'invite' : null);
+    }
+
+    return () => {
+      abortRef.current?.abort();
+      requestIdRef.current += 1;
+      clearAppraisalTimers();
+    };
+  }, [signature]);
 
   // Free Dragging Position State (No snap to edge)
   const MASCOT_WIDTH = 96;
@@ -356,16 +486,15 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
     document.addEventListener('touchend', handleTouchEnd);
   };
 
-  // Click mascot directly -> Opens FULL Detailed Appraisal Slip
   const handleClickMascot = () => {
-    if (hasMovedRef.current) return;
-    if (bubble === 'detail') {
-      setBubble(null);
-    } else {
-      setBubble('detail');
+    if (hasMovedRef.current || isThinking) return;
+    const currentSignature = outfitAppraisalSignature(outfitRef.current);
+    if (analysisRef.current && scoredSignatureRef.current === currentSignature) {
       setShownAnalysis(analysisRef.current);
-      setIsThinking(false);
+      setBubble(bubble === 'detail' ? null : 'detail');
+      return;
     }
+    beginAppraisal();
   };
 
   const [viewport, setViewport] = useState(() => ({
@@ -419,8 +548,8 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
   const spaceRight = viewport.width - (position.x + MASCOT_WIDTH) - edge;
   const openLeft = spaceLeft >= spaceRight;
   const beside = Math.max(180, (openLeft ? spaceLeft : spaceRight) - 14);
-  const bubbleWidth = Math.min(bubble === 'detail' ? 680 : 330, beside);
-  const fallbackHeight = bubble === 'detail' ? 300 : 110;
+  const bubbleWidth = Math.min(bubble === 'detail' ? 680 : 340, beside);
+  const fallbackHeight = bubble === 'detail' ? 300 : bubble === 'invite' || bubble === 'error' ? 132 : 110;
   const bubbleHeight = bubbleSize.height || fallbackHeight;
   const minOffset = edge - position.y;
   const maxOffset = viewport.height - edge - bubbleHeight - position.y;
@@ -467,8 +596,8 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
           </div>
         )}
 
-        {/* 2. CHAT BUBBLE (Summary or Full Detail) */}
-        {bubble && shownAnalysis && !isThinking && (
+        {/* 2. CHAT BUBBLE (Invite, Summary, or Full Detail) */}
+        {(bubble === 'invite' || bubble === 'error' || (shownAnalysis && (bubble === 'summary' || bubble === 'detail'))) && !isThinking && (
           <div
             ref={bubbleRef}
             style={{
@@ -499,7 +628,19 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
               }}
             />
 
-            {bubble === 'summary' ? (
+            {bubble === 'invite' ? (
+              <HeritageFrame className="w-full">
+                <InviteBubble
+                  eventName={outfit.event.name}
+                  onAccept={beginAppraisal}
+                  onHide={() => setBubble(null)}
+                />
+              </HeritageFrame>
+            ) : bubble === 'error' ? (
+              <HeritageFrame className="w-full">
+                <ErrorBubble onRetry={beginAppraisal} onHide={() => setBubble(null)} />
+              </HeritageFrame>
+            ) : bubble === 'summary' && shownAnalysis ? (
               /* Mini Summary Chat Bubble in Heritage Frame */
               <HeritageFrame className="w-full">
                 <MiniScoreBubble
@@ -509,7 +650,7 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
                   onHide={() => setBubble(null)}
                 />
               </HeritageFrame>
-            ) : (
+            ) : shownAnalysis ? (
               /* Full Detailed Cultural Appraisal Card */
               <div style={{ maxHeight: viewport.height - edge * 2, overflowY: 'auto' }}>
                 <HeritageFrame className="w-full">
@@ -520,7 +661,7 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
                   />
                 </HeritageFrame>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
@@ -531,7 +672,7 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
           onClick={handleClickMascot}
           style={{ touchAction: 'none' }}
           className="relative cursor-grab active:cursor-grabbing transition-transform duration-200 active:scale-95 group select-none"
-          title="Bé Cáo Cổ Phong - Nhấp để xem Thẩm định Văn hóa"
+          title="Bé Cáo Cổ Phong - Nhấp để chấm điểm outfit"
         >
           <img
             src={

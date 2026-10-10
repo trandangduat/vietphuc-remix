@@ -1,5 +1,6 @@
 import { ActiveOutfitState, AIOverviewResult } from '../types';
 
+/** Nhận xét khi chưa chọn trang phục. */
 export const evaluateCulturalOutfit = (outfit: ActiveOutfitState): AIOverviewResult => {
   const hasAnyPiece = Boolean(outfit.topPiece || outfit.bottomPiece || outfit.footwearPiece || outfit.accessoryPiece);
   

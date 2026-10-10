@@ -228,6 +228,68 @@ export async function renderStudioPreviewCanvas(
   return canvas.toDataURL('image/jpeg', 0.9);
 }
 
+function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  boxW: number,
+  boxH: number
+) {
+  const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight);
+  const drawW = img.naturalWidth * scale;
+  const drawH = img.naturalHeight * scale;
+  ctx.drawImage(img, (boxW - drawW) / 2, (boxH - drawH) / 2, drawW, drawH);
+}
+
+/**
+ * The left Studio preview: event background, mannequin, and the selected pieces.
+ * Smaller JPEG for the scoring request.
+ */
+export async function renderAppraisalPreview(outfit: ActiveOutfitState): Promise<string> {
+  const width = 480;
+  const height = 640;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Không thể khởi tạo ảnh preview');
+
+  ctx.fillStyle = '#141820';
+  ctx.fillRect(0, 0, width, height);
+
+  if (outfit.event.bgUrl) {
+    try {
+      const background = await loadImage(outfit.event.bgUrl);
+      drawImageCover(ctx, background, width, height);
+    } catch (err) {
+      console.warn('Appraisal background skipped', err);
+    }
+  }
+
+  const layers: { url: string; alignment?: PieceAlignment }[] = [
+    { url: mannequinAssetFor(outfit) },
+  ];
+  const bottomPiece = outfit.bottomPiece || outfit.bottomVariant;
+  const footwearPiece = outfit.footwearPiece || outfit.footwearVariant;
+  const topPiece = outfit.topPiece || outfit.topVariant;
+  const accessoryPiece = outfit.accessoryPiece || outfit.accessoryVariant;
+  if (bottomPiece?.assetUrl) layers.push({ url: bottomPiece.assetUrl, alignment: getPieceAlignment(bottomPiece.id) });
+  if (footwearPiece?.assetUrl) layers.push({ url: footwearPiece.assetUrl, alignment: getPieceAlignment(footwearPiece.id) });
+  if (topPiece?.assetUrl) layers.push({ url: topPiece.assetUrl, alignment: getPieceAlignment(topPiece.id) });
+  if (accessoryPiece?.assetUrl) layers.push({ url: accessoryPiece.assetUrl, alignment: getPieceAlignment(accessoryPiece.id) });
+
+  for (const layer of layers) {
+    try {
+      const img = await loadImage(layer.url);
+      if (layer.alignment) drawAlignedLayer(ctx, img, layer.alignment, width, height);
+      else drawImageContained(ctx, img, 0, 0, width, height);
+    } catch (err) {
+      console.warn(`Appraisal layer skipped: ${layer.url}`, err);
+    }
+  }
+
+  return canvas.toDataURL('image/jpeg', 0.72);
+}
+
 /**
  * Builds the simplified Virtual Try-On prompt:
  * Image 1 = Mannequin wearing the outfit (no background)

@@ -524,12 +524,12 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
       {/* 4. MODAL XEM CHI TIẾT: NỀN MỜ, NÚT ĐÓNG BÊN PHẢI, NÚT XÓA Ở DƯỚI, ẢNH AI BÊN PHẢI */}
       {viewingItem && (
         <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex flex-col bg-[#07090d]/90 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setViewingItem(null)}
         >
           {/* THANH HEADER MODAL: TIÊU ĐỀ BÊN TRÁI, NÚT ĐÓNG (X) Ở BÊN PHẢI */}
           <div
-            className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/10 bg-black/40 backdrop-blur-sm"
+            className="flex items-center justify-between border-b border-imperial-gold/25 bg-lacquer/80 px-4 py-3.5 sm:px-6"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Tiêu đề & Đổi tên */}
@@ -541,12 +541,12 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     value={editNameText}
                     onChange={(e) => setEditNameText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveRename()}
-                    className="bg-neutral-900 text-white text-sm px-3 py-1.5 rounded-none border border-[#d8af65] focus:outline-none"
+                    className="border border-imperial-gold/50 bg-black/40 px-3 py-1.5 text-sm text-silk-ivory focus:border-imperial-gold-light focus:outline-none"
                     autoFocus
                   />
                   <button
                     onClick={handleSaveRename}
-                    className="p-1.5 bg-emerald-700/80 hover:bg-emerald-600 text-white cursor-pointer rounded-none"
+                    className="cursor-pointer bg-imperial-gold p-1.5 text-lacquer hover:bg-imperial-gold-light"
                     title="Lưu tên"
                   >
                     <Check className="w-4 h-4" />
@@ -562,15 +562,15 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       setIsEditingName(true);
                       setEditNameText(viewingItem.outfit.name);
                     }}
-                    className="text-silk-muted hover:text-[#d8af65] cursor-pointer p-1 transition-colors"
+                    className="cursor-pointer p-1 text-silk-muted transition-colors hover:text-imperial-gold-light"
                     title="Đổi tên"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <span className="hidden sm:inline-block text-[11px] px-2 py-0.5 bg-white/10 text-silk-muted uppercase tracking-wider font-semibold rounded-none">
+                  <span className="hidden border border-imperial-gold/35 px-2 py-0.5 text-[12px] font-medium text-imperial-gold-light sm:inline-block">
                     {viewingItem.type === 'outfit'
                       ? viewingItem.outfit.event?.name || 'Outfit'
-                      : 'Ảnh Thử Đồ AI'}
+                      : 'Ảnh thử đồ'}
                   </span>
                 </div>
               )}
@@ -579,7 +579,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             {/* NÚT ĐÓNG (X) CHUYỂN SANG BÊN PHẢI */}
             <button
               onClick={() => setViewingItem(null)}
-              className="w-9 h-9 rounded-none border border-white/20 hover:border-[#d8af65] bg-white/5 hover:bg-white/15 text-silk-ivory flex items-center justify-center transition-colors cursor-pointer"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center border border-imperial-gold/40 bg-[#07090d] text-silk-ivory transition-colors hover:border-imperial-gold hover:bg-imperial-gold hover:text-lacquer"
               title="Đóng (Esc)"
             >
               <X className="w-5 h-5" />
@@ -594,7 +594,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             {/* Nút lùi */}
             <button
               onClick={() => handleNavigateItem('prev')}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 sm:w-11 h-10 sm:h-11 rounded-none border border-white/20 bg-black/70 hover:bg-[#d8af65] hover:text-[#241708] text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer shadow-lg active:scale-95"
+              className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center border border-imperial-gold/40 bg-[#07090d]/90 text-silk-ivory shadow-lg backdrop-blur-md transition-colors hover:bg-imperial-gold hover:text-lacquer active:scale-95 sm:left-6 sm:h-11 sm:w-11"
               title="Mục trước"
             >
               <ChevronLeft className="w-6 h-6 stroke-[2]" />
@@ -603,7 +603,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
             {/* Nút tiến */}
             <button
               onClick={() => handleNavigateItem('next')}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 sm:w-11 h-10 sm:h-11 rounded-none border border-white/20 bg-black/70 hover:bg-[#d8af65] hover:text-[#241708] text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer shadow-lg active:scale-95"
+              className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center border border-imperial-gold/40 bg-[#07090d]/90 text-silk-ivory shadow-lg backdrop-blur-md transition-colors hover:bg-imperial-gold hover:text-lacquer active:scale-95 sm:right-6 sm:h-11 sm:w-11"
               title="Mục tiếp"
             >
               <ChevronRight className="w-6 h-6 stroke-[2]" />
@@ -615,20 +615,24 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   - NẾU LÀ ẢNH AI: GIỮ NGUYÊN TỶ LỆ GỐC (TỰ CO GIÃN THEO ẢNH, KHÔNG BỊ CẮT XÉN ĐẦU HAY CHÂN VÁY)
                   - NẾU LÀ OUTFIT: TỶ LỆ 1:1 VUÔNG CHUẨN PREVIEW STUDIO */}
               {viewingItem.type === 'ai-photo' && viewingItem.aiPhotoUrl ? (
-                <div className="h-[52vh] sm:h-[62vh] lg:h-[72vh] w-auto max-w-[90vw] lg:max-w-[calc(100%-320px)] overflow-hidden shadow-2xl bg-black border-2 border-white/15 relative flex items-center justify-center rounded-none flex-shrink-0">
+                <div className="relative flex h-[52vh] w-auto max-w-[90vw] flex-shrink-0 items-center justify-center overflow-hidden border border-imperial-gold/45 bg-[#07090d] p-[3px] shadow-[0_24px_70px_rgba(0,0,0,0.65)] sm:h-[62vh] lg:h-[72vh] lg:max-w-[calc(100%-320px)]">
+                  <div className="flex h-full w-full items-center justify-center border border-imperial-gold/25 bg-black">
                   <img
                     src={viewingItem.aiPhotoUrl}
                     alt={viewingItem.outfit.name}
-                    className="h-full w-auto max-w-full object-contain block"
+                    className="block h-full w-auto max-w-full object-contain"
                   />
+                  </div>
                 </div>
               ) : (
-                <div className="h-[52vh] sm:h-[62vh] lg:h-[70vh] max-w-[70vh] aspect-square overflow-hidden shadow-2xl bg-black border-2 border-white/15 relative flex items-center justify-center rounded-none flex-shrink-0">
+                <div className="relative flex aspect-square h-[52vh] max-w-[70vh] flex-shrink-0 items-center justify-center overflow-hidden border border-imperial-gold/45 bg-[#07090d] p-[3px] shadow-[0_24px_70px_rgba(0,0,0,0.65)] sm:h-[62vh] lg:h-[70vh]">
+                  <div className="h-full w-full border border-imperial-gold/25">
                   <OutfitMannequinComposite
                     outfit={viewingItem.outfit}
-                    className="w-full h-full"
+                    className="h-full w-full"
                     isModal
                   />
+                  </div>
                 </div>
               )}
 
@@ -636,11 +640,11 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   - NẾU LÀ OUTFIT: THÊM CÁC ẢNH ĐÃ TẠO BỞI AI TỪ OUTFIT ĐÓ
                   - NẾU LÀ ẢNH AI: HIỂN THỊ BẢN PHỐI OUTFIT GỐC ĐỂ THAM CHIẾU */}
               {viewingItem.type === 'outfit' ? (
-                <div className="w-full lg:w-72 xl:w-80 h-auto lg:h-[70vh] flex flex-col bg-black/50 border border-white/10 p-4 rounded-none">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-                    <div className="flex items-center gap-2 text-amber-300">
-                      <Sparkles className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-silk-ivory">
+                <div className="flex h-auto w-full flex-col border border-imperial-gold/30 bg-lacquer/90 p-4 lg:h-[70vh] lg:w-72 xl:w-80">
+                  <div className="mb-3 flex items-center justify-between border-b border-imperial-gold/20 pb-3">
+                    <div className="flex items-center gap-2 text-imperial-gold">
+                      <Sparkles className="h-4 w-4" fill="currentColor" strokeWidth={1.25} />
+                      <span className="text-[13px] font-medium text-silk-ivory">
                         Ảnh tạo bởi AI
                       </span>
                     </div>
@@ -652,7 +656,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                           ? [viewingItem.outfit.tryOnImage]
                           : [];
                       return (
-                        <span className="text-xs text-silk-muted font-mono">{aiImgs.length} ảnh</span>
+                        <span className="text-[12px] text-silk-muted">{aiImgs.length} ảnh</span>
                       );
                     })()}
                   </div>
@@ -678,7 +682,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                                   aiPhotoUrl: aiUrl,
                                 });
                               }}
-                              className="group relative aspect-[3/4] w-full bg-black/80 border-2 border-white/15 hover:border-[#d8af65] cursor-pointer overflow-hidden transition-colors rounded-none flex items-center justify-center"
+                              className="group relative flex aspect-[3/4] w-full cursor-pointer items-center justify-center overflow-hidden border border-imperial-gold/25 bg-black/80 transition-colors hover:border-imperial-gold"
                               title="Bấm để xem ảnh lớn"
                             >
                               <img
@@ -686,7 +690,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                                 alt={`${viewingItem.outfit.name} - AI ${idx + 1}`}
                                 className="w-full h-full object-contain"
                               />
-                              <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 border border-white/10 text-[11px] text-amber-300 font-medium flex items-center gap-1">
+                              <div className="absolute bottom-2 left-2 flex items-center gap-1 border border-imperial-gold/30 bg-[#07090d]/90 px-2 py-0.5 text-[11px] font-medium text-imperial-gold-light">
                                 <Sparkles className="w-3 h-3" />
                                 <span>Xem ảnh lớn</span>
                               </div>
@@ -698,7 +702,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
                     return (
                       <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-                        <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center text-amber-300/70 mb-3 rounded-none">
+                        <div className="mb-3 flex h-12 w-12 items-center justify-center border border-imperial-gold/30 text-imperial-gold/80">
                           <Sparkles className="w-6 h-6" />
                         </div>
                         <p className="text-xs sm:text-sm font-semibold text-silk-ivory mb-1">
@@ -713,10 +717,10 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                             setViewingItem(null);
                             onOpenStudio();
                           }}
-                          className="w-full py-2.5 px-3 bg-[#d8af65] hover:bg-[#e8c078] text-[#241708] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 rounded-none"
+                          className="flex w-full cursor-pointer items-center justify-center gap-1.5 bg-imperial-gold px-3 py-2.5 text-[13px] font-semibold text-lacquer transition-colors hover:bg-imperial-gold-light"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
-                          <span>Tạo ảnh với Studio</span>
+                          <span>Tạo ảnh trong Studio</span>
                         </button>
                       </div>
                     );
@@ -724,11 +728,11 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                 </div>
               ) : (
                 /* NẾU ĐANG XEM ẢNH AI: CỘT PHẢI HIỂN THỊ OUTFIT GỐC */
-                <div className="w-full lg:w-72 xl:w-80 h-auto lg:h-[70vh] flex flex-col bg-black/50 border border-white/10 p-4 rounded-none">
-                  <div className="flex items-center gap-2 pb-3 border-b border-white/10 mb-3 text-amber-300">
-                    <BookOpen className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-silk-ivory">
-                      Outfit Phối Đồ Gốc
+                <div className="flex h-auto w-full flex-col border border-imperial-gold/30 bg-lacquer/90 p-4 lg:h-[70vh] lg:w-72 xl:w-80">
+                  <div className="mb-3 flex items-center gap-2 border-b border-imperial-gold/20 pb-3 text-imperial-gold">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-[13px] font-medium text-silk-ivory">
+                      Bản phối gốc
                     </span>
                   </div>
 
@@ -739,15 +743,15 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                         outfit: viewingItem.outfit,
                       });
                     }}
-                    className="relative aspect-square w-full bg-black/70 border-2 border-white/15 hover:border-[#d8af65] cursor-pointer overflow-hidden mb-3 transition-colors rounded-none"
+                    className="relative mb-3 aspect-square w-full cursor-pointer overflow-hidden border border-imperial-gold/25 bg-black/70 transition-colors hover:border-imperial-gold"
                     title="Bấm để xem outfit"
                   >
                     <OutfitMannequinComposite
                       outfit={viewingItem.outfit}
                       className="w-full h-full"
                     />
-                    <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 border border-white/10 text-[11px] text-silk-ivory flex items-center gap-1">
-                      <span>Xem Outfit</span>
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 border border-imperial-gold/30 bg-[#07090d]/90 px-2 py-0.5 text-[11px] text-imperial-gold-light">
+                      <span>Xem bản phối</span>
                     </div>
                   </div>
 
@@ -764,7 +768,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                       setViewingItem(null);
                       onOpenStudio();
                     }}
-                    className="mt-auto w-full py-2 px-3 border border-white/20 hover:border-white/50 bg-white/5 text-silk-ivory text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer rounded-none flex items-center justify-center gap-1.5"
+                    className="mt-auto flex w-full cursor-pointer items-center justify-center gap-1.5 border border-imperial-gold/40 px-3 py-2.5 text-[13px] font-medium text-silk-ivory transition-colors hover:border-imperial-gold hover:text-imperial-gold-light"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Mở trong Studio</span>
@@ -776,7 +780,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
 
           {/* THANH CÔNG CỤ DƯỚI ĐÁY: NÚT XÓA CHUYỂN XUỐNG ĐÂY */}
           <div
-            className="p-3.5 flex items-center justify-center border-t border-white/10 bg-black/40 backdrop-blur-sm"
+            className="flex items-center justify-center border-t border-imperial-gold/25 bg-lacquer/85 px-4 py-3.5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -792,7 +796,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     setViewingItem(null);
                   }
                 }}
-                className="px-3.5 py-2 border border-rose-500/30 hover:border-rose-500 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none"
+                className="flex cursor-pointer items-center gap-1.5 border border-rose-400/35 bg-rose-950/30 px-3.5 py-2 text-[13px] font-medium text-rose-200 transition-colors hover:border-rose-300"
                 title="Xóa khỏi bộ sưu tập"
               >
                 <Trash2 className="w-4 h-4" />
@@ -803,10 +807,10 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
               {onToggleFavorite && (
                 <button
                   onClick={() => onToggleFavorite(viewingItem.outfit.id)}
-                  className={`px-3.5 py-2 border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none ${
+                  className={`flex cursor-pointer items-center gap-1.5 border px-3.5 py-2 text-[13px] font-medium transition-colors ${
                     viewingItem.outfit.isFavorite
-                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                      : 'bg-white/5 hover:bg-white/10 text-silk-muted hover:text-white border-white/15'
+                      ? 'border-rose-400/40 bg-rose-950/30 text-rose-200'
+                      : 'border-imperial-gold/30 text-silk-muted hover:border-imperial-gold/60 hover:text-silk-ivory'
                   }`}
                   title={viewingItem.outfit.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
                 >
@@ -835,7 +839,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                     showToast('Không có liên kết ảnh để tải');
                   }
                 }}
-                className="px-3.5 py-2 border border-white/15 hover:border-white/40 bg-white/5 hover:bg-white/10 text-silk-muted hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none"
+                className="flex cursor-pointer items-center gap-1.5 border border-imperial-gold/30 px-3.5 py-2 text-[13px] font-medium text-silk-muted transition-colors hover:border-imperial-gold/60 hover:text-silk-ivory"
                 title="Tải ảnh về máy"
               >
                 <Download className="w-4 h-4" />
@@ -849,7 +853,7 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
                   setViewingItem(null);
                   onOpenStudio();
                 }}
-                className="px-4 py-2 bg-white hover:bg-neutral-200 text-black font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer rounded-none shadow-sm"
+                className="flex cursor-pointer items-center gap-1.5 bg-imperial-gold px-4 py-2 text-[13px] font-semibold text-lacquer transition-colors hover:bg-imperial-gold-light"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>Mở trong Studio</span>
