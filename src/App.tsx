@@ -11,18 +11,12 @@ import {
   updateOutfitInDb,
   deleteOutfitFromDb,
 } from './services/outfitService';
-import {
-  fetchUserLookbooks,
-  createLookbookInDb,
-  deleteLookbookFromDb,
-} from './services/lookbookService';
 import { PIECES, EVENTS, PRESET_OUTFITS } from './data/catalog';
 import {
   ActiveOutfitState,
   SavedOutfit,
   PresetOutfit,
   EventBackground,
-  Lookbook,
 } from './types';
 import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
@@ -246,9 +240,8 @@ export function App() {
   ];
 
   const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
-  const [lookbooks, setLookbooks] = useState<Lookbook[]>([]);
 
-  // Sync outfits and lookbooks with Supabase when user logs in
+  // Sync outfits with Supabase when user logs in
   useEffect(() => {
     if (user) {
       fetchUserOutfits(user.id).then((dbOutfits) => {
@@ -256,14 +249,8 @@ export function App() {
           setSavedOutfits(dbOutfits);
         }
       });
-      fetchUserLookbooks(user.id).then((dbLookbooks) => {
-        if (dbLookbooks) {
-          setLookbooks(dbLookbooks);
-        }
-      });
     } else {
       setSavedOutfits([]);
-      setLookbooks([]);
     }
   }, [user?.id]);
 
@@ -427,33 +414,6 @@ export function App() {
     }
   }, [currentScreen, isLoggedIn]);
 
-  // Create Lookbook
-  const handleCreateLookbook = async (data: {
-    title: string;
-    subtitle: string;
-    description: string;
-    outfitId: string;
-    coverImageUrl: string;
-    verticalPoem: string;
-    decorStamp: 'blossom' | 'cloud' | 'moon' | 'seal';
-  }) => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    const created = await createLookbookInDb(user.id, data);
-    setLookbooks((prev) => [created, ...prev]);
-    showToast(`✨ Đã tạo Lookbook "${created.title}" thành công!`);
-  };
-
-  // Delete Lookbook
-  const handleDeleteLookbook = async (id: string) => {
-    if (!user) return;
-    await deleteLookbookFromDb(id);
-    setLookbooks((prev) => prev.filter((l) => l.id !== id));
-    showToast('Đã xóa Lookbook');
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-lacquer text-silk-ivory">
       {/* Global Navbar */}
@@ -484,7 +444,6 @@ export function App() {
         {currentScreen === 'lookbook' && isLoggedIn && (
           <LookbookScreen
             outfits={savedOutfits}
-            lookbooks={lookbooks}
             isLoggedIn={isLoggedIn}
             onLoginPrompt={() => setShowAuthModal(true)}
             onLoadOutfitIntoStudio={handleLoadOutfitIntoStudio}
@@ -518,8 +477,6 @@ export function App() {
               }
             }}
             onOpenStudio={() => setCurrentScreen('studio')}
-            onCreateLookbook={handleCreateLookbook}
-            onDeleteLookbook={handleDeleteLookbook}
             showToast={showToast}
           />
         )}

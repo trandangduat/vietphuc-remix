@@ -48,10 +48,16 @@ export const PIECES: Piece[] = [
     zIndex: 4,
     culturalInfo: {
       period: 'Thời Nguyễn (Thế kỷ XIX – XX)',
+      origin: 'Áo tấc (còn gọi là áo thụng, áo rộng) là dạng lễ phục thụng tay truyền thống bắt nguồn và được điển chế hóa dưới triều Nguyễn. Thiết kế đặc trưng với cổ đứng cài năm khuy và tà áo dài thụng chấm đầu gối mang lại vẻ uy nghiêm, mực thước.',
       meaning: 'Lễ phục trang trọng bậc nhất thời Nguyễn, sắc đỏ gấm hoàng triều tượng trưng cho điềm lành, hỷ sự và phẩm cách tôn nghiêm.',
       context: 'Mặc trong các đại lễ, tế giao, lễ cưới gia đình, dâng hương ngày Tết.',
       source: 'Bảo tàng Lịch sử Quốc gia & "Ngàn năm áo mũ" (Trần Quang Đức)',
       citationUrl: 'https://baotanglichsu.vn',
+      sources: [
+        { title: 'Bảo tàng Lịch sử Quốc gia', url: 'https://baotanglichsu.vn' },
+        { title: 'Sách "Ngàn năm áo mũ" - Trần Quang Đức', url: 'https://www.google.com/search?q=Ngan+nam+ao+mu+Tran+Quang+Duc+ao+tac' },
+        { title: 'Cổng Di sản Văn hóa Việt Nam', url: 'http://dsvh.gov.vn' },
+      ],
     },
     defaultVariantId: 'piece-ao-tac-do',
     variants: [
@@ -78,10 +84,16 @@ export const PIECES: Piece[] = [
     zIndex: 4,
     culturalInfo: {
       period: 'Thời Nguyễn (Thế kỷ XIX – XX)',
+      origin: 'Biến thể áo tấc thụng tay năm thân dành cho tầng lớp quan lại, nho sĩ và quý tộc triều đình. Màu xanh chàm (cổ vịt) được nhuộm thủ công từ cây chàm tự nhiên, toát lên phong thái điềm đạm, tao nhã.',
       meaning: 'Sắc xanh chàm cổ vịt trang nhã biểu trưng cho sự đĩnh đạc, tri thức và khí chất thanh cao của giới quý tộc xưa.',
       context: 'Mặc trong các dịp gặp gỡ học giới, dạo xuân nghệ thuật, lễ nghi trang trọng.',
       source: 'Bảo tàng Lịch sử Quốc gia & "Ngàn năm áo mũ" (Trần Quang Đức)',
       citationUrl: 'https://baotanglichsu.vn',
+      sources: [
+        { title: 'Bảo tàng Lịch sử Quốc gia', url: 'https://baotanglichsu.vn' },
+        { title: 'Trung tâm Bảo tồn Di tích Cố đô Huế', url: 'https://hueworldheritage.org.vn' },
+        { title: 'Tư liệu Lễ phục Cung đình Triều Nguyễn', url: 'https://www.google.com/search?q=ao+tac+trieu+nguyen+co+do+hue' },
+      ],
     },
     defaultVariantId: 'piece-ao-tac-xanh',
     variants: [
@@ -110,9 +122,16 @@ export const PIECES: Piece[] = [
     zIndex: 2,
     culturalInfo: {
       period: 'Cổ truyền Việt Nam',
+      origin: 'Quần lụa ống sớ trắng ngà là trang phục lót và mặc cùng không thể thiếu của người Việt trong suốt nhiều thế kỷ. Lụa được dệt từ sợi tơ tằm tự nhiên tại các vùng đất dệt cổ truyền như Vạn Phúc, Nha Xá, Nam Cao.',
       meaning: 'Chất liệu lụa tơ tằm dệt mềm mại, thoáng mát, tạo nên dáng đi khoan thai thướt tha đặc trưng của người Việt xưa.',
       context: 'Phối chuẩn mực nhất bên trong áo dài, áo ngũ thân, áo tấc.',
       source: 'Bảo tàng Phụ nữ Nam Bộ & Nghiên cứu Trang phục Cổ Việt',
+      citationUrl: 'https://baotangphunu.com',
+      sources: [
+        { title: 'Bảo tàng Phụ nữ Nam Bộ', url: 'https://baotangphunu.com' },
+        { title: 'Làng nghề dệt lụa Vạn Phúc (Hà Đông)', url: 'https://www.google.com/search?q=lang+nghe+lua+van+phuc+ha+dong' },
+        { title: 'Nghiên cứu Trang phục Cổ truyền Dân tộc', url: 'https://baotanglichsu.vn' },
+      ],
     },
     defaultVariantId: 'piece-quan-lua',
     variants: [
@@ -139,9 +158,15 @@ export const PIECES: Piece[] = [
     zIndex: 2,
     culturalInfo: {
       period: 'Đương đại Gen Z / Remix',
+      origin: 'Dáng quần âu ống suông xếp ly (pleated trousers) lấy cảm hứng từ trang phục may đo cổ điển thế kỷ XX kết hợp cùng tinh thần đường phố hiện đại. Đây là món đồ chủ đạo trong làn sóng "Heritage Remix" của giới trẻ Việt Nam.',
       meaning: 'Dáng quần âu ống rộng xếp ly đứng phom mang phong cách menswear hiện đại, tạo nét tương phản sắc sảo khi phối cùng cổ phục.',
       context: 'Hoàn hảo cho sự kiện trường học, dạo phố Tết, phong cách Cổ phong Remix năng động.',
       source: 'Xu hướng thời trang đương đại Gen Z Việt Nam',
+      citationUrl: 'https://bazaarvietnam.vn',
+      sources: [
+        { title: "Tạp chí Harper's Bazaar Việt Nam - Trào lưu Cổ phục Remix", url: 'https://bazaarvietnam.vn' },
+        { title: 'Cộng đồng Việt Phục & Giới trẻ Đương đại', url: 'https://www.google.com/search?q=trao+luu+viet+phuc+remix+gioi+tre' },
+      ],
     },
     defaultVariantId: 'piece-quan-tay',
     variants: [
@@ -170,9 +195,15 @@ export const PIECES: Piece[] = [
     zIndex: 3,
     culturalInfo: {
       period: 'Thời Nguyễn / Cung đình Huế',
+      origin: 'Hài thêu hoa sen mũi cong là phụ kiện ngự dụng quý phái chốn hoàng cung và giới danh gia vọng tộc triều Nguyễn. Được thêu chỉ kim tuyến thủ công trên nền vải nhung the đỏ thắm.',
       meaning: 'Hài mũi cong bọc nhung cao cấp thêu họa tiết hoa sen chỉ kim tuyến, biểu trưng cho sự thanh cao, thuần khiết.',
       context: 'Đi cùng lễ phục cổ phong, không gian đền chùa, lễ gia tiên.',
       source: 'Trung tâm Bảo tồn Di tích Cố đô Huế',
+      citationUrl: 'https://hueworldheritage.org.vn',
+      sources: [
+        { title: 'Trung tâm Bảo tồn Di tích Cố đô Huế', url: 'https://hueworldheritage.org.vn' },
+        { title: 'Bảo tàng Cổ vật Cung đình Huế', url: 'https://hueworldheritage.org.vn/vi-vn/Bao-tang-Co-vat-Cung-dinh-Hue' },
+      ],
     },
     defaultVariantId: 'piece-hai-nhung',
     variants: [
@@ -199,9 +230,15 @@ export const PIECES: Piece[] = [
     zIndex: 3,
     culturalInfo: {
       period: 'Thời trang đương đại',
+      origin: 'Giày Penny Loafer bằng da thật có xuất xứ từ giới sinh viên học viện Ivy League thế kỷ XX, nhanh chóng lan tỏa toàn cầu như biểu tượng của phong cách trí thức thanh nhã, dễ ứng dụng.',
       meaning: 'Giày lười da cổ điển đem lại vẻ trí thức thanh lịch, đĩnh đạc nhưng vẫn phóng khoáng.',
       context: 'Dự dạ hội trường học, prom, triển lãm, phối ăn ý với áo tấc và quần tây.',
       source: 'Cẩm nang phối đồ Vintage & Heritage Remix',
+      citationUrl: 'https://www.elleman.vn',
+      sources: [
+        { title: 'Tạp chí Phái đẹp & Phong cách ELLE Man', url: 'https://www.elleman.vn' },
+        { title: 'Cẩm nang Vintage Tailoring & Heritage Remix', url: 'https://www.google.com/search?q=penny+loafer+vintage+heritage+style' },
+      ],
     },
     defaultVariantId: 'piece-loafer',
     variants: [
@@ -230,9 +267,16 @@ export const PIECES: Piece[] = [
     zIndex: 5,
     culturalInfo: {
       period: 'Di sản văn hóa dân tộc',
+      origin: 'Nón lá truyền thống xuất hiện từ ngàn xưa, gắn liền với nền văn minh lúa nước sông Hồng. Nón được chằm thủ công từ lá cọ khô, nan tre và quai lụa tơ tằm mềm mại tại các làng nghề danh tiếng như làng Chuông (Hà Nội).',
       meaning: 'Biểu tượng hồn cốt của đất nước hình chữ S, che nắng che mưa và tôn vinh nét e ấp, dịu dàng của người mặc.',
       context: 'Dạo phố hoa Tết, du xuân, chụp ảnh lưu niệm ngoại cảnh.',
       source: 'Làng nghề nón Chuông & Di sản phi vật thể quốc gia',
+      citationUrl: 'http://dsvh.gov.vn',
+      sources: [
+        { title: 'Cục Di sản Văn hóa - Làng nón Chuông', url: 'http://dsvh.gov.vn' },
+        { title: 'Bảo tàng Phụ nữ Việt Nam', url: 'https://baotangphunu.org.vn' },
+        { title: 'Cổng Thông tin Du lịch Hà Nội', url: 'https://dulichhanoi.gov.vn' },
+      ],
     },
     defaultVariantId: 'piece-non-la',
     variants: [

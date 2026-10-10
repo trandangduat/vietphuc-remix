@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Piece, PieceCategory, StyleFilter, PresetOutfit } from '../types';
-import { Sparkles, X, Check, BookOpen, Layers, Ban, Shirt, Columns2, Footprints, Crown, LayoutGrid, Gem } from 'lucide-react';
-import { HeritageCulturalCard } from './heritage/HeritageCulturalCard';
+import { Info, Sparkles, X, Check, BookOpen, Layers, Ban, Shirt, Columns2, Footprints, Crown, LayoutGrid, Gem } from 'lucide-react';
+import { PieceInfoModal } from './PieceInfoModal';
 
 // Oriental Needle Diamond Separator between Category Tabs
 const TabSeparator: React.FC = () => (
@@ -63,55 +63,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
   onClearCategory,
   onSelectPreset,
 }) => {
-  const [hoveredPiece, setHoveredPiece] = useState<Piece | null>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const posRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
-  // Helper to calculate bounded coordinates within viewport
-  const calculateTooltipCoords = (clientX: number, clientY: number) => {
-    const offset = 18;
-    const tooltipWidth = 350;
-    const tooltipHeight = 360;
-
-    let x = clientX + offset;
-    let y = clientY + offset;
-
-    // Boundary flip: right edge
-    if (x + tooltipWidth > window.innerWidth - 12) {
-      x = clientX - tooltipWidth - 12;
-    }
-    if (x < 10) x = 10;
-
-    // Boundary flip: bottom edge
-    if (y + tooltipHeight > window.innerHeight - 12) {
-      y = clientY - tooltipHeight - 12;
-    }
-    if (y < 10) y = 10;
-
-    return { x, y };
-  };
-
-  const handleMouseEnterPiece = useCallback((piece: Piece, e: React.MouseEvent<HTMLDivElement>) => {
-    const { x, y } = calculateTooltipCoords(e.clientX, e.clientY);
-    posRef.current = { x, y };
-
-    if (tooltipRef.current) {
-      tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    }
-    setHoveredPiece(piece);
-  }, []);
-
-  // Instant zero-delay 1:1 cursor tracking via direct GPU transform
-  const handleMouseMovePiece = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!tooltipRef.current) return;
-    const { x, y } = calculateTooltipCoords(e.clientX, e.clientY);
-    posRef.current = { x, y };
-    tooltipRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  }, []);
-
-  const handleMouseLeavePiece = useCallback(() => {
-    setHoveredPiece(null);
-  }, []);
+  const [inspectedPiece, setInspectedPiece] = useState<Piece | null>(null);
 
   const handleSelect = (piece: Piece) => {
     if (onSelectPiece) {
@@ -178,38 +130,7 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
     },
   ];
 
-  const outfitSlots = [
-    {
-      category: 'top' as const,
-      label: 'Áo',
-      icon: Shirt,
-      piece: selectedPieces.top,
-      emptyText: 'Chưa chọn áo',
-    },
-    {
-      category: 'bottom' as const,
-      label: 'Quần / Váy',
-      icon: Columns2,
-      piece: selectedPieces.bottom,
-      emptyText: 'Chưa chọn quần',
-    },
-    {
-      category: 'footwear' as const,
-      label: 'Giày / Hài',
-      icon: Footprints,
-      piece: selectedPieces.footwear,
-      emptyText: 'Chưa chọn giày',
-    },
-    {
-      category: 'accessory' as const,
-      label: 'Phụ kiện',
-      icon: Crown,
-      piece: selectedPieces.accessory,
-      emptyText: 'Chưa chọn phụ kiện',
-    },
-  ];
 
-  const activePiecesCount = outfitSlots.filter((s) => !!s.piece).length;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-lacquer-card overflow-hidden font-sans relative">
@@ -456,9 +377,6 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                       handleSelect(piece);
                     }
                   }}
-                  onMouseEnter={(e) => handleMouseEnterPiece(piece, e)}
-                  onMouseMove={handleMouseMovePiece}
-                  onMouseLeave={handleMouseLeavePiece}
                   className={`aspect-square w-full rounded-none border-2 transition-colors duration-100 flex items-center justify-center p-2 relative cursor-pointer group select-none ${
                     isPieceActive
                       ? 'bg-lacquer-surface border-imperial-gold shadow-lg ring-1 ring-imperial-gold/50'
@@ -472,6 +390,20 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
                       <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   )}
+
+                  {/* Nút Thông tin (Hiện khi di chuột vào piece) */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInspectedPiece(piece);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-150 absolute top-1.5 left-1.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/90 hover:bg-[#C5A059] text-[#EDE5D8] hover:text-[#0A0D12] border border-[#C5A059]/70 hover:border-[#F0D195] shadow-[0_2px_8px_rgba(0,0,0,0.85)] text-[10px] sm:text-[11px] font-sans font-semibold tracking-wide backdrop-blur-md cursor-pointer active:scale-95"
+                    title={`Xem thông tin nguồn gốc & ý nghĩa của ${piece.name}`}
+                  >
+                    <Info className="w-3 h-3 flex-shrink-0" />
+                    <span>Thông tin</span>
+                  </button>
 
                   {/* Clean Visual Preview (No text inside card) */}
                   <img
@@ -488,141 +420,23 @@ export const PieceSelector: React.FC<PieceSelectorProps> = ({
         )}
       </div>
 
-      {/* Dock: Thanh tổng hợp phục trang đang mặc (Sleek Clean Atelier Design) */}
-      <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-[#C5A059]/20 bg-lacquer-surface/90 backdrop-blur-md flex-shrink-0 relative z-10">
-        {/* Header: Clean minimal title with count */}
-        <div className="flex items-center justify-between mb-2 px-0.5">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E5BA70]" />
-            <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#E5BA70]">
-              Trang phục đang mặc
-            </span>
-            <span className="text-[11px] font-mono text-[#EDE5D8]/45">
-              ({activePiecesCount}/4)
-            </span>
-          </div>
 
-          {activePiecesCount > 0 && (
-            <button
-              onClick={() => {
-                onClearCategory('top');
-                onClearCategory('bottom');
-                onClearCategory('footwear');
-                onClearAccessory();
-              }}
-              className="text-[11px] font-sans text-[#EDE5D8]/45 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
-              title="Bỏ chọn tất cả trang phục đang mặc"
-            >
-              <span>Đặt lại</span>
-            </button>
-          )}
-        </div>
 
-        {/* 4 Sleek Slots: [ Áo ] [ Quần / Váy ] [ Giày / Hài ] [ Phụ kiện ] */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
-          {outfitSlots.map((slot) => {
-            const isSlotCategoryActive = activeCategory === slot.category;
-            const IconComp = slot.icon;
-            const piece = slot.piece;
-
-            return (
-              <div
-                key={slot.category}
-                onClick={() => onSelectCategory(slot.category)}
-                className={`group relative rounded-md px-2.5 py-1.5 transition-all duration-150 cursor-pointer border flex items-center gap-2.5 select-none h-13 ${
-                  piece
-                    ? isSlotCategoryActive
-                      ? 'bg-lacquer-card/90 border-[#E5BA70] shadow-[0_2px_12px_rgba(229,186,112,0.15)] ring-1 ring-[#E5BA70]/30'
-                      : 'bg-lacquer-card/60 border-white/10 hover:border-[#E5BA70]/50 hover:bg-lacquer-card/80'
-                    : isSlotCategoryActive
-                      ? 'bg-white/[0.02] border-[#E5BA70]/50 border-dashed'
-                      : 'bg-white/[0.01] border-white/10 border-dashed hover:border-white/20 hover:bg-white/[0.03]'
-                }`}
-              >
-                {/* Left: Thumbnail or Category Icon */}
-                <div
-                  className={`w-9 h-9 rounded flex-shrink-0 flex items-center justify-center p-1 transition-colors ${
-                    piece
-                      ? 'bg-black/50 border border-white/10'
-                      : isSlotCategoryActive
-                      ? 'bg-[#E5BA70]/10 border border-[#E5BA70]/30 text-[#E5BA70]'
-                      : 'bg-white/[0.03] border border-white/10 text-[#EDE5D8]/40'
-                  }`}
-                >
-                  {piece ? (
-                    <img
-                      src={piece.thumbnailUrl || piece.assetUrl}
-                      alt={piece.name}
-                      className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
-                    />
-                  ) : (
-                    <IconComp className="w-4 h-4 opacity-70" />
-                  )}
-                </div>
-
-                {/* Middle: Category Label & Piece Name */}
-                <div className="min-w-0 flex-1">
-                  <span
-                    className={`text-[10px] font-sans font-bold uppercase tracking-wider block leading-tight ${
-                      piece
-                        ? isSlotCategoryActive
-                          ? 'text-[#E5BA70]'
-                          : 'text-[#C5A059]'
-                        : isSlotCategoryActive
-                        ? 'text-[#E5BA70]/70'
-                        : 'text-[#EDE5D8]/40'
-                    }`}
-                  >
-                    {slot.label}
-                  </span>
-                  <p
-                    className={`text-xs font-sans truncate mt-0.5 leading-tight ${
-                      piece
-                        ? 'text-silk-ivory font-medium group-hover:text-[#F0D195] transition-colors'
-                        : 'text-[#EDE5D8]/35 font-normal italic'
-                    }`}
-                    title={piece ? piece.name : slot.emptyText}
-                  >
-                    {piece ? piece.name : `+ Chọn ${slot.label.toLowerCase()}`}
-                  </p>
-                </div>
-
-                {/* Right: Quick Remove Button (only when piece is equipped) */}
-                {piece && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (slot.category === 'accessory') {
-                        onClearAccessory();
-                      } else {
-                        onClearCategory(slot.category);
-                      }
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-rose-950/70 text-rose-300 hover:text-white transition-opacity flex-shrink-0 cursor-pointer"
-                    title={`Tháo ${piece.name}`}
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {hoveredPiece && (
-        <div
-          ref={tooltipRef}
-          style={{
-            transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`,
-            top: 0,
-            left: 0,
-            willChange: 'transform',
-          }}
-          className="fixed z-50 pointer-events-none max-w-sm w-[350px]"
-        >
-          <HeritageCulturalCard piece={hoveredPiece} />
-        </div>
-      )}
+      {/* Popup Modal chi tiết thông tin piece, nguồn gốc, ý nghĩa & nguồn tham khảo */}
+      <PieceInfoModal
+        piece={inspectedPiece}
+        isOpen={Boolean(inspectedPiece)}
+        onClose={() => setInspectedPiece(null)}
+        onSelectPiece={handleSelect}
+        isEquipped={Boolean(
+          inspectedPiece &&
+            (currentActivePiece?.id === inspectedPiece.id ||
+              selectedPieces.top?.id === inspectedPiece.id ||
+              selectedPieces.bottom?.id === inspectedPiece.id ||
+              selectedPieces.footwear?.id === inspectedPiece.id ||
+              selectedPieces.accessory?.id === inspectedPiece.id)
+        )}
+      />
     </div>
   );
 };

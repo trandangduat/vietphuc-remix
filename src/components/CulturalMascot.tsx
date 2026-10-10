@@ -381,6 +381,23 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // Track if any full-screen modal or dialog is currently open in the DOM
+  const [isModalActive, setIsModalActive] = useState(false);
+
+  useEffect(() => {
+    const checkModal = () => {
+      const activeModal = document.querySelector(
+        '[role="dialog"], [aria-modal="true"], .heritage-modal-active, .fixed.inset-0.z-\\[100\\], .fixed.inset-0.z-50'
+      );
+      setIsModalActive(Boolean(activeModal));
+    };
+
+    checkModal();
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   useLayoutEffect(() => {
     const node = bubbleRef.current;
     if (!node) return;
@@ -418,13 +435,17 @@ export const CulturalMascot: React.FC<CulturalMascotProps> = ({
 
   return (
     <>
-      {/* FLOATING DRAGGABLE MASCOT CONTAINER */}
+      {/* FLOATING DRAGGABLE MASCOT CONTAINER (Submerged under modals) */}
       <div
         style={{
           position: 'fixed',
           left: `${position.x}px`,
           top: `${position.y}px`,
-          zIndex: 60,
+          zIndex: isModalActive ? -1 : 35,
+          opacity: isModalActive ? 0 : 1,
+          visibility: isModalActive ? 'hidden' : 'visible',
+          pointerEvents: isModalActive ? 'none' : 'auto',
+          transition: 'opacity 0.2s ease, visibility 0.2s ease',
         }}
         className="select-none font-sans"
       >

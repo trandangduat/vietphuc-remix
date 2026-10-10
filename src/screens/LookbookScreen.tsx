@@ -1,71 +1,24 @@
-import React, { useState, useRef } from 'react';
-import { SavedOutfit, Piece, Lookbook } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { SavedOutfit, Piece } from '../types';
 import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Heart,
   Sparkles,
-  ExternalLink,
+  Download,
   Trash2,
   Edit2,
   Check,
-  X,
-  Calendar,
-  Layers,
-  Download,
-  ArrowRight,
-  ShieldCheck,
-  ChevronLeft,
-  ChevronRight,
-  Heart,
+  ExternalLink,
   BookOpen,
-  Plus,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { getPieceAlignment, getAlignmentStyle } from '../data/pieceAlignments';
-import { CreateLookbookModal } from '../components/CreateLookbookModal';
-import { LookbookDetailModal } from '../components/LookbookDetailModal';
-import {
-  CornerTopLeftTassel,
-  CornerBottomRightBrass,
-  CornerBottomLeft,
-} from '../components/heritage/HeritageDecorations';
-
 
 /**
- * Traditional corner watermark for cards (cherry blossom, cloud, harvest moon, seal)
- */
-const DecorWatermark: React.FC<{ type?: 'cloud' | 'blossom' | 'moon' | 'seal' }> = ({ type = 'blossom' }) => {
-  if (type === 'moon') {
-    return (
-      <div className="w-6 h-6 rounded-full border border-[#8c745c]/40 flex items-center justify-center opacity-45">
-        <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-[#8c745c]/50 to-transparent" />
-      </div>
-    );
-  }
-  if (type === 'seal') {
-    return (
-      <div className="w-4.5 h-4.5 border border-[#8B1E1E]/50 rounded-none flex items-center justify-center opacity-60">
-        <span className="text-[7.5px] text-[#8B1E1E] font-serif font-black">ẤN</span>
-      </div>
-    );
-  }
-  if (type === 'cloud') {
-    return (
-      <img
-        src="/assets/decorations/golden-cloud.png"
-        alt="Mây"
-        className="w-6 h-auto opacity-40 object-contain"
-      />
-    );
-  }
-  // blossom default
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5 text-[#8c745c] opacity-40">
-      <circle cx="12" cy="12" r="2.5" />
-      <path d="M12 4.5 C 9.5 7 9.5 9 12 9 C 14.5 9 14.5 7 12 4.5 Z M19.5 12 C 17 9.5 15 9.5 15 12 C 15 14 17 14 19 12 Z M12 19.5 C 14.5 17 14.5 15 12 15 C 9.5 15 9.5 17 12 19.5 Z M4.5 12 C 7 14.5 9 14.5 9 12 C 9 9.5 7 9.5 4.5 12 Z" />
-    </svg>
-  );
-};
-
-/**
- * Renders the full mannequin composite wearing all pieces for an outfit
+ * 2D Composite Mannequin Stage for outfits
+ * Khung phẳng góc vuông, không zoom khi hover
  */
 const OutfitMannequinComposite: React.FC<{
   outfit: SavedOutfit;
@@ -84,27 +37,22 @@ const OutfitMannequinComposite: React.FC<{
 
   return (
     <div className={`relative w-full h-full flex items-center justify-center overflow-hidden select-none ${className}`}>
-      {/* Background Event Layer */}
       {outfit.event?.bgUrl && (
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src={outfit.event.bgUrl}
             alt={outfit.event.name}
-            className={`w-full h-full object-cover transition-transform duration-700 ${
-              isModal ? 'opacity-95' : 'opacity-90 group-hover:scale-105'
+            className={`w-full h-full object-cover ${
+              isModal ? 'opacity-95' : 'opacity-90'
             }`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
         </div>
       )}
 
-      {/* Scaled Mannequin & Clothes Composite Stage */}
       <div
-        className={`relative z-10 w-full h-full max-h-[96%] aspect-[3/4] flex items-center justify-center pointer-events-none py-2 transition-transform duration-500 ${
-          isModal ? '' : 'group-hover:scale-105'
-        }`}
+        className="relative z-10 w-full h-full max-h-[96%] aspect-[3/4] flex items-center justify-center pointer-events-none py-2"
       >
-        {/* Layer 1: Mannequin Base */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
           <img
             src="/assets/mannequins/mannequin-base.png"
@@ -113,7 +61,6 @@ const OutfitMannequinComposite: React.FC<{
           />
         </div>
 
-        {/* Layer 2: Quần / Chân váy (Z=20) */}
         {bottomPiece?.assetUrl && (
           <div
             className="absolute inset-0 z-20 pointer-events-none"
@@ -127,7 +74,6 @@ const OutfitMannequinComposite: React.FC<{
           </div>
         )}
 
-        {/* Layer 3: Giày / Dép (Z=30) */}
         {footwearPiece?.assetUrl && (
           <div
             className="absolute inset-0 z-30 pointer-events-none"
@@ -141,7 +87,6 @@ const OutfitMannequinComposite: React.FC<{
           </div>
         )}
 
-        {/* Layer 4: Áo (Z=40) - Phủ lên quần */}
         {topPiece?.assetUrl && (
           <div
             className="absolute inset-0 z-40 pointer-events-none"
@@ -155,7 +100,6 @@ const OutfitMannequinComposite: React.FC<{
           </div>
         )}
 
-        {/* Layer 5: Phụ kiện (Z=50) - Nón, khăn, mũ */}
         {accessoryPiece?.assetUrl && (
           <div
             className="absolute inset-0 z-50 pointer-events-none"
@@ -173,262 +117,26 @@ const OutfitMannequinComposite: React.FC<{
   );
 };
 
-/**
- * Vintage Giấy Dó Postcard Card Component (Artistic Scrapbook Style with Real Torn Paper Asset)
- */
-const ScrapbookPostcardCard: React.FC<{
+interface AiPhotoItem {
+  id: string;
+  url: string;
   outfit: SavedOutfit;
-  onSelect: () => void;
-  onToggleFavorite?: (id: string) => void;
-  isLoggedIn?: boolean;
-  onLoginPrompt?: () => void;
-}> = ({ outfit, onSelect, onToggleFavorite, isLoggedIn, onLoginPrompt }) => {
-  const hasAIImage = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
-  const tilt = outfit.tiltAngle || 0;
-  const isFeatured = Boolean(outfit.isFeatured);
+  index: number;
+}
 
-  // Format date-time: DD/MM/YYYY • HH:mm
-  const formatCreationDateTime = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
-      const day = date.toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      const hasTime = dateStr.includes('T') || dateStr.includes(':');
-      const time = hasTime
-        ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
-        : '09:00';
-      return `${day} • ${time}`;
-    } catch {
-      return dateStr;
-    }
-  };
-
-  return (
-    <div
-      onClick={onSelect}
-      className={`group relative flex-shrink-0 cursor-pointer transition-all duration-300 ${
-        isFeatured
-          ? 'w-[280px] sm:w-[305px] md:w-[320px] scale-105 z-20'
-          : 'w-[250px] sm:w-[270px] md:w-[280px] z-10 hover:z-30 hover:scale-105'
-      }`}
-      style={{
-        transform: tilt !== 0 ? `rotate(${tilt}deg)` : undefined,
-      }}
-    >
-      {/* Outer shadow filter wrapping the authentic torn paper */}
-      <div
-        className={`w-full transition-all duration-300 ${
-          isFeatured
-            ? 'filter drop-shadow-[0_16px_32px_rgba(0,0,0,0.95)] drop-shadow-[0_0_28px_rgba(216,175,101,0.5)]'
-            : 'filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] group-hover:drop-shadow-[0_18px_32px_rgba(0,0,0,0.95)]'
-        }`}
-      >
-        {/* Pinned Washi Tape / Crown Ribbon at Top (Increased font size) */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none">
-          {isFeatured ? (
-            <div className="bg-gradient-to-r from-[#d8af65] via-[#f7e3b8] to-[#c69b56] text-[#241402] px-4 py-1.5 text-sm sm:text-base font-calligraphy font-black shadow-md border border-[#9A7332] whitespace-nowrap rounded-xs flex items-center gap-1.5 -rotate-1">
-              <span>{outfit.conceptTag || '👑 Được yêu thích nhất'}</span>
-            </div>
-          ) : (
-            <div className="bg-[#ede0ca]/95 backdrop-blur-xs border-y border-[#cbba9e]/70 shadow-xs px-4 py-1 text-sm sm:text-base font-calligraphy text-[#2e2014] font-black whitespace-nowrap -rotate-1.5">
-              <span>{outfit.conceptTag || outfit.name}</span>
-            </div>
-          )}
-        </div>
-
-        {/* The Authentic Handmade Giấy Dó Paper Canvas using delicate deckled paper asset */}
-        <div className="relative w-full px-5 sm:px-6 pt-5 sm:pt-5.5 pb-5 sm:pb-6 flex flex-col gap-2.5 select-none">
-          {/* Real Deckled Paper Texture Asset */}
-          <img
-            src="/assets/decorations/deckled-paper.png"
-            alt="Giấy Dó viền thô tự nhiên"
-            className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
-          />
-
-          {/* Inner Content Layer (comfortably centered inside deckled paper borders) */}
-          <div className="relative z-10 flex flex-col gap-2.5">
-            {/* Inner Photo Frame (Standard 9:16 aspect ratio with clean border) */}
-            <div className="relative w-full aspect-[9/16] overflow-hidden bg-black/95 border border-[#2d2216]/50 rounded-[2px] shadow-sm">
-              {hasAIImage ? (
-                <div className="relative w-full h-full overflow-hidden">
-                  <img
-                    src={outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages[0])}
-                    alt={outfit.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                </div>
-              ) : (
-                <OutfitMannequinComposite outfit={outfit} />
-              )}
-            </div>
-
-            {/* Bottom Card Footer Area (Spaced generously away from paper deckled edges) */}
-            <div className="flex flex-col gap-2 px-1 pt-1">
-              {/* Row 1: Timestamp & Favorite Heart Toggle */}
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] sm:text-xs text-[#4a3928] font-mono tracking-wider font-bold">
-                  {formatCreationDateTime(outfit.createdAt)}
-                </span>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isLoggedIn) {
-                      onLoginPrompt?.();
-                      return;
-                    }
-                    onToggleFavorite?.(outfit.id);
-                  }}
-                  className="p-1 hover:scale-125 active:scale-95 transition-transform text-[#6d543e] hover:text-[#8B1E1E] cursor-pointer"
-                  title={outfit.isFavorite ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
-                >
-                  <Heart
-                    className={`w-3.5 h-3.5 transition-colors ${
-                      outfit.isFavorite ? 'fill-[#8B1E1E] text-[#8B1E1E]' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Row 2: Color Palette Swatches & Traditional Corner Watermark */}
-              <div className="flex items-center justify-between pt-0.5">
-                {/* Palette dots */}
-                <div className="flex items-center gap-1.5">
-                  {(outfit.colorPalette || ['#8B1E1E', '#F7F4EE', '#9A7332']).map((color, idx) => (
-                    <span
-                      key={idx}
-                      className="w-2.5 h-2.5 rounded-full border border-black/20 shadow-2xs inline-block"
-                      style={{ backgroundColor: color }}
-                      title={`Màu sắc trang phục #${idx + 1}`}
-                    />
-                  ))}
-                </div>
-
-                {/* Traditional Watermark Stamp */}
-                <div className="pr-1">
-                  <DecorWatermark type={outfit.decorStamp} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/**
- * Lookbook Album Card (Trang Lookbook tạp chí thời trang)
- */
-const LookbookAlbumCard: React.FC<{
-  lookbook: Lookbook;
-  allOutfits: SavedOutfit[];
-  onOpen: () => void;
-  onDelete?: () => void;
-}> = ({ lookbook, allOutfits, onOpen, onDelete }) => {
-  const outfit =
-    allOutfits.find((o) => o.id === lookbook.outfitId) ||
-    allOutfits.find((o) => lookbook.outfitIds?.includes(o.id));
-  const coverImage =
-    lookbook.coverImageUrl ||
-    outfit?.tryOnImage ||
-    outfit?.top?.piece?.thumbnailUrl ||
-    outfit?.top?.piece?.assetUrl ||
-    '';
-
-  return (
-    <div
-      onClick={onOpen}
-      className="group relative bg-lacquer-surface border-2 border-imperial-gold/60 hover:border-imperial-gold p-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(216,175,101,0.25)] flex flex-col justify-between cursor-pointer select-none"
-    >
-      {/* Visual Cover Stage */}
-      <div className="relative aspect-[3/4] w-full bg-lacquer overflow-hidden border border-lacquer-border/80 flex items-center justify-center">
-        {coverImage ? (
-          <img
-            src={coverImage}
-            alt={lookbook.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          />
-        ) : (
-          <div className="text-center p-4">
-            <BookOpen className="w-12 h-12 text-imperial-gold/40 mx-auto mb-2" />
-            <span className="text-xs text-silk-muted">Chưa có ảnh bìa</span>
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none" />
-
-        {/* Corner Decor Stamp */}
-        <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
-          <DecorWatermark type={lookbook.decorStamp || 'seal'} />
-        </div>
-
-        {/* Look Number badge */}
-        <div className="absolute top-2.5 left-2.5 z-10">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-black/75 backdrop-blur-md text-imperial-gold border border-imperial-gold/40">
-            {lookbook.lookNumber || 'LOOK 01'}
-          </span>
-        </div>
-
-        {/* Bottom Title on Image */}
-        <div className="absolute bottom-3 inset-x-3 z-10">
-          <h3 className="font-serif font-extrabold text-base sm:text-lg text-silk-ivory leading-snug drop-shadow-md group-hover:text-imperial-gold transition-colors line-clamp-2">
-            {lookbook.title}
-          </h3>
-          {lookbook.subtitle && (
-            <p className="text-[11px] text-imperial-gold/90 font-serif italic drop-shadow mt-0.5">
-              {lookbook.subtitle}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Info & Actions */}
-      <div className="mt-3 pt-2.5 border-t border-lacquer-border/70 flex items-center justify-between">
-        <div className="min-w-0 flex-1 pr-2">
-          {lookbook.description ? (
-            <p className="text-[11px] text-silk-muted italic truncate">
-              "{lookbook.description}"
-            </p>
-          ) : (
-            <p className="text-[11px] text-silk-muted">
-              Tạo lúc {new Date(lookbook.createdAt).toLocaleDateString('vi-VN')}
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {onDelete && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (window.confirm(`Bạn có chắc muốn xóa Lookbook "${lookbook.title}" không? (Outfit gốc vẫn được giữ lại)`)) {
-                  onDelete();
-                }
-              }}
-              className="p-1.5 text-silk-muted hover:text-rose-400 hover:bg-rose-950/40 transition-colors"
-              title="Xóa Lookbook"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
-          <span className="p-1 text-imperial-gold group-hover:translate-x-0.5 transition-transform">
-            <ArrowRight className="w-4 h-4" />
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
+interface AlbumItem {
+  id: string;
+  title: string;
+  type: 'outfit' | 'ai-photo';
+  count: number;
+  outfits?: SavedOutfit[];
+  aiPhotos?: AiPhotoItem[];
+  coverOutfit?: SavedOutfit;
+  coverImageUrl?: string;
+}
 
 interface LookbookScreenProps {
   outfits: SavedOutfit[];
-  lookbooks?: Lookbook[];
   isLoggedIn: boolean;
   onLoginPrompt: () => void;
   onLoadOutfitIntoStudio: (outfit: SavedOutfit) => void;
@@ -436,22 +144,11 @@ interface LookbookScreenProps {
   onRenameOutfit: (id: string, newName: string) => void;
   onToggleFavorite?: (id: string) => void;
   onOpenStudio: () => void;
-  onCreateLookbook?: (data: {
-    title: string;
-    subtitle: string;
-    description: string;
-    outfitId: string;
-    coverImageUrl: string;
-    verticalPoem: string;
-    decorStamp: 'blossom' | 'cloud' | 'moon' | 'seal';
-  }) => Promise<void>;
-  onDeleteLookbook?: (id: string) => Promise<void>;
   showToast?: (msg: string) => void;
 }
 
 export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   outfits,
-  lookbooks = [],
   isLoggedIn,
   onLoginPrompt,
   onLoadOutfitIntoStudio,
@@ -459,656 +156,707 @@ export const LookbookScreen: React.FC<LookbookScreenProps> = ({
   onRenameOutfit,
   onToggleFavorite,
   onOpenStudio,
-  onCreateLookbook,
-  onDeleteLookbook,
   showToast = () => {},
 }) => {
-  // Active Tab: 'lookbooks' (Bộ sưu tập) | 'all-outfits' (Tất cả outfit)
-  const [activeTab, setActiveTab] = useState<'lookbooks' | 'all-outfits'>('lookbooks');
+  // Navigation: null = Albums Grid view; string = Inside specific album
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
 
-  // Modal create lookbook state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Modal xem chi tiết: hỗ trợ xem outfit hoặc ảnh AI
+  const [viewingItem, setViewingItem] = useState<{
+    type: 'outfit' | 'ai-photo';
+    outfit: SavedOutfit;
+    aiPhotoUrl?: string;
+  } | null>(null);
 
-  // Selected lookbook for detail viewer
-  const [selectedLookbook, setSelectedLookbook] = useState<Lookbook | null>(null);
-
-  // Modal detail view for clicked outfit
-  const [selectedOutfit, setSelectedOutfit] = useState<SavedOutfit | null>(null);
-
-  // Active view inside modal: '2d' or index of AI image
-  const [activeMediaIndex, setActiveMediaIndex] = useState<number>(0);
-
-  // Inline rename state in modal
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameText, setEditNameText] = useState('');
 
-  // Carousel slider ref
-  const sliderRef = useRef<HTMLDivElement>(null);
+  // Close modal with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setViewingItem(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  // Smooth scroll handler for carousel arrows
-  const handleScroll = (direction: 'left' | 'right') => {
-    if (sliderRef.current) {
-      const scrollAmount = 320;
-      sliderRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
+  // 1. TẬP HỢP TẤT CẢ ẢNH DO AI TẠO (Album duy nhất "Thử đồ AI")
+  const allAiPhotos = useMemo<AiPhotoItem[]>(() => {
+    const list: AiPhotoItem[] = [];
+    outfits.forEach((o) => {
+      const images =
+        o.tryOnImages && o.tryOnImages.length > 0
+          ? o.tryOnImages
+          : o.tryOnImage
+          ? [o.tryOnImage]
+          : [];
+
+      images.forEach((url, idx) => {
+        if (url) {
+          list.push({
+            id: `${o.id}-ai-${idx}`,
+            url,
+            outfit: o,
+            index: idx,
+          });
+        }
       });
-    }
-  };
+    });
+    return list;
+  }, [outfits]);
 
-  // Open detail modal for outfit
-  const handleOpenDetail = (outfit: SavedOutfit) => {
-    setSelectedOutfit(outfit);
-    const hasAI = Boolean(outfit.tryOnImage || (outfit.tryOnImages && outfit.tryOnImages.length > 0));
-    setActiveMediaIndex(hasAI ? 1 : 0);
+  // 2. DANH SÁCH ALBUM
+  // - Tất cả outfit: Chỉ chứa outfit (không có ảnh AI)
+  // - Event (Tết Cổ Truyền, Dạ hội Prom, v.v.): Cũng chỉ chứa outfit
+  // - "Thử đồ AI": Album duy nhất chứa ảnh tạo bởi AI (không có outfit)
+  const albums = useMemo<AlbumItem[]>(() => {
+    const list: AlbumItem[] = [];
+
+    // Album 1: Tất cả outfit
+    list.push({
+      id: 'all-outfits',
+      title: 'Tất cả outfit',
+      type: 'outfit',
+      count: outfits.length,
+      outfits,
+      coverOutfit: outfits[0],
+    });
+
+    // Album 2+: Nhóm theo Sự kiện (Tết, Dạ hội School Prom, Trung Thu, v.v.)
+    const eventMap = new Map<string, { name: string; outfits: SavedOutfit[] }>();
+    outfits.forEach((o) => {
+      const evName = o.event?.name?.trim() || 'Sự kiện khác';
+      if (!eventMap.has(evName)) {
+        eventMap.set(evName, { name: evName, outfits: [] });
+      }
+      eventMap.get(evName)!.outfits.push(o);
+    });
+
+    eventMap.forEach((data, evName) => {
+      list.push({
+        id: `event-${encodeURIComponent(evName)}`,
+        title: evName,
+        type: 'outfit',
+        count: data.outfits.length,
+        outfits: data.outfits,
+        coverOutfit: data.outfits[0],
+      });
+    });
+
+    // Album DUY NHẤT: "Thử đồ AI" (Chỉ chứa ảnh do AI tạo)
+    list.push({
+      id: 'ai-try-on',
+      title: 'Thử đồ AI',
+      type: 'ai-photo',
+      count: allAiPhotos.length,
+      aiPhotos: allAiPhotos,
+      coverImageUrl: allAiPhotos[0]?.url,
+    });
+
+    return list;
+  }, [outfits, allAiPhotos]);
+
+  // Album hiện đang mở
+  const currentAlbum = useMemo(() => {
+    if (!selectedAlbumId) return null;
+    return albums.find((a) => a.id === selectedAlbumId) || null;
+  }, [albums, selectedAlbumId]);
+
+  // Mở popup xem Outfit
+  const handleOpenOutfit = (outfit: SavedOutfit) => {
+    setViewingItem({
+      type: 'outfit',
+      outfit,
+    });
     setIsEditingName(false);
     setEditNameText(outfit.name);
   };
 
-  // Save rename
+  // Mở popup xem Ảnh AI
+  const handleOpenAiPhoto = (photo: AiPhotoItem) => {
+    setViewingItem({
+      type: 'ai-photo',
+      outfit: photo.outfit,
+      aiPhotoUrl: photo.url,
+    });
+    setIsEditingName(false);
+    setEditNameText(photo.outfit.name);
+  };
+
+  // Điều hướng mục tiếp / trước trong popup
+  const handleNavigateItem = (direction: 'next' | 'prev') => {
+    if (!viewingItem) return;
+
+    if (viewingItem.type === 'outfit') {
+      const list = currentAlbum?.outfits || outfits;
+      if (list.length === 0) return;
+      const currentIndex = list.findIndex((o) => o.id === viewingItem.outfit.id);
+      if (currentIndex === -1) return;
+      const nextIndex =
+        direction === 'next'
+          ? (currentIndex + 1) % list.length
+          : (currentIndex - 1 + list.length) % list.length;
+      handleOpenOutfit(list[nextIndex]);
+    } else {
+      const list = currentAlbum?.aiPhotos || allAiPhotos;
+      if (list.length === 0) return;
+      const currentIndex = list.findIndex(
+        (p) => p.url === viewingItem.aiPhotoUrl
+      );
+      if (currentIndex === -1) return;
+      const nextIndex =
+        direction === 'next'
+          ? (currentIndex + 1) % list.length
+          : (currentIndex - 1 + list.length) % list.length;
+      handleOpenAiPhoto(list[nextIndex]);
+    }
+  };
+
+  // Lưu đổi tên outfit
   const handleSaveRename = () => {
-    if (selectedOutfit && editNameText.trim()) {
-      onRenameOutfit(selectedOutfit.id, editNameText.trim());
-      setSelectedOutfit({ ...selectedOutfit, name: editNameText.trim() });
+    if (viewingItem && editNameText.trim()) {
+      onRenameOutfit(viewingItem.outfit.id, editNameText.trim());
+      setViewingItem({
+        ...viewingItem,
+        outfit: { ...viewingItem.outfit, name: editNameText.trim() },
+      });
     }
     setIsEditingName(false);
   };
 
-  // Helper to get all media photos for an outfit
-  const getOutfitMediaList = (outfit: SavedOutfit) => {
-    const list: { id: string; label: string; type: '2d' | 'ai'; url: string }[] = [];
-    
-    // 1. 2D composite top piece or canvas
-    list.push({
-      id: '2d-studio',
-      label: 'Bản phối 2D Studio',
-      type: '2d',
-      url: outfit.top.piece.assetUrl || (outfit.top.variant as Piece)?.assetUrl || '',
-    });
-
-    // 2. AI try on images
-    if (outfit.tryOnImages && outfit.tryOnImages.length > 0) {
-      outfit.tryOnImages.forEach((img, idx) => {
-        list.push({
-          id: `ai-${idx}`,
-          label: `Ảnh AI Try-on #${idx + 1}`,
-          type: 'ai',
-          url: img,
-        });
-      });
-    } else if (outfit.tryOnImage) {
-      list.push({
-        id: 'ai-default',
-        label: 'Ảnh AI Try-on',
-        type: 'ai',
-        url: outfit.tryOnImage,
-      });
-    }
-
-    return list;
+  // Tải ảnh về máy
+  const handleDownload = (url: string, name: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.replace(/\s+/g, '_')}.png`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-56px)] bg-lacquer text-silk-ivory font-sans pb-16 relative overflow-hidden">
-      {/* ATMOSPHERIC BACKGROUND ENVIRONMENT: 16:9 Ancient Imperial Palace Courtyard & Veranda at Night */}
+    <div className="w-full min-h-[calc(100vh-56px)] bg-lacquer text-silk-ivory font-sans pb-20 select-none relative overflow-hidden">
+      {/* 1. NỀN HOÀNG CUNG CỔ TRẦM ẤM */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
         <img
           src="/assets/backgrounds/gallery-bg.jpg"
           alt="Không gian cổ lầu hoàng cung"
           className="w-full h-full object-cover object-center opacity-35 sm:opacity-45 filter brightness-90 contrast-105"
         />
-        {/* Ambient Dark Gradient Overlays for High Card Contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-lacquer/80 via-lacquer/50 to-lacquer/95" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#0A0D12_90%)]" />
-        {/* Warm lantern glow highlights */}
         <div className="absolute top-12 right-1/4 w-96 h-96 rounded-full bg-imperial-gold/15 filter blur-[100px]" />
         <div className="absolute top-24 left-1/4 w-80 h-80 rounded-full bg-imperial-red/10 filter blur-[90px]" />
       </div>
 
-      {/* 1. GUEST SESSION BANNER (Non-intrusive, invites Google Sign-In) */}
-      {!isLoggedIn && (
-        <div className="relative z-10 w-full bg-lacquer-surface/90 backdrop-blur-md border-b border-imperial-gold/30 px-4 sm:px-6 lg:px-10 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-imperial-gold animate-ping" />
-            <span className="text-silk-muted">
-              Đăng nhập bằng tài khoản Google để bắt đầu lưu trữ và quản lý các bộ sưu tập Việt phục của riêng bạn.
-            </span>
-          </div>
-          <button
-            onClick={onLoginPrompt}
-            className="px-4 py-1.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider shadow transition-all whitespace-nowrap cursor-pointer"
-          >
-            Đăng nhập với Google
-          </button>
-        </div>
-      )}
-
-      {/* 2. ARTISTIC EDITORIAL HERO HEADER (Title without badge, Golden Chim Lac Hong motif next to Outfit) */}
-      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 pt-7 pb-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          {/* Left: Title "Bộ Sưu Tập" over "Outfit" + Golden Chim Lạc Hồng Motif */}
-          <div className="flex flex-col">
-            {/* Line 1: Bộ Sưu Tập */}
-            <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md leading-none">
-              Bộ Sưu Tập
-            </h1>
-
-            {/* Line 2: Outfit + Golden Chim Lạc Hồng Motif Asset (Simplified, Golden) */}
-            <div className="flex items-center gap-3.5 sm:gap-4 mt-2">
-              <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-2 font-bold drop-shadow-[0_4px_14px_rgba(232,200,123,0.35)] leading-none select-none">
-                Outfit
-              </span>
-              <img
-                src="/assets/decorations/chim-lac.png"
-                alt="Họa tiết chim Lạc Hồng vàng kim"
-                className="h-8 sm:h-10 lg:h-11 w-auto object-contain filter drop-shadow-[0_2px_12px_rgba(232,200,123,0.5)] select-none pointer-events-none inline-block hover:scale-105 transition-transform"
-              />
-            </div>
-          </div>
-
-          {/* Right: Poetic Calligraphic Quote & Parchment "Tạo Lookbook" Button (No rounded corners) */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 self-start md:self-center">
-            {/* Calligraphic poetic quote */}
-            <div className="text-left sm:text-right hidden sm:block">
-              <p className="font-calligraphy text-lg sm:text-xl text-[#f3eedd]/90 italic -rotate-1 leading-snug drop-shadow-sm">
-                Mỗi bộ đồ là một câu chuyện về văn hóa Việt
-              </p>
-            </div>
-
-            {/* Stylized Golden Parchment Button (rounded-none, sharp corners) */}
-            <button
-              onClick={() => {
-                if (!isLoggedIn) {
-                  onLoginPrompt();
-                } else {
-                  setIsCreateModalOpen(true);
-                }
-              }}
-              className="py-2.5 px-6 rounded-none bg-gradient-to-r from-[#d8af65] via-[#f2d89b] to-[#d8af65] text-[#241708] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-[0_6px_22px_rgba(216,175,101,0.4)] hover:brightness-110 hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border-2 border-[#fae7be]/70 cursor-pointer flex-shrink-0"
-              title="Tạo Lookbook mới"
-            >
-              <BookOpen className="w-4 h-4 stroke-[2.5]" />
-              <span className="font-extrabold">TẠO LOOKBOOK</span>
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. TABS SELECTOR (Trực quan & dễ hiểu): "Lookbook" & "Tất Cả Outfit" */}
-      <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 mt-4 mb-2 flex items-center gap-3">
-        <button
-          onClick={() => setActiveTab('lookbooks')}
-          className={`px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 border cursor-pointer ${
-            activeTab === 'lookbooks'
-              ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow-md'
-              : 'bg-lacquer/80 text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span>Lookbook</span>
-          <span
-            className={`px-1.5 py-0.2 text-[10px] font-bold ${
-              activeTab === 'lookbooks'
-                ? 'bg-lacquer text-imperial-gold'
-                : 'bg-imperial-gold/20 text-imperial-gold'
-            }`}
-          >
-            {lookbooks.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('all-outfits')}
-          className={`px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center gap-2 border cursor-pointer ${
-            activeTab === 'all-outfits'
-              ? 'bg-imperial-gold text-lacquer border-imperial-gold shadow-md'
-              : 'bg-lacquer/80 text-silk-muted border-lacquer-border hover:text-silk-ivory hover:border-imperial-gold/50'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>Tất Cả Outfit</span>
-          <span
-            className={`px-1.5 py-0.2 text-[10px] font-bold ${
-              activeTab === 'all-outfits'
-                ? 'bg-lacquer text-imperial-gold'
-                : 'bg-imperial-gold/20 text-imperial-gold'
-            }`}
-          >
-            {outfits.length}
-          </span>
-        </button>
-      </div>
-
-      {/* 4. MAIN CONTENT AREA: TAB "LOOKBOOK" HOẶC TAB "TẤT CẢ OUTFIT" */}
-      {activeTab === 'lookbooks' ? (
-        /* TAB 1: LOOKBOOK (MAGAZINE SPREADS GRID) */
-        <div className="relative z-10 w-full pt-4 pb-8">
-          {lookbooks.length === 0 ? (
-            <div className="mx-6 sm:mx-12 text-center py-20 p-8 rounded-none bg-lacquer-surface/60 border border-lacquer-border backdrop-blur-md">
-              <BookOpen className="w-16 h-16 text-imperial-gold/40 mx-auto mb-4" />
-              <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
-                Chưa có Lookbook nào
-              </h3>
-              <p className="text-sm text-silk-muted max-w-md mx-auto mb-6 leading-relaxed">
-                Bạn đã có {outfits.length} bộ outfit đã lưu. Hãy chọn 1 bộ outfit và bấm 'TẠO LOOKBOOK' để biến thành trang bìa tạp chí thời trang cổ phong tinh xảo!
-              </p>
-              <button
-                onClick={() => {
-                  if (!isLoggedIn) onLoginPrompt();
-                  else setIsCreateModalOpen(true);
-                }}
-                className="py-3 px-6 rounded-none bg-gradient-to-r from-imperial-gold to-imperial-gold-light text-lacquer font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
-              >
-                Tạo Lookbook Đầu Tiên
-              </button>
-            </div>
-          ) : (
-            <div className="px-4 sm:px-8 lg:px-12 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {lookbooks.map((lb) => (
-                <LookbookAlbumCard
-                  key={lb.id}
-                  lookbook={lb}
-                  allOutfits={outfits}
-                  onOpen={() => setSelectedLookbook(lb)}
-                  onDelete={
-                    onDeleteLookbook ? () => onDeleteLookbook(lb.id) : undefined
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
-        /* TAB 2: TẤT CẢ OUTFIT (SCRAPBOOK POSTCARDS REEL) */
-        <div className="relative z-10 w-full pt-4 pb-8">
-          {outfits.length === 0 ? (
-            /* Empty State */
-            <div className="mx-6 sm:mx-12 text-center py-24 p-8 rounded-2xl bg-lacquer-surface/50 border border-lacquer-border backdrop-blur-md">
-              <Layers className="w-16 h-16 text-silk-muted mx-auto mb-4 opacity-30" />
-              <h3 className="font-serif font-bold text-2xl text-silk-ivory mb-2">
-                Chưa có outfit nào trong bộ sưu tập
-              </h3>
-              <p className="text-sm text-silk-muted max-w-sm mx-auto mb-6 leading-relaxed">
-                Hãy quay lại Studio để bắt đầu phối bộ xiêm y cổ phong đầu tiên của bạn!
-              </p>
-              <button
-                onClick={onOpenStudio}
-                className="py-3 px-6 rounded-xl bg-imperial-gold text-lacquer font-bold text-xs uppercase tracking-wider hover:bg-imperial-gold-light shadow-lg transition-all"
-              >
-                Mở Studio Phối Đồ Ngay
-              </button>
-            </div>
-          ) : (
-            /* Carousel Stage Container with Floating Nav Buttons and Edge Fades */
-            <div className="relative w-full">
-              {/* Left Edge Fade for Overflow Effect */}
-              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-lacquer via-lacquer/80 to-transparent z-30" />
-
-              {/* Right Edge Fade for Overflow Effect */}
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-lacquer via-lacquer/80 to-transparent z-30" />
-
-              {/* Floating Left Arrow Button */}
-              <button
-                onClick={() => handleScroll('left')}
-                className="absolute left-2 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
-                title="Cuộn sang trái"
-              >
-                <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
-              </button>
-
-              {/* Floating Right Arrow Button */}
-              <button
-                onClick={() => handleScroll('right')}
-                className="absolute right-2 sm:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/70 hover:bg-[#d8af65] hover:text-lacquer text-silk-ivory border border-white/20 hover:border-[#d8af65] backdrop-blur-md flex items-center justify-center transition-all shadow-[0_8px_24px_rgba(0,0,0,0.8)] hover:scale-110 active:scale-95 cursor-pointer"
-                title="Cuộn sang phải"
-              >
-                <ChevronRight className="w-6 h-6 stroke-[2.5]" />
-              </button>
-
-              {/* Horizontal Scroll Reel */}
-              <div
-                ref={sliderRef}
-                className="w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-6 sm:gap-7 lg:gap-8 px-12 sm:px-20 lg:px-24 py-10"
-              >
-                {outfits.map((outfit) => (
-                  <ScrapbookPostcardCard
-                    key={outfit.id}
-                    outfit={outfit}
-                    onSelect={() => handleOpenDetail(outfit)}
-                    onToggleFavorite={onToggleFavorite}
-                    isLoggedIn={isLoggedIn}
-                    onLoginPrompt={onLoginPrompt}
+      {/* CONTAINER THU GỌN VỪA VẶN */}
+      <div className="relative z-10 max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 2. HEADER: TIÊU ĐỀ BỘ SƯU TẬP + CHIM LẠC */}
+        <header className="w-full pt-8 pb-6">
+          <div className="flex items-center justify-between">
+            {/* TIÊU ĐỀ HOẶC NÚT QUAY LẠI ALBUM */}
+            {!selectedAlbumId ? (
+              <div className="flex flex-col flex-shrink-0">
+                <h1 className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-silk-ivory tracking-tight drop-shadow-md leading-none">
+                  Bộ Sưu Tập
+                </h1>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <span className="font-calligraphy text-4xl sm:text-5xl lg:text-6xl text-[#e8c87b] -rotate-2 font-bold drop-shadow-[0_4px_14px_rgba(232,200,123,0.35)] leading-none select-none">
+                    Outfit
+                  </span>
+                  <img
+                    src="/assets/decorations/chim-lac.png"
+                    alt="Họa tiết chim Lạc Hồng vàng kim"
+                    className="h-8 sm:h-9 lg:h-10 w-auto object-contain filter drop-shadow-[0_2px_12px_rgba(232,200,123,0.5)] select-none pointer-events-none inline-block"
                   />
-                ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            ) : (
+              <div className="flex flex-col flex-shrink-0">
+                <button
+                  onClick={() => setSelectedAlbumId(null)}
+                  className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 text-sm font-semibold transition-colors cursor-pointer group mb-1.5"
+                >
+                  <ChevronLeft className="w-5 h-5 -ml-1 transition-transform group-hover:-translate-x-0.5" />
+                  <span>Quay lại Album</span>
+                </button>
+                <h1 className="font-serif font-bold text-2xl sm:text-3xl text-silk-ivory tracking-tight leading-snug">
+                  {currentAlbum?.title || 'Album'}
+                </h1>
+                <p className="text-xs sm:text-sm text-silk-muted font-normal">
+                  {currentAlbum?.count || 0} {currentAlbum?.type === 'ai-photo' ? 'ảnh' : 'outfit'}
+                </p>
+              </div>
+            )}
+          </div>
+        </header>
 
-      {/* 4. THE OUTFIT DETAIL MODAL (Opens when clicking any card) */}
-      {selectedOutfit && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 lg:p-10 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setSelectedOutfit(null)}
-        >
-          {/* Modal Container matching cultural popup frame */}
-          <div
-            style={{ borderRadius: '10px' }}
-            className="w-full max-w-5xl max-h-[92vh] bg-gradient-to-b from-[#11141C] via-[#0C0E14] to-[#07090D] border border-[#C5A059]/65 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_24px_rgba(197,160,89,0.12),inset_0_0_0_1px_rgba(197,160,89,0.2)] flex flex-col lg:flex-row overflow-hidden animate-in zoom-in-95 duration-200 relative text-[#EDE5D8]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Heritage Corners (Peach blossom removed) */}
-            <CornerTopLeftTassel />
-            <CornerBottomRightBrass />
-            <CornerBottomLeft />
-
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedOutfit(null)}
-              className="absolute top-2.5 right-2.5 z-40 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 border border-[#C5A059]/50 hover:border-[#D4AF37] text-[#EDE5D8]/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer shadow-md"
-              title="Đóng cửa sổ"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-
-            {/* LEFT SIDE: Media Visual Stage (58%) */}
-            <div className="w-full lg:w-[58%] bg-lacquer-card flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-lacquer-border/80 relative overflow-hidden">
-              {/* Media Display Canvas */}
-              <div className="relative flex-1 min-h-[340px] sm:min-h-[440px] flex items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-lacquer to-lacquer-surface overflow-hidden">
-                {/* The Active Media */}
-                {(() => {
-                  const mediaList = getOutfitMediaList(selectedOutfit);
-                  const activeMedia = mediaList[activeMediaIndex] || mediaList[0];
-                  if (activeMedia?.type === '2d') {
-                    return <OutfitMannequinComposite outfit={selectedOutfit} isModal={true} />;
-                  }
+        {/* 3. NỘI DUNG CHÍNH: LƯỚI ALBUM HOẶC BÊN TRONG ALBUM (GÓC VUÔNG, KHÔNG BO GÓC, KHÔNG ZOOM) */}
+        <main className="w-full pt-2">
+          {/* MÀN HÌNH 1: DANH SÁCH ALBUM Ở NGOÀI */}
+          {!selectedAlbumId ? (
+            <div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+                {albums.map((album) => {
                   return (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <img
-                        src={activeMedia?.url}
-                        alt={selectedOutfit.name}
-                        className="relative z-10 max-h-[460px] max-w-full rounded-xl object-contain drop-shadow-[0_16px_36px_rgba(0,0,0,0.9)]"
-                      />
+                    <div
+                      key={album.id}
+                      onClick={() => setSelectedAlbumId(album.id)}
+                      className="group cursor-pointer text-left flex flex-col"
+                    >
+                      {/* Khung Album: 1:1, góc vuông, không bo góc, không zoom, hover thay đổi border */}
+                      <div className="relative aspect-square w-full overflow-hidden bg-black/60 backdrop-blur-sm border-2 border-white/15 hover:border-[#d8af65] transition-colors duration-150 rounded-none shadow-lg">
+                        {album.type === 'ai-photo' ? (
+                          album.coverImageUrl ? (
+                            <img
+                              src={album.coverImageUrl}
+                              alt={album.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-silk-muted/40 gap-2">
+                              <Sparkles className="w-8 h-8" />
+                              <span className="text-xs">Chưa có ảnh</span>
+                            </div>
+                          )
+                        ) : album.coverOutfit ? (
+                          <OutfitMannequinComposite
+                            outfit={album.coverOutfit}
+                            className="w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-white/5 text-silk-muted/40">
+                            <ImageIcon className="w-8 h-8" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tiêu đề & Đếm số lượng */}
+                      <div className="mt-2.5 px-0.5">
+                        <p className="text-[14px] sm:text-[15px] font-semibold text-silk-ivory tracking-tight leading-snug truncate group-hover:text-amber-300 transition-colors">
+                          {album.title}
+                        </p>
+                        <p className="text-[12px] sm:text-[13px] text-silk-muted font-normal leading-snug mt-0.5">
+                          {album.count} {album.type === 'ai-photo' ? 'ảnh' : 'outfit'}
+                        </p>
+                      </div>
                     </div>
                   );
-                })()}
-
-                {/* Floating badge for active media */}
-                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
-                  <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-imperial-gold border border-imperial-gold/40 shadow">
-                    {selectedOutfit.event.name}
-                  </span>
-                </div>
+                })}
               </div>
-
-              {/* Media Switcher Thumbnails Bar (If multiple media exist) */}
-              {(() => {
-                const mediaList = getOutfitMediaList(selectedOutfit);
-                if (mediaList.length <= 1) return null;
-                return (
-                  <div className="p-3 bg-lacquer/90 border-t border-lacquer-border flex items-center gap-2.5 overflow-x-auto">
-                    <span className="text-[10px] text-silk-muted uppercase tracking-wider font-bold ml-1">
-                      Ảnh ({mediaList.length}):
-                    </span>
-                    {mediaList.map((media, idx) => (
-                      <button
-                        key={media.id}
-                        onClick={() => setActiveMediaIndex(idx)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                          activeMediaIndex === idx
-                            ? 'bg-imperial-gold text-lacquer border-imperial-gold font-bold shadow-md'
-                            : 'bg-lacquer-surface border-lacquer-border text-silk-muted hover:text-silk-ivory hover:border-imperial-gold/40'
-                        }`}
+            </div>
+          ) : (
+            /* MÀN HÌNH 2: BÊN TRONG ALBUM (GÓC VUÔNG, KHÔNG BO GÓC, KHÔNG ZOOM, KHÔNG TEXT KHI HOVER) */
+            <div>
+              {/* Nếu là Album Thử đồ AI */}
+              {currentAlbum?.type === 'ai-photo' ? (
+                (!currentAlbum.aiPhotos || currentAlbum.aiPhotos.length === 0) ? (
+                  <div className="py-24 text-center bg-black/40 backdrop-blur-md border border-white/10 p-8 my-4 rounded-none">
+                    <Sparkles className="w-12 h-12 text-silk-muted/50 mx-auto mb-3" />
+                    <p className="text-silk-muted text-sm">
+                      Chưa có ảnh thử đồ AI nào được tạo
+                    </p>
+                    <button
+                      onClick={onOpenStudio}
+                      className="mt-4 px-5 py-2.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer rounded-none text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md"
+                    >
+                      Mở Studio để Thử Đồ AI
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6 pb-12">
+                    {currentAlbum.aiPhotos.map((photo) => (
+                      <div
+                        key={photo.id}
+                        onClick={() => handleOpenAiPhoto(photo)}
+                        className="group relative aspect-[3/4] overflow-hidden bg-black/80 border-2 border-white/15 hover:border-[#d8af65] transition-colors duration-150 cursor-pointer rounded-none shadow-md flex items-center justify-center"
                       >
-                        {media.type === 'ai' ? <Sparkles className="w-3 h-3 text-amber-300" /> : <Layers className="w-3 h-3" />}
-                        <span>{media.label}</span>
-                      </button>
+                        <img
+                          src={photo.url}
+                          alt={photo.outfit.name}
+                          className="w-full h-full object-contain"
+                          loading="lazy"
+                        />
+                      </div>
                     ))}
                   </div>
-                );
-              })()}
+                )
+              ) : (
+                /* Nếu là Album Outfit (Tất cả outfit, Tết, Prom, v.v.) */
+                (!currentAlbum?.outfits || currentAlbum.outfits.length === 0) ? (
+                  <div className="py-24 text-center bg-black/40 backdrop-blur-md border border-white/10 p-8 my-4 rounded-none">
+                    <ImageIcon className="w-12 h-12 text-silk-muted/50 mx-auto mb-3" />
+                    <p className="text-silk-muted text-sm">
+                      Không có outfit nào trong album này
+                    </p>
+                    <button
+                      onClick={onOpenStudio}
+                      className="mt-4 px-5 py-2.5 bg-imperial-gold hover:bg-imperial-gold-light text-lacquer rounded-none text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md"
+                    >
+                      Mở Studio Phối Đồ
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6 pb-12">
+                    {currentAlbum.outfits.map((outfit) => (
+                      <div
+                        key={outfit.id}
+                        onClick={() => handleOpenOutfit(outfit)}
+                        className="group relative aspect-square overflow-hidden bg-black/60 border-2 border-white/15 hover:border-[#d8af65] transition-colors duration-150 cursor-pointer rounded-none shadow-md"
+                      >
+                        <OutfitMannequinComposite
+                          outfit={outfit}
+                          className="w-full h-full"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* 4. MODAL XEM CHI TIẾT: NỀN MỜ, NÚT ĐÓNG BÊN PHẢI, NÚT XÓA Ở DƯỚI, ẢNH AI BÊN PHẢI */}
+      {viewingItem && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col animate-in fade-in duration-200"
+          onClick={() => setViewingItem(null)}
+        >
+          {/* THANH HEADER MODAL: TIÊU ĐỀ BÊN TRÁI, NÚT ĐÓNG (X) Ở BÊN PHẢI */}
+          <div
+            className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/10 bg-black/40 backdrop-blur-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Tiêu đề & Đổi tên */}
+            <div className="flex items-center gap-3 max-w-xl truncate">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editNameText}
+                    onChange={(e) => setEditNameText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveRename()}
+                    className="bg-neutral-900 text-white text-sm px-3 py-1.5 rounded-none border border-[#d8af65] focus:outline-none"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSaveRename}
+                    className="p-1.5 bg-emerald-700/80 hover:bg-emerald-600 text-white cursor-pointer rounded-none"
+                    title="Lưu tên"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5 truncate">
+                  <span className="text-base sm:text-lg font-serif font-bold text-silk-ivory truncate">
+                    {viewingItem.outfit.name}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setIsEditingName(true);
+                      setEditNameText(viewingItem.outfit.name);
+                    }}
+                    className="text-silk-muted hover:text-[#d8af65] cursor-pointer p-1 transition-colors"
+                    title="Đổi tên"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="hidden sm:inline-block text-[11px] px-2 py-0.5 bg-white/10 text-silk-muted uppercase tracking-wider font-semibold rounded-none">
+                    {viewingItem.type === 'outfit'
+                      ? viewingItem.outfit.event?.name || 'Outfit'
+                      : 'Ảnh Thử Đồ AI'}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* RIGHT SIDE: Dossier & Pieces Breakdown (42%) */}
-            <div className="w-full lg:w-[42%] flex flex-col justify-between p-6 sm:p-7 overflow-y-auto max-h-[90vh]">
-              <div className="space-y-6">
-                {/* 1. Header: Editable Outfit Title & Date */}
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-[#C5A059] font-sans">
-                      Hồ Sơ Trang Phục
-                    </span>
-                    <span className="text-xs text-[#EDE5D8]/70 flex items-center gap-1 font-sans">
-                      <Calendar className="w-3 h-3" />
-                      <span>{selectedOutfit.createdAt}</span>
-                    </span>
+            {/* NÚT ĐÓNG (X) CHUYỂN SANG BÊN PHẢI */}
+            <button
+              onClick={() => setViewingItem(null)}
+              className="w-9 h-9 rounded-none border border-white/20 hover:border-[#d8af65] bg-white/5 hover:bg-white/15 text-silk-ivory flex items-center justify-center transition-colors cursor-pointer"
+              title="Đóng (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* SÂN KHẤU CHÍNH: OUTFIT / ẢNH AI + CỘT ẢNH AI BÊN PHẢI */}
+          <div
+            className="flex-1 relative flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Nút lùi */}
+            <button
+              onClick={() => handleNavigateItem('prev')}
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 sm:w-11 h-10 sm:h-11 rounded-none border border-white/20 bg-black/70 hover:bg-[#d8af65] hover:text-[#241708] text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer shadow-lg active:scale-95"
+              title="Mục trước"
+            >
+              <ChevronLeft className="w-6 h-6 stroke-[2]" />
+            </button>
+
+            {/* Nút tiến */}
+            <button
+              onClick={() => handleNavigateItem('next')}
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 sm:w-11 h-10 sm:h-11 rounded-none border border-white/20 bg-black/70 hover:bg-[#d8af65] hover:text-[#241708] text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer shadow-lg active:scale-95"
+              title="Mục tiếp"
+            >
+              <ChevronRight className="w-6 h-6 stroke-[2]" />
+            </button>
+
+            {/* KHUNG HIỂN THỊ CHÍNH (CHIA CỘT) */}
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-6 max-h-[75vh] w-full max-w-5xl">
+              {/* CỘT CHÍNH:
+                  - NẾU LÀ ẢNH AI: GIỮ NGUYÊN TỶ LỆ GỐC (TỰ CO GIÃN THEO ẢNH, KHÔNG BỊ CẮT XÉN ĐẦU HAY CHÂN VÁY)
+                  - NẾU LÀ OUTFIT: TỶ LỆ 1:1 VUÔNG CHUẨN PREVIEW STUDIO */}
+              {viewingItem.type === 'ai-photo' && viewingItem.aiPhotoUrl ? (
+                <div className="h-[52vh] sm:h-[62vh] lg:h-[72vh] w-auto max-w-[90vw] lg:max-w-[calc(100%-320px)] overflow-hidden shadow-2xl bg-black border-2 border-white/15 relative flex items-center justify-center rounded-none flex-shrink-0">
+                  <img
+                    src={viewingItem.aiPhotoUrl}
+                    alt={viewingItem.outfit.name}
+                    className="h-full w-auto max-w-full object-contain block"
+                  />
+                </div>
+              ) : (
+                <div className="h-[52vh] sm:h-[62vh] lg:h-[70vh] max-w-[70vh] aspect-square overflow-hidden shadow-2xl bg-black border-2 border-white/15 relative flex items-center justify-center rounded-none flex-shrink-0">
+                  <OutfitMannequinComposite
+                    outfit={viewingItem.outfit}
+                    className="w-full h-full"
+                    isModal
+                  />
+                </div>
+              )}
+
+              {/* CỘT BÊN PHẢI:
+                  - NẾU LÀ OUTFIT: THÊM CÁC ẢNH ĐÃ TẠO BỞI AI TỪ OUTFIT ĐÓ
+                  - NẾU LÀ ẢNH AI: HIỂN THỊ BẢN PHỐI OUTFIT GỐC ĐỂ THAM CHIẾU */}
+              {viewingItem.type === 'outfit' ? (
+                <div className="w-full lg:w-72 xl:w-80 h-auto lg:h-[70vh] flex flex-col bg-black/50 border border-white/10 p-4 rounded-none">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+                    <div className="flex items-center gap-2 text-amber-300">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-silk-ivory">
+                        Ảnh tạo bởi AI
+                      </span>
+                    </div>
+                    {(() => {
+                      const aiImgs =
+                        viewingItem.outfit.tryOnImages && viewingItem.outfit.tryOnImages.length > 0
+                          ? viewingItem.outfit.tryOnImages
+                          : viewingItem.outfit.tryOnImage
+                          ? [viewingItem.outfit.tryOnImage]
+                          : [];
+                      return (
+                        <span className="text-xs text-silk-muted font-mono">{aiImgs.length} ảnh</span>
+                      );
+                    })()}
                   </div>
 
-                  {isEditingName ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="text"
-                        value={editNameText}
-                        onChange={(e) => setEditNameText(e.target.value)}
-                        className="flex-1 bg-[#0D111A] border border-[#C5A059]/50 px-3 py-1.5 text-sm font-sans text-[#EDE5D8] focus:outline-none rounded-[6px]"
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleSaveRename}
-                        className="p-2 bg-gradient-to-r from-[#D4AF37] to-[#AA8232] text-[#0A0D12] hover:brightness-110 rounded-[6px] cursor-pointer"
-                        title="Lưu tên mới"
-                      >
-                        <Check className="w-4 h-4 stroke-[3]" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 group/edit">
-                      <h2 className="font-serif font-extrabold text-2xl text-[#F7F4EE] tracking-tight">
-                        {selectedOutfit.name}
-                      </h2>
-                      {isLoggedIn && (
+                  {(() => {
+                    const aiImgs =
+                      viewingItem.outfit.tryOnImages && viewingItem.outfit.tryOnImages.length > 0
+                        ? viewingItem.outfit.tryOnImages
+                        : viewingItem.outfit.tryOnImage
+                        ? [viewingItem.outfit.tryOnImage]
+                        : [];
+
+                    if (aiImgs.length > 0) {
+                      return (
+                        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                          {aiImgs.map((aiUrl, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => {
+                                setViewingItem({
+                                  type: 'ai-photo',
+                                  outfit: viewingItem.outfit,
+                                  aiPhotoUrl: aiUrl,
+                                });
+                              }}
+                              className="group relative aspect-[3/4] w-full bg-black/80 border-2 border-white/15 hover:border-[#d8af65] cursor-pointer overflow-hidden transition-colors rounded-none flex items-center justify-center"
+                              title="Bấm để xem ảnh lớn"
+                            >
+                              <img
+                                src={aiUrl}
+                                alt={`${viewingItem.outfit.name} - AI ${idx + 1}`}
+                                className="w-full h-full object-contain"
+                              />
+                              <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 border border-white/10 text-[11px] text-amber-300 font-medium flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                <span>Xem ảnh lớn</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+                        <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center text-amber-300/70 mb-3 rounded-none">
+                          <Sparkles className="w-6 h-6" />
+                        </div>
+                        <p className="text-xs sm:text-sm font-semibold text-silk-ivory mb-1">
+                          Chưa có ảnh AI
+                        </p>
+                        <p className="text-xs text-silk-muted mb-4 leading-relaxed">
+                          Outfit này chưa tạo ảnh thử đồ AI. Mở Studio để phối và tạo ảnh độc bản.
+                        </p>
                         <button
                           onClick={() => {
-                            setIsEditingName(true);
-                            setEditNameText(selectedOutfit.name);
+                            onLoadOutfitIntoStudio(viewingItem.outfit);
+                            setViewingItem(null);
+                            onOpenStudio();
                           }}
-                          className="text-[#EDE5D8]/50 hover:text-[#D4AF37] opacity-0 group-hover/edit:opacity-100 transition-opacity p-1 cursor-pointer"
-                          title="Đổi tên bộ trang phục"
+                          className="w-full py-2.5 px-3 bg-[#d8af65] hover:bg-[#e8c078] text-[#241708] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 rounded-none"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Tạo ảnh với Studio</span>
                         </button>
-                      )}
-                    </div>
-                  )}
-
-                  <p className="text-xs text-[#EDE5D8]/70 mt-1 font-sans">
-                    Bối cảnh phục sức: <strong className="text-[#F7F4EE]">{selectedOutfit.event.name}</strong> • Giới tính:{' '}
-                    <strong className="text-[#F7F4EE]">{selectedOutfit.gender === 'women' ? 'Nữ' : 'Nam'}</strong>
-                  </p>
+                      </div>
+                    );
+                  })()}
                 </div>
-
-                {/* 2. PIECES BREAKDOWN (Bóc tách từng món đồ) */}
-                <div className="space-y-2.5 font-sans">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#C5A059] flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>Cấu Thành Phục Sức ({selectedOutfit.accessory ? '4' : '3'} món)</span>
-                  </h4>
-
-                  <div className="space-y-2">
-                    {/* Áo */}
-                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
-                        <img
-                          src={selectedOutfit.top.piece.thumbnailUrl || selectedOutfit.top.piece.assetUrl}
-                          alt={selectedOutfit.top.piece.name}
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Áo</span>
-                          {selectedOutfit.top.piece.culturalInfo && (
-                            <span className="text-[9px] text-[#EDE5D8]/60">
-                              {selectedOutfit.top.piece.culturalInfo.period.split('(')[0]}
-                            </span>
-                          )}
-                        </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
-                          {selectedOutfit.top.piece.name}
-                        </h5>
-                      </div>
-                    </div>
-
-                    {/* Quần */}
-                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
-                        <img
-                          src={selectedOutfit.bottom.piece.thumbnailUrl || selectedOutfit.bottom.piece.assetUrl}
-                          alt={selectedOutfit.bottom.piece.name}
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Quần / Váy</span>
-                          {selectedOutfit.bottom.piece.culturalInfo && (
-                            <span className="text-[9px] text-[#EDE5D8]/60">
-                              {selectedOutfit.bottom.piece.culturalInfo.period.split('(')[0]}
-                            </span>
-                          )}
-                        </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
-                          {selectedOutfit.bottom.piece.name}
-                        </h5>
-                      </div>
-                    </div>
-
-                    {/* Giày */}
-                    <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
-                        <img
-                          src={selectedOutfit.footwear.piece.thumbnailUrl || selectedOutfit.footwear.piece.assetUrl}
-                          alt={selectedOutfit.footwear.piece.name}
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider">Giày / Dép</span>
-                          {selectedOutfit.footwear.piece.culturalInfo && (
-                            <span className="text-[9px] text-[#EDE5D8]/60">
-                              {selectedOutfit.footwear.piece.culturalInfo.period.split('(')[0]}
-                            </span>
-                          )}
-                        </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
-                          {selectedOutfit.footwear.piece.name}
-                        </h5>
-                      </div>
-                    </div>
-
-                    {/* Phụ kiện (nếu có) */}
-                    {selectedOutfit.accessory && (
-                      <div className="p-2.5 rounded-[8px] bg-[#0D111A]/80 border border-[#C5A059]/25 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[6px] bg-[#121622] border border-[#C5A059]/30 p-1 flex items-center justify-center flex-shrink-0">
-                          <img
-                            src={selectedOutfit.accessory.piece.thumbnailUrl || selectedOutfit.accessory.piece.assetUrl}
-                            alt={selectedOutfit.accessory.piece.name}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="text-[10px] text-[#C5A059] uppercase font-bold tracking-wider block">Phụ kiện</span>
-                          <h5 className="font-bold text-xs sm:text-sm text-[#F7F4EE] truncate">
-                            {selectedOutfit.accessory.piece.name}
-                          </h5>
-                        </div>
-                      </div>
-                    )}
+              ) : (
+                /* NẾU ĐANG XEM ẢNH AI: CỘT PHẢI HIỂN THỊ OUTFIT GỐC */
+                <div className="w-full lg:w-72 xl:w-80 h-auto lg:h-[70vh] flex flex-col bg-black/50 border border-white/10 p-4 rounded-none">
+                  <div className="flex items-center gap-2 pb-3 border-b border-white/10 mb-3 text-amber-300">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-silk-ivory">
+                      Outfit Phối Đồ Gốc
+                    </span>
                   </div>
-                </div>
 
-                {/* 3. Đánh giá văn hóa (Bé Nghê Cung Đình) */}
-                {selectedOutfit.aiAnalysis && (
-                  <div className="p-3.5 rounded-[8px] bg-[#0D111A] border border-[#C5A059]/35 space-y-1.5 font-sans">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#C5A059] flex items-center gap-1.5 uppercase tracking-wider">
-                        <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                        <span>Nhận Xét Điển Lễ</span>
-                      </span>
-                      <span className="text-xs font-sans font-medium px-2 py-0.5 rounded-[4px] bg-[#12161F] text-[#D4AF37] border border-[#C5A059]/50">
-                        ★ {selectedOutfit.aiAnalysis.totalScore}/10
-                      </span>
-                    </div>
-                    <p className="font-sans text-xs text-[#EDE5D8]/95 leading-relaxed">
-                      "{selectedOutfit.aiAnalysis.mascotQuote || selectedOutfit.aiAnalysis.explanation}"
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* 4. Action Buttons at bottom of modal */}
-              <div className="pt-5 border-t border-[#C5A059]/20 flex flex-col sm:flex-row items-center gap-2.5 mt-5 font-sans">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onLoadOutfitIntoStudio(selectedOutfit);
-                    setSelectedOutfit(null);
-                  }}
-                  className="w-full sm:flex-1 py-2.5 px-4 rounded-[6px] bg-gradient-to-r from-[#D4AF37] to-[#AA8232] hover:brightness-110 text-[#0A0D12] font-bold text-xs uppercase tracking-wider shadow-[0_4px_16px_rgba(212,175,55,0.25)] flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Mở Trong Studio (Remix)</span>
-                </button>
-
-                {isLoggedIn && (
-                  <button
-                    type="button"
+                  <div
                     onClick={() => {
-                      const idToDelete = selectedOutfit.id;
-                      setSelectedOutfit(null);
-                      onDeleteOutfit(idToDelete);
+                      setViewingItem({
+                        type: 'outfit',
+                        outfit: viewingItem.outfit,
+                      });
                     }}
-                    className="py-2.5 px-4 rounded-[6px] bg-[#161B26] hover:bg-rose-950/60 border border-[#C5A059]/40 hover:border-rose-500/50 text-[#EDE5D8]/70 hover:text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    title="Xóa bộ trang phục này"
+                    className="relative aspect-square w-full bg-black/70 border-2 border-white/15 hover:border-[#d8af65] cursor-pointer overflow-hidden mb-3 transition-colors rounded-none"
+                    title="Bấm để xem outfit"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Xóa</span>
+                    <OutfitMannequinComposite
+                      outfit={viewingItem.outfit}
+                      className="w-full h-full"
+                    />
+                    <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 border border-white/10 text-[11px] text-silk-ivory flex items-center gap-1">
+                      <span>Xem Outfit</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm font-semibold text-silk-ivory truncate">
+                    {viewingItem.outfit.name}
+                  </p>
+                  <p className="text-xs text-silk-muted mt-0.5">
+                    {viewingItem.outfit.event?.name || 'Sự kiện cổ truyền'}
+                  </p>
+
+                  <button
+                    onClick={() => {
+                      onLoadOutfitIntoStudio(viewingItem.outfit);
+                      setViewingItem(null);
+                      onOpenStudio();
+                    }}
+                    className="mt-auto w-full py-2 px-3 border border-white/20 hover:border-white/50 bg-white/5 text-silk-ivory text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer rounded-none flex items-center justify-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Mở trong Studio</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* THANH CÔNG CỤ DƯỚI ĐÁY: NÚT XÓA CHUYỂN XUỐNG ĐÂY */}
+          <div
+            className="p-3.5 flex items-center justify-center border-t border-white/10 bg-black/40 backdrop-blur-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {/* Nút Xóa (Đã chuyển xuống thanh công cụ dưới đáy) */}
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Bạn có chắc muốn xóa "${viewingItem.outfit.name}" khỏi bộ sưu tập?`
+                    )
+                  ) {
+                    onDeleteOutfit(viewingItem.outfit.id);
+                    setViewingItem(null);
+                  }
+                }}
+                className="px-3.5 py-2 border border-rose-500/30 hover:border-rose-500 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none"
+                title="Xóa khỏi bộ sưu tập"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Xóa</span>
+              </button>
+
+              {/* Yêu thích */}
+              {onToggleFavorite && (
+                <button
+                  onClick={() => onToggleFavorite(viewingItem.outfit.id)}
+                  className={`px-3.5 py-2 border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none ${
+                    viewingItem.outfit.isFavorite
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : 'bg-white/5 hover:bg-white/10 text-silk-muted hover:text-white border-white/15'
+                  }`}
+                  title={viewingItem.outfit.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${
+                      viewingItem.outfit.isFavorite ? 'fill-rose-400' : ''
+                    }`}
+                  />
+                  <span>{viewingItem.outfit.isFavorite ? 'Đã thích' : 'Yêu thích'}</span>
+                </button>
+              )}
+
+              {/* Tải ảnh về máy */}
+              <button
+                onClick={() => {
+                  const url =
+                    viewingItem.type === 'ai-photo' && viewingItem.aiPhotoUrl
+                      ? viewingItem.aiPhotoUrl
+                      : viewingItem.outfit.tryOnImage ||
+                        (viewingItem.outfit.tryOnImages && viewingItem.outfit.tryOnImages[0]) ||
+                        viewingItem.outfit.top?.piece?.assetUrl ||
+                        '';
+                  if (url) {
+                    handleDownload(url, viewingItem.outfit.name);
+                  } else {
+                    showToast('Không có liên kết ảnh để tải');
+                  }
+                }}
+                className="px-3.5 py-2 border border-white/15 hover:border-white/40 bg-white/5 hover:bg-white/10 text-silk-muted hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-none"
+                title="Tải ảnh về máy"
+              >
+                <Download className="w-4 h-4" />
+                <span>Tải ảnh</span>
+              </button>
+
+              {/* Mở lại trong Studio */}
+              <button
+                onClick={() => {
+                  onLoadOutfitIntoStudio(viewingItem.outfit);
+                  setViewingItem(null);
+                  onOpenStudio();
+                }}
+                className="px-4 py-2 bg-white hover:bg-neutral-200 text-black font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer rounded-none shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Mở trong Studio</span>
+              </button>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Create Lookbook Modal */}
-      {onCreateLookbook && (
-        <CreateLookbookModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          outfits={outfits}
-          onCreateLookbook={onCreateLookbook}
-          onOpenStudio={onOpenStudio}
-        />
-      )}
-
-      {/* Lookbook Detail Viewer Modal */}
-      {selectedLookbook && (
-        <LookbookDetailModal
-          isOpen={Boolean(selectedLookbook)}
-          onClose={() => setSelectedLookbook(null)}
-          lookbook={selectedLookbook}
-          allOutfits={outfits}
-          onLoadOutfitIntoStudio={onLoadOutfitIntoStudio}
-          onDeleteLookbook={(id) => {
-            onDeleteLookbook?.(id);
-            setSelectedLookbook(null);
-          }}
-          showToast={showToast}
-        />
       )}
     </div>
   );

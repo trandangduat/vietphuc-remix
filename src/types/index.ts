@@ -2,12 +2,20 @@ export type PieceCategory = 'top' | 'bottom' | 'footwear' | 'accessory';
 export type StyleFilter = 'all' | 'traditional' | 'modern';
 export type GenderSelection = 'men' | 'women';
 
+export interface CulturalSource {
+  title: string;
+  url: string;
+  authorOrOrg?: string;
+}
+
 export interface CulturalInfo {
   period: string;
   meaning: string;
   context: string;
   source: string;
   citationUrl?: string;
+  origin?: string;
+  sources?: CulturalSource[];
 }
 
 export interface PieceVariant {
