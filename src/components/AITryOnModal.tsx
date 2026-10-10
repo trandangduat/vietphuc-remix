@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   Shield,
@@ -11,11 +11,20 @@ import {
   Calendar,
   AlertCircle,
   RefreshCw,
-  Image as ImageIcon,
+  Key,
+  ExternalLink,
+  Layers,
+  User,
 } from 'lucide-react';
 import { ActiveOutfitState } from '../types';
 import { HeritageModal } from './heritage/HeritageFrame';
-import { callAITryOnService } from '../services/tryOnService';
+import {
+  callAITryOnService,
+  renderStudioPreviewCanvas,
+  getSavedPollinationsApiKey,
+  savePollinationsApiKey,
+  DEFAULT_AI_MODEL,
+} from '../services/tryOnService';
 
 interface AITryOnModalProps {
   isOpen: boolean;
@@ -55,6 +64,7 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [photoName, setPhotoName] = useState<string>('');
+  const [studioPreview, setStudioPreview] = useState<string | null>(null);
   const [isMinorConsent, setIsMinorConsent] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
@@ -62,7 +72,31 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Pollinations API Key & Multimodal Model Selection
+  const [apiKey, setApiKey] = useState<string>('');
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_AI_MODEL);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load saved API key on mount
+  useEffect(() => {
+    setApiKey(getSavedPollinationsApiKey());
+  }, []);
+
+  // Pre-render the exact Studio canvas preview whenever modal opens or outfit changes
+  useEffect(() => {
+    if (isOpen) {
+      renderStudioPreviewCanvas(outfit)
+        .then((dataUrl) => setStudioPreview(dataUrl))
+        .catch((err) => console.warn('Could not pre-render studio preview:', err));
+    }
+  }, [isOpen, outfit]);
+
+  const handleSaveKey = () => {
+    savePollinationsApiKey(apiKey);
+    setShowKeyConfig(false);
+  };
 
   // Handle file upload from device
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,10 +117,10 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
     }
   };
 
-  // Trigger AI generation with Nano Banana
+  // Trigger Multimodal AI Virtual Try-On
   const handleStartGeneration = async () => {
     if (!selectedPhoto) {
-      setErrorMessage('Vui lòng tải lên hoặc chọn một ảnh khuôn mặt chân dung.');
+      setErrorMessage('Vui lòng tải lên hoặc chọn một ảnh khuôn mặt/người mẫu.');
       return;
     }
 
@@ -97,7 +131,10 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
       const response = await callAITryOnService(
         {
           faceImage: selectedPhoto,
+          studioPreviewImage: studioPreview || undefined,
           outfit,
+          apiKey: apiKey.trim() || undefined,
+          model: selectedModel,
         },
         (progress) => setGenerationStep(progress)
       );
@@ -134,32 +171,89 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
       title="Thử Trang Phục AI (AI Try On)"
       subtitle={`Tạo ảnh người thật mặc cổ phục qua AI • Bối cảnh: ${outfit.event.name}`}
       icon={<Sparkles className="w-4 h-4 flex-shrink-0 text-[#C5A059]" />}
-      badge="NANO BANANA AI"
+      badge="MULTIMODAL AI TRY-ON"
       maxWidth="max-w-xl"
     >
       <div className="space-y-4 font-sans text-xs">
-        {/* Privacy Notice Banner */}
-        <div className="p-3 rounded-lg bg-[#0D111A] border-l-4 border-l-emerald-500 border border-[#C5A059]/25 flex items-start gap-2.5 text-xs text-[#EDE5D8]/80">
-          <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-bold text-[#F7F4EE]">Bảo mật hình ảnh: </span>
-            Ảnh khuôn mặt của bạn chỉ được sử dụng trong phiên làm việc để tạo ảnh phục trang truyền thống và không được lưu trữ cho mục đích khác.
+        {/* Top Controls: Model Switcher & API Key */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-[#0D111A] border border-[#C5A059]/25 text-xs">
+          <div className="flex items-center gap-2 text-[#EDE5D8]/90">
+            <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <span className="text-[11px] leading-tight font-medium">
+              Mô hình: <strong className="text-[#F7F4EE]">{selectedModel.split('/').pop()?.toUpperCase()}</strong>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            {/* Model switcher */}
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="bg-black/60 border border-white/15 text-[#EDE5D8] text-[11px] rounded px-2 py-1 focus:border-[#E5BA70] focus:outline-none cursor-pointer"
+            >
+              <option value="openai/gpt-image-2">GPT Image 2 (Khuyên dùng)</option>
+              <option value="openai/gpt-image-1-mini">GPT Image Mini (Nhanh)</option>
+              <option value="google/gemini-nano-banana-2.1">Nano Banana 2.1 (Google)</option>
+            </select>
+
+            {/* API Key settings button */}
+            <button
+              type="button"
+              onClick={() => setShowKeyConfig(!showKeyConfig)}
+              className={`px-2 py-1 rounded text-[11px] font-medium border flex items-center gap-1 transition-colors cursor-pointer ${
+                apiKey
+                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
+                  : 'bg-white/5 border-white/10 text-[#EDE5D8]/70 hover:text-white'
+              }`}
+              title="Cấu hình API Key"
+            >
+              <Key className="w-3 h-3" />
+              <span>{apiKey ? 'Key OK' : 'API Key'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Outfit summary chip */}
-        <div className="p-3 rounded-lg bg-black/40 border border-white/10 flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-[#EDE5D8]/90 truncate">
-            <Shirt className="w-4 h-4 text-[#E5BA70] flex-shrink-0" />
-            <span className="truncate">
-              <strong>Phục trang:</strong> {outfit.topPiece?.name || 'Áo tấc'} + {outfit.bottomPiece?.name || 'Quần'}
-            </span>
+        {/* API Key Configuration Dropdown */}
+        {showKeyConfig && (
+          <div className="p-3 rounded-lg bg-[#141A26] border border-[#E5BA70]/40 space-y-2 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#E5BA70] flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5" />
+                <span>Cấu hình API Key (Pollinations)</span>
+              </span>
+              <a
+                href="https://enter.pollinations.ai/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] text-[#E5BA70] hover:underline flex items-center gap-1"
+              >
+                <span>Lấy Key miễn phí</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            </div>
+
+            <p className="text-[11px] text-[#EDE5D8]/70 leading-relaxed">
+              Dán API Key (bắt đầu bằng <code>sk_...</code> hoặc <code>pk_...</code>) để kích hoạt mô hình đa phương thức:
+            </p>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="password"
+                placeholder="Dán API Key..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="flex-1 px-2.5 py-1.5 rounded bg-black/60 border border-white/15 text-[#EDE5D8] text-xs focus:border-[#E5BA70] focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleSaveKey}
+                className="px-3 py-1.5 rounded bg-[#E5BA70] text-[#1A140E] font-bold text-xs hover:bg-[#F0D195] transition-colors cursor-pointer"
+              >
+                Lưu
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[#E5BA70] flex-shrink-0 text-[11px] font-medium">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{outfit.event.name}</span>
-          </div>
-        </div>
+        )}
 
         {/* Error notification alert */}
         {errorMessage && (
@@ -178,21 +272,22 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               </button>
             </div>
 
-            {/* Quick Demo Preview fallback if quota limit or billing is hit */}
-            {(errorMessage.includes('Billing') || errorMessage.includes('Quota')) && (
+            {/* Prompt to add API Key if 401, 402, 403, or quota is returned */}
+            {(errorMessage.includes('402') ||
+              errorMessage.includes('403') ||
+              errorMessage.includes('401') ||
+              errorMessage.includes('API Key') ||
+              errorMessage.includes('Paid Pollen')) && (
               <div className="pt-2 border-t border-rose-500/30 flex items-center justify-between">
-                <span className="text-[11px] text-rose-200/80">
-                  Bạn có muốn xem ảnh mô phỏng kết quả mẫu để kiểm tra giao diện?
+                <span className="text-[11px] text-rose-200/90">
+                  Cần kiểm tra API Key hoặc đổi mô hình khác:
                 </span>
                 <button
-                  onClick={() => {
-                    setGeneratedResult('/assets/test-composite-preview.png');
-                    setErrorMessage(null);
-                  }}
+                  onClick={() => setShowKeyConfig(true)}
                   className="px-2.5 py-1 rounded bg-[#E5BA70] hover:bg-[#F0D195] text-[#1A140E] font-bold text-[10px] transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  <ImageIcon className="w-3 h-3" />
-                  <span>Xem ảnh mẫu</span>
+                  <Key className="w-3 h-3" />
+                  <span>Cấu hình Key</span>
                 </button>
               </div>
             )}
@@ -201,106 +296,114 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
 
         {!generatedResult ? (
           <div className="space-y-4">
-            {/* Step 1: Upload Face Photo */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] font-bold text-[#E5BA70] uppercase tracking-wider block">
-                  Tải lên ảnh khuôn mặt của bạn:
-                </label>
-                {selectedPhoto && (
-                  <button
-                    onClick={() => {
-                      setSelectedPhoto(null);
-                      setPhotoName('');
-                    }}
-                    className="text-[11px] text-rose-300 hover:text-rose-200 transition-colors flex items-center gap-1 cursor-pointer"
+            {/* Visual Input Overview: 2 Reference Images Fed to AI */}
+            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/10">
+              {/* Input 1: User Person / Face Image */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  <span>1. Ảnh khuôn mặt / Người mẫu</span>
+                </span>
+                {selectedPhoto ? (
+                  <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-[#E5BA70]/50 bg-black/60 group">
+                    <img
+                      src={selectedPhoto}
+                      alt="Ảnh người mẫu"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedPhoto(null);
+                        setPhotoName('');
+                      }}
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/75 hover:bg-rose-900 text-rose-300 transition-colors"
+                      title="Đổi ảnh khác"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/75 px-1.5 py-0.5 text-[9px] text-[#EDE5D8] truncate text-center">
+                      {photoName || 'Đã chọn'}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="aspect-[3/4] rounded-lg border-2 border-dashed border-[#C5A059]/35 hover:border-[#E5BA70] bg-[#0D111A]/60 flex flex-col items-center justify-center p-2 text-center cursor-pointer transition-all"
                   >
-                    <X className="w-3 h-3" />
-                    <span>Chọn ảnh khác</span>
-                  </button>
+                    <Upload className="w-5 h-5 text-[#E5BA70] mb-1" />
+                    <span className="text-[10px] font-bold text-[#EDE5D8]">Bấm tải ảnh lên</span>
+                    <span className="text-[9px] text-[#EDE5D8]/50">Khuôn mặt rõ nét</span>
+                  </div>
                 )}
               </div>
 
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/jpg"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-
-              {/* Drag/Click upload box or Photo preview */}
-              {selectedPhoto ? (
-                <div className="flex items-center gap-3.5 p-3 rounded-xl bg-[#0D111A] border border-[#E5BA70]/60 shadow-[0_0_15px_rgba(229,186,112,0.15)]">
-                  <img
-                    src={selectedPhoto}
-                    alt="Khuôn mặt đã chọn"
-                    className="w-16 h-16 rounded-lg object-cover border border-[#E5BA70]/40 flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5BA70] block">
-                      Ảnh khuôn mặt sẵn sàng
-                    </span>
-                    <p className="text-xs text-silk-ivory font-medium truncate mt-0.5">
-                      {photoName || 'Chân dung người dùng'}
-                    </p>
-                    <span className="text-[11px] text-[#EDE5D8]/50 block mt-0.5">
-                      AI sẽ giữ trọn diện mạo khuôn mặt này và mặc bộ cổ phục lên người bạn.
-                    </span>
+              {/* Input 2: Studio Preview Reference (Outfit + Background) */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5BA70] flex items-center gap-1">
+                  <Layers className="w-3 h-3" />
+                  <span>2. Bản phối Studio thực tế</span>
+                </span>
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-[#C5A059]/40 bg-black/60">
+                  {studioPreview ? (
+                    <img
+                      src={studioPreview}
+                      alt="Bản phối Studio thực tế"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] text-[#EDE5D8]/50 animate-pulse">
+                      Đang kết xuất bản phối...
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 inset-x-0 bg-black/80 px-1.5 py-0.5 text-[9px] text-[#E5BA70] truncate text-center">
+                    {outfit.topPiece?.name || 'Áo tấc'} • {outfit.event.name}
                   </div>
                 </div>
-              ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-[#C5A059]/35 hover:border-[#E5BA70] bg-[#0D111A]/60 hover:bg-[#0D111A]/80 rounded-xl p-5 text-center cursor-pointer transition-all"
-                >
-                  <div className="w-10 h-10 rounded-full bg-[#E5BA70]/15 border border-[#E5BA70]/30 flex items-center justify-center mb-2 mx-auto text-[#E5BA70]">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs text-[#EDE5D8] font-bold block mb-0.5">
-                    Bấm để tải ảnh khuôn mặt từ thiết bị
-                  </span>
-                  <span className="text-[11px] text-[#EDE5D8]/50 block">
-                    Khuyến nghị: Ảnh chụp chính diện, rõ nét (JPG, PNG tối đa 15MB)
-                  </span>
-                </div>
-              )}
-
-              {/* Sample Faces Shortcuts */}
-              {!selectedPhoto && (
-                <div className="mt-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#EDE5D8]/50 block mb-1.5">
-                    Hoặc thử nhanh với ảnh chân dung mẫu:
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {SAMPLE_FACES.map((face) => (
-                      <div
-                        key={face.id}
-                        onClick={() => {
-                          setSelectedPhoto(face.url);
-                          setPhotoName(face.label);
-                          setErrorMessage(null);
-                        }}
-                        className="p-2 rounded-lg border border-white/10 bg-[#0D111A]/70 hover:border-[#E5BA70]/50 cursor-pointer transition-all flex items-center gap-2 select-none"
-                      >
-                        <img
-                          src={face.url}
-                          alt={face.label}
-                          className="w-7 h-7 rounded-full object-cover border border-[#E5BA70]/40 flex-shrink-0"
-                        />
-                        <span className="text-[11px] text-[#EDE5D8] font-medium truncate">
-                          {face.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
 
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/jpg"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            {/* Sample Faces Shortcuts */}
+            {!selectedPhoto && (
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#EDE5D8]/50 block mb-1.5">
+                  Hoặc thử nhanh với ảnh chân dung mẫu:
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {SAMPLE_FACES.map((face) => (
+                    <div
+                      key={face.id}
+                      onClick={() => {
+                        setSelectedPhoto(face.url);
+                        setPhotoName(face.label);
+                        setErrorMessage(null);
+                      }}
+                      className="p-1.5 rounded-lg border border-white/10 bg-[#0D111A]/70 hover:border-[#E5BA70]/50 cursor-pointer transition-all flex items-center gap-2 select-none"
+                    >
+                      <img
+                        src={face.url}
+                        alt={face.label}
+                        className="w-7 h-7 rounded-full object-cover border border-[#E5BA70]/40 flex-shrink-0"
+                      />
+                      <span className="text-[11px] text-[#EDE5D8] font-medium truncate">
+                        {face.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Parental Consent Checkbox */}
-            <div className="p-3 rounded-lg bg-[#0D111A] border border-[#C5A059]/25">
+            <div className="p-2.5 rounded-lg bg-[#0D111A] border border-[#C5A059]/25">
               <label className="flex items-start gap-2.5 cursor-pointer text-xs">
                 <input
                   type="checkbox"
@@ -327,12 +430,12 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               {isGenerating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-[#1A140E]/30 border-t-[#1A140E] rounded-full animate-spin" />
-                  <span>{generationStep || 'AI đang sinh ảnh...'}</span>
+                  <span>{generationStep || 'AI đang xử lý ghép ảnh đa phương thức...'}</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-[#1A140E] fill-current" />
-                  <span>Tạo ảnh AI Try On ngay</span>
+                  <span>Tạo ảnh AI Try On (Khuôn mặt + Bộ đồ Studio)</span>
                 </>
               )}
             </button>
@@ -348,12 +451,12 @@ export const AITryOnModal: React.FC<AITryOnModalProps> = ({
               />
               <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-black/85 backdrop-blur-md border border-[#E5BA70]/60 text-[10px] font-bold text-[#E5BA70] flex items-center gap-1.5 uppercase tracking-wider shadow">
                 <Sparkles className="w-3 h-3 text-[#E5BA70] fill-current" />
-                <span>AI Generated</span>
+                <span>AI TRY-ON RESULT</span>
               </div>
             </div>
 
             <p className="text-xs text-[#EDE5D8]/80 max-w-sm mx-auto leading-relaxed">
-              Bức ảnh mô phỏng hoàn tất! Bạn có thể tải ngay file ảnh chất lượng cao về máy hoặc lưu vào Bộ sưu tập Lookbook cá nhân.
+              Bức ảnh thử trang phục hoàn tất! Bạn có thể tải ngay file ảnh về máy hoặc lưu vào Bộ sưu tập Lookbook cá nhân.
             </p>
 
             <div className="grid grid-cols-3 gap-2.5 pt-1">

@@ -1,13 +1,13 @@
-import { ActiveOutfitState, Piece } from '../types';
+import { ActiveOutfitState } from '../types';
+import { getPieceAlignment, PieceAlignment } from '../data/pieceAlignments';
 
 export interface AITryOnRequest {
-  faceImage: string; // Base64 data URL or public URL of user's face
+  faceImage: string; // Base64 data URL or URL of the user's uploaded person/face image
+  studioPreviewImage?: string; // Optional pre-rendered studio preview; will be auto-generated if omitted
   outfit: ActiveOutfitState;
   customPrompt?: string;
   apiKey?: string;
-  endpoint?: string; // Custom endpoint (e.g. Kaggle / Colab Cloudflare Tunnel)
-  model?: string; // default: 'gemini-3.1-flash-lite-image' (Best P/P Nano Banana model)
-  useMockFallbackOnError?: boolean;
+  model?: 'openai/gpt-image-2' | 'openai/gpt-image-1-mini' | 'google/gemini-nano-banana-2.1' | string;
 }
 
 export interface AITryOnResponse {
@@ -15,225 +15,235 @@ export interface AITryOnResponse {
   promptUsed: string;
   status: 'success' | 'error';
   errorMessage?: string;
-  isMockFallback?: boolean;
 }
 
-const LOCAL_STORAGE_KEY = 'vietphuc_gemini_api_key';
-const LOCAL_STORAGE_ENDPOINT_KEY = 'vietphuc_tryon_endpoint';
-
-// Best P/P model of Nano Banana family: Gemini 3.1 Flash Lite Image
-export const DEFAULT_NANO_BANANA_MODEL = 'gemini-3.1-flash-lite-image';
+const LOCAL_STORAGE_KEY = 'vietphuc_pollinations_api_key';
 
 /**
- * Retrieve the active Gemini API key from environment variables or localStorage
+ * Default AI Model for Multimodal Virtual Try-On
  */
-export function getSavedGeminiApiKey(): string {
-  const envKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim();
+export const DEFAULT_AI_MODEL = 'openai/gpt-image-2';
+
+/**
+ * Retrieve saved Pollinations API key
+ */
+export function getSavedPollinationsApiKey(): string {
+  const envKey = (import.meta.env.VITE_POLLINATIONS_API_KEY as string | undefined)?.trim();
   if (envKey) return envKey;
   return localStorage.getItem(LOCAL_STORAGE_KEY)?.trim() || '';
 }
 
 /**
- * Retrieve custom Try-On endpoint (e.g. Kaggle / Colab URL) if configured
+ * Save Pollinations API key to localStorage
  */
-export function getCustomTryOnEndpoint(): string {
-  const envEndpoint = (import.meta.env.VITE_TRYON_API_URL as string | undefined)?.trim();
-  if (envEndpoint) return envEndpoint;
-  return localStorage.getItem(LOCAL_STORAGE_ENDPOINT_KEY)?.trim() || '';
-}
-
-/**
- * Resizes an image (base64 or image URL) to standard resolution (max 1024px)
- * to ensure fast multimodal upload and avoid hitting Gemini request payload limits.
- */
-export async function optimizeImageForAI(
-  dataUrlOrUrl: string,
-  maxDim: number = 1024
-): Promise<{ data: string; mimeType: string }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    img.onload = () => {
-      let { width, height } = img;
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height);
-        const resDataUrl = canvas.toDataURL('image/jpeg', 0.88);
-        const [header, base64] = resDataUrl.split(',');
-        const mimeType = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
-        resolve({ data: base64, mimeType });
-      } else {
-        const parts = dataUrlOrUrl.split(',');
-        const mimeType = parts[0]?.match(/:(.*?);/)?.[1] || 'image/jpeg';
-        resolve({ data: parts[1] || parts[0], mimeType });
-      }
-    };
-
-    img.onerror = () => {
-      if (dataUrlOrUrl.startsWith('data:')) {
-        const parts = dataUrlOrUrl.split(',');
-        const mimeType = parts[0]?.match(/:(.*?);/)?.[1] || 'image/jpeg';
-        resolve({ data: parts[1], mimeType });
-      } else {
-        reject(new Error('Không thể xử lý ảnh khuôn mặt'));
-      }
-    };
-
-    img.src = dataUrlOrUrl;
-  });
-}
-
-/**
- * Converts a relative or public URL to base64 for API multimodal transmission
- */
-export async function urlToBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        const [header, base64] = result.split(',');
-        const mimeType = header.match(/:(.*?);/)?.[1] || blob.type || 'image/png';
-        resolve({ data: base64, mimeType });
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch (e) {
-    console.warn('Could not load piece asset for try-on payload:', url, e);
-    return null;
+export function savePollinationsApiKey(key: string): void {
+  if (key && key.trim()) {
+    localStorage.setItem(LOCAL_STORAGE_KEY, key.trim());
+  } else {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   }
 }
 
 /**
- * Builds the comprehensive prompt for Vietnamese Traditional Virtual Try-On
+ * Helper to load an HTML image asynchronously
  */
-export function buildTryOnPrompt(outfit: ActiveOutfitState, piecesCount: number = 0): string {
-  const gender = outfit.mannequinGender === 'men' ? 'nam' : 'nữ';
-  const top = outfit.topPiece?.name || 'Áo tấc truyền thống';
-  const topStyle = outfit.topPiece?.style || 'truyền thống';
-  const topInfo = outfit.topPiece?.culturalInfo?.meaning ? ` (${outfit.topPiece.culturalInfo.meaning})` : '';
-
-  const bottom = outfit.bottomPiece?.name || 'Quần lụa trắng truyền thống';
-  const footwear = outfit.footwearPiece?.name || 'Hài nhung truyền thống';
-  const accessory = outfit.accessoryPiece ? `, phụ kiện đi kèm: ${outfit.accessoryPiece.name}` : '';
-  const event = outfit.event.name;
-  const eventDesc = outfit.event.description || '';
-
-  return `TASK: High-Fashion Photorealistic Virtual Try-On Portrait with Authentic Vietnamese Traditional Attire (Cổ Phục Việt Nam).
-
-REFERENCE INPUTS PROVIDED:
-1. First image: Reference face portrait of the person.
-${piecesCount > 0 ? `2. Subsequent images: Visual reference garment pieces selected by the user for this outfit.` : ''}
-
-CRITICAL GENERATION REQUIREMENTS:
-1. FACIAL IDENTITY RETENTION:
-   - Precisely preserve the facial likeness, facial structure, skin tone, eye shape, nose, mouth, expression, and gender (${gender}) of the individual from the reference face photo.
-   - Do NOT replace or alter the face into a generic face; it must visibly and naturally be the exact same person.
-
-2. AUTHENTIC VIETNAMESE ATTIRE:
-   - DRESS the person in the exact selected Vietnamese traditional garments:
-     • Áo chính (Top): "${top}" - Phong cách: ${topStyle}${topInfo}. Cổ áo đứng gài chéo hoặc cài khuy ngọc tinh xảo, tà áo buông rủ thanh thoát, chất liệu gấm hoặc tơ tằm dệt thủ công Việt Nam.
-     • Quần/Váy (Bottom): "${bottom}" - Lụa mềm mại, rủ thẳng, trang nhã.
-     • Hài/Giày (Footwear): "${footwear}".
-     ${accessory ? `• Phụ kiện: ${accessory}.` : ''}
-   ${piecesCount > 0 ? '- Faithfully reproduce the textures, fabric drape, color palette, embroidery patterns, and seams shown in the attached reference garment images.' : ''}
-
-3. EVENT ENVIRONMENT & LIGHTING:
-   - Atmospheric backdrop: "${event}" (${eventDesc}).
-   - Full natural daylight or warm ambient festival lighting fitting the Vietnamese cultural setting.
-   - Elegant, dignified posture matching Vietnamese traditional etiquette.
-
-4. PHOTOGRAPHIC QUALITY:
-   - 8k resolution, cinematic commercial fashion photoshoot, shallow depth of field, sharp garment textile details (silk sheen, brocade weaves, gold thread embroidery).
-   - High fidelity, natural skin texture, perfectly realistic hands and proportions.`;
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Không thể nạp tài nguyên: ${url}`));
+    img.src = url;
+  });
 }
 
 /**
- * Dispatches request either to:
- * 1. Self-hosted Kaggle / Colab GPU Server (if VITE_TRYON_API_URL or endpoint is set)
- * 2. Or Google AI Studio Gemini API (Nano Banana: gemini-3.1-flash-lite-image)
+ * Resizes an image (base64 or URL) to a maximum dimension to ensure fast network upload
+ */
+export async function optimizeImageForAI(
+  dataUrlOrUrl: string,
+  maxDim: number = 1024
+): Promise<string> {
+  try {
+    const img = await loadImage(dataUrlOrUrl);
+    let { width, height } = img;
+    if (width > maxDim || height > maxDim) {
+      if (width > height) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return dataUrlOrUrl;
+
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', 0.88);
+  } catch (err) {
+    console.warn('Could not optimize image, using original:', err);
+    return dataUrlOrUrl;
+  }
+}
+
+/**
+ * Renders the full 2D Studio mockup (Background + Mannequin + Calibrated Garment Layers)
+ * into a single high-resolution image to serve as the exact visual reference for AI.
+ */
+export async function renderStudioPreviewCanvas(
+  outfit: ActiveOutfitState,
+  width: number = 768,
+  height: number = 1024
+): Promise<string> {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Không thể khởi tạo Canvas 2D');
+
+  const bottomPiece = outfit.bottomPiece || outfit.bottomVariant;
+  const footwearPiece = outfit.footwearPiece || outfit.footwearVariant;
+  const topPiece = outfit.topPiece || outfit.topVariant;
+  const accessoryPiece = outfit.accessoryPiece || outfit.accessoryVariant;
+
+  interface LayerItem {
+    url: string;
+    alignment?: PieceAlignment;
+    isCover?: boolean;
+  }
+
+  const layers: LayerItem[] = [];
+
+  // 1. Background
+  if (outfit.event.bgUrl) {
+    layers.push({ url: outfit.event.bgUrl, isCover: true });
+  }
+
+  // 2. Mannequin Base
+  layers.push({ url: '/assets/mannequins/mannequin-base.png' });
+
+  // 3. Bottoms
+  if (bottomPiece?.assetUrl) {
+    layers.push({ url: bottomPiece.assetUrl, alignment: getPieceAlignment(bottomPiece.id) });
+  }
+
+  // 4. Footwear
+  if (footwearPiece?.assetUrl) {
+    layers.push({ url: footwearPiece.assetUrl, alignment: getPieceAlignment(footwearPiece.id) });
+  }
+
+  // 5. Tops
+  if (topPiece?.assetUrl) {
+    layers.push({ url: topPiece.assetUrl, alignment: getPieceAlignment(topPiece.id) });
+  }
+
+  // 6. Accessories
+  if (accessoryPiece?.assetUrl) {
+    layers.push({ url: accessoryPiece.assetUrl, alignment: getPieceAlignment(accessoryPiece.id) });
+  }
+
+  for (const item of layers) {
+    try {
+      const img = await loadImage(item.url);
+      if (item.isCover) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      } else if (item.alignment) {
+        const align = item.alignment;
+        ctx.save();
+        const cx = canvas.width / 2 + (align.x / 100) * canvas.width;
+        const cy = canvas.height / 2 + (align.y / 100) * canvas.height;
+        ctx.translate(cx, cy);
+        if (align.rotate) {
+          ctx.rotate((align.rotate * Math.PI) / 180);
+        }
+        const sx = align.scale * (align.scaleX ?? 1);
+        const sy = align.scale * (align.scaleY ?? 1);
+        ctx.scale(sx, sy);
+        ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+        ctx.restore();
+      } else {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+    } catch (err) {
+      console.warn(`Layer render skipped: ${item.url}`, err);
+    }
+  }
+
+  return canvas.toDataURL('image/jpeg', 0.9);
+}
+
+/**
+ * Builds the multimodal Virtual Try-On prompt that instructs AI to combine:
+ * 1. Image 1: The user's portrait/face
+ * 2. Image 2: The exact Studio outfit & background composition
+ */
+export function buildMultimodalTryOnPrompt(outfit: ActiveOutfitState): string {
+  const top = outfit.topPiece?.name || 'Áo tấc truyền thống';
+  const bottom = outfit.bottomPiece?.name || 'Quần lụa truyền thống';
+  const footwear = outfit.footwearPiece?.name || 'Hài nhung';
+  const accessory = outfit.accessoryPiece ? `, phụ kiện: ${outfit.accessoryPiece.name}` : '';
+  const event = outfit.event.name;
+
+  return (
+    `CRITICAL TASK: Photorealistic Virtual Try-On Fashion Portrait.\n\n` +
+    `INPUT REFERENCE IMAGES PROVIDED:\n` +
+    `• IMAGE 1 (Source Person): Reference portrait of the person. You MUST preserve this individual's facial likeness, facial structure, eyes, nose, mouth, skin tone, and expression.\n` +
+    `• IMAGE 2 (Reference Outfit & Scene): The EXACT Vietnamese traditional attire (${top}, ${bottom}, ${footwear}${accessory}) set in ${event}.\n\n` +
+    `GENERATION INSTRUCTIONS:\n` +
+    `1. DRESS the person from Image 1 in the EXACT Vietnamese traditional costume shown in Image 2.\n` +
+    `2. Faithfully reproduce the garment colors, rich silk jacquard weaves, intricate metallic gold embroidery, seam drape, and silhouette from Image 2.\n` +
+    `3. Place the person naturally in the historical environment and ambient lighting shown in Image 2.\n` +
+    `4. Output must be a single high-fashion photographic portrait, 8k resolution, natural skin texture, realistic hands, seamless fabric folds, authentic Vietnamese cultural heritage masterpiece.`
+  );
+}
+
+/**
+ * Converts image URL or Blob to Base64 Data URL (with proxy fallback)
+ */
+async function fetchImageAsDataUrl(url: string): Promise<string> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.warn('Direct fetch failed, falling back to proxy / raw url:', err);
+    try {
+      const proxyUrl = `/api/pollinations-proxy?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+      const blob = await res.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return url;
+    }
+  }
+}
+
+/**
+ * Dispatches multimodal Virtual Try-On request to Pollinations OpenAI-compatible API
+ * using: [Target Face Image] + [Studio Outfit Reference Image] + [Custom Try-On Prompt]
  */
 export async function callAITryOnService(
   request: AITryOnRequest,
   onProgress?: (message: string) => void
 ): Promise<AITryOnResponse> {
-  // Check if a self-hosted Kaggle/Colab or custom server is configured
-  const customEndpoint = request.endpoint || getCustomTryOnEndpoint();
-
-  if (customEndpoint) {
-    try {
-      onProgress?.('Đang chuẩn bị ảnh chân dung...');
-      const faceImg = await optimizeImageForAI(request.faceImage, 1024);
-      const prompt = request.customPrompt || buildTryOnPrompt(request.outfit);
-
-      onProgress?.('Đang kết nối tới máy chủ Kaggle GPU...');
-      const response = await fetch(customEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          face_image: `data:${faceImg.mimeType};base64,${faceImg.data}`,
-          prompt,
-          outfit: {
-            top: request.outfit.topPiece?.name,
-            bottom: request.outfit.bottomPiece?.name,
-            footwear: request.outfit.footwearPiece?.name,
-            accessory: request.outfit.accessoryPiece?.name,
-            event: request.outfit.event.name,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Máy chủ Kaggle phản hồi lỗi (${response.status}): ${response.statusText}`);
-      }
-
-      onProgress?.('Đang hoàn thiện ảnh chân dung cổ phục...');
-      const data = await response.json();
-      const imageUrl = data.image_url || data.output?.[0] || data.result;
-
-      if (!imageUrl) {
-        throw new Error('Máy chủ không trả về ảnh kết quả.');
-      }
-
-      return {
-        imageUrl,
-        promptUsed: prompt,
-        status: 'success',
-      };
-    } catch (err: any) {
-      console.error('Kaggle Server Try-On Error:', err);
-      return {
-        imageUrl: '',
-        promptUsed: '',
-        status: 'error',
-        errorMessage: err.message || 'Không thể kết nối máy chủ Kaggle GPU.',
-      };
-    }
-  }
-
-  // Fallback to Google AI Studio Gemini API
-  const apiKey = request.apiKey || getSavedGeminiApiKey();
+  const apiKey = request.apiKey || getSavedPollinationsApiKey();
 
   if (!apiKey) {
     return {
@@ -241,157 +251,92 @@ export async function callAITryOnService(
       promptUsed: '',
       status: 'error',
       errorMessage:
-        'Chưa cấu hình API Key (VITE_GEMINI_API_KEY) hoặc Máy chủ Kaggle (VITE_TRYON_API_URL) trong file .env.',
+        'Chưa có API Key. Vui lòng bấm nút "API Key" ở trên để nhập key miễn phí từ enter.pollinations.ai/keys.',
     };
   }
 
-  const model = request.model || DEFAULT_NANO_BANANA_MODEL;
+  const model = request.model || DEFAULT_AI_MODEL;
 
   try {
-    onProgress?.('Đang chuẩn bị ảnh chân dung...');
-    const faceImg = await optimizeImageForAI(request.faceImage, 1024);
+    onProgress?.('Đang chuẩn bị ảnh chân dung của bạn...');
+    const optimizedFace = await optimizeImageForAI(request.faceImage, 1024);
 
-    onProgress?.('Đang nạp chi tiết các mảnh cổ phục đã chọn...');
-    const piecesToLoad: Piece[] = [];
-    if (request.outfit.topPiece) piecesToLoad.push(request.outfit.topPiece);
-    if (request.outfit.bottomPiece) piecesToLoad.push(request.outfit.bottomPiece);
-    if (request.outfit.footwearPiece) piecesToLoad.push(request.outfit.footwearPiece);
-    if (request.outfit.accessoryPiece) piecesToLoad.push(request.outfit.accessoryPiece);
+    onProgress?.('Đang kết xuất bản phối trang phục từ Studio...');
+    const studioPreview =
+      request.studioPreviewImage || (await renderStudioPreviewCanvas(request.outfit));
+    const optimizedStudio = await optimizeImageForAI(studioPreview, 1024);
 
-    const pieceImageParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+    const prompt = request.customPrompt || buildMultimodalTryOnPrompt(request.outfit);
 
-    for (const piece of piecesToLoad) {
-      const assetUrl = piece.assetUrl || piece.thumbnailUrl;
-      if (assetUrl) {
-        const pieceData = await urlToBase64(assetUrl);
-        if (pieceData) {
-          pieceImageParts.push({
-            text: `[Visual Reference Piece: ${piece.name} - ${piece.category}]`,
-          });
-          pieceImageParts.push({
-            inlineData: {
-              mimeType: pieceData.mimeType,
-              data: pieceData.data,
-            },
-          });
-        }
-      }
-    }
+    onProgress?.(`Đang gửi dữ liệu tới AI đa phương thức (${model})...`);
 
-    const prompt = request.customPrompt || buildTryOnPrompt(request.outfit, pieceImageParts.length / 2);
-
-    const parts: any[] = [
-      { text: prompt },
-      { text: '[Reference User Face Portrait Photo]:' },
-      {
-        inlineData: {
-          mimeType: faceImg.mimeType,
-          data: faceImg.data,
-        },
-      },
-      ...pieceImageParts,
-    ];
-
-    onProgress?.('Đang kết nối AI sinh ảnh cổ phục (Nano Banana)...');
-
-    const endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(
-      apiKey
-    )}`;
-
-    const response = await fetch(endpointUrl, {
+    const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        contents: [
+        model,
+        messages: [
           {
-            parts,
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: optimizedFace } },
+              { type: 'image_url', image_url: { url: optimizedStudio } },
+            ],
           },
         ],
       }),
     });
 
     if (!response.ok) {
-      let errDetails = '';
-      let isFreeTierZeroQuota = false;
-
+      let errText = '';
       try {
         const errJson = await response.json();
-        errDetails = errJson.error?.message || response.statusText;
-        if (errDetails.includes('limit: 0') || errDetails.includes('free_tier_requests')) {
-          isFreeTierZeroQuota = true;
-        }
+        errText = errJson.error?.message || response.statusText;
       } catch {
-        errDetails = response.statusText;
+        errText = await response.text();
       }
 
-      if (response.status === 429) {
-        if (isFreeTierZeroQuota) {
-          throw new Error(
-            'Tài khoản Google AI Studio hiện tại chưa kích hoạt Billing (Google đặt hạn mức sinh ảnh ở gói miễn phí là 0). Vui lòng liên kết thẻ thanh toán (Pay-as-you-go) tại Google AI Studio, hoặc chuyển sang dùng máy chủ Kaggle GPU miễn phí.'
-          );
-        }
+      if (response.status === 402 || errText.includes('INSUFFICIENT_BALANCE')) {
         throw new Error(
-          'Đã vượt quá hạn mức gọi (Quota limit) của Google AI Studio. Vui lòng thử lại sau ít phút.'
+          `Mô hình "${model}" yêu cầu số dư Paid Pollen. Bạn có thể đổi sang mô hình "GPT Image 2" hoặc "GPT Image Mini" để tiếp tục.`
         );
-      } else if (response.status === 400) {
-        throw new Error(`Yêu cầu không hợp lệ (400): ${errDetails}`);
-      } else if (response.status === 403 || response.status === 401) {
-        throw new Error(
-          `API Key không hợp lệ hoặc chưa được cấp quyền (HTTP ${response.status}). Vui lòng kiểm tra lại key trong .env.`
-        );
-      } else {
-        throw new Error(`Lỗi từ Google AI (${response.status}): ${errDetails}`);
       }
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('API Key không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại key.');
+      }
+
+      throw new Error(`AI phản hồi lỗi (${response.status}): ${errText}`);
     }
 
-    onProgress?.('Đang hoàn thiện ảnh chân dung cổ phục...');
+    onProgress?.('AI đang hoàn thiện và render ảnh thử đồ...');
     const data = await response.json();
 
-    const candidates = data?.candidates;
-    if (!candidates || candidates.length === 0) {
-      throw new Error(data?.error?.message || 'Không nhận được kết quả hình ảnh từ AI.');
+    const assistantContent = data.choices?.[0]?.message?.content;
+    if (!assistantContent) {
+      throw new Error('Mô hình không trả về nội dung hình ảnh.');
     }
 
-    const firstCandidate = candidates[0];
+    // Extract image URL from response (Markdown ![Image](url) or raw URL)
+    const urlMatch =
+      assistantContent.match(/https:\/\/media\.pollinations\.ai\/[a-zA-Z0-9_\-]+/i) ||
+      assistantContent.match(/https?:\/\/[^\s\)\"\'\<\>]+/i);
 
-    if (firstCandidate.finishReason && firstCandidate.finishReason !== 'STOP') {
-      if (firstCandidate.finishReason === 'SAFETY') {
-        throw new Error('Ảnh bị từ chối bởi bộ lọc an toàn của Google Gemini. Vui lòng thử lại với một ảnh khuôn mặt khác.');
-      }
+    if (!urlMatch || !urlMatch[0]) {
+      throw new Error(`AI phản hồi dạng văn bản thay vì ảnh: ${assistantContent}`);
     }
 
-    let imageBase64: string | undefined;
-    let mimeType = 'image/png';
+    const generatedImageUrl = urlMatch[0];
 
-    if (firstCandidate.content?.parts) {
-      for (const part of firstCandidate.content.parts) {
-        if (part.inlineData?.data) {
-          imageBase64 = part.inlineData.data;
-          mimeType = part.inlineData.mimeType || 'image/png';
-          break;
-        }
-        if (part.inline_data?.data) {
-          imageBase64 = part.inline_data.data;
-          mimeType = part.inline_data.mime_type || 'image/png';
-          break;
-        }
-      }
-    }
-
-    if (!imageBase64) {
-      const textPart = firstCandidate.content?.parts?.find((p: any) => p.text)?.text;
-      if (textPart) {
-        throw new Error(`Mô hình phản hồi: ${textPart}`);
-      }
-      throw new Error('Mô hình không trả về dữ liệu hình ảnh. Vui lòng thử lại.');
-    }
-
-    const finalImageUrl = `data:${mimeType};base64,${imageBase64}`;
+    onProgress?.('Đang tải ảnh chất lượng cao về máy...');
+    const base64DataUrl = await fetchImageAsDataUrl(generatedImageUrl);
 
     return {
-      imageUrl: finalImageUrl,
+      imageUrl: base64DataUrl,
       promptUsed: prompt,
       status: 'success',
     };
@@ -401,7 +346,7 @@ export async function callAITryOnService(
       imageUrl: '',
       promptUsed: '',
       status: 'error',
-      errorMessage: err.message || 'Đã xảy ra lỗi khi kết nối với AI sinh ảnh.',
+      errorMessage: err.message || 'Đã xảy ra lỗi khi tạo ảnh thử đồ.',
     };
   }
 }
